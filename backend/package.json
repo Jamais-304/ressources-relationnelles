@@ -1,0 +1,29 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "The (RE)SOURCES RELATIONNELLES backend.",
+  "main": "server.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jamais-304/ressources-relationnelles.git"
+  },
+  "author": "Jamais 304",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jamais-304/ressources-relationnelles/issues"
+  },
+  "homepage": "https://github.com/Jamais-304/ressources-relationnelles#readme",
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
