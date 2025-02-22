@@ -1,13 +1,18 @@
-version: "3.8"
+# Prod environment
 
 services:
   backend:
     build:
-      context: backend/
-      dockerfile: docker/node/Dockerfile
+      context: ./backend
+      dockerfile: ./docker/node/prod/Dockerfile
     ports:
       - "3000:3000"
-    volumes:
-      - ./backend:/usr/src/app
-      - /usr/src/app/node_modules
+    command: ["npm", "run", "start"]
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ./docker/node/prod/Dockerfile
+    ports:
+      - "8000:8000"
     command: ["npm", "run", "start"]

@@ -1,4 +1,5 @@
 .history/*
+.env
 
 ## Backend
 backend/node_modules/*

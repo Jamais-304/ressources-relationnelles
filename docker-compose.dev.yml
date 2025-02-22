@@ -1,0 +1,34 @@
+# Dev environment
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ./docker/node/dev/Dockerfile
+      args:
+        - HOST_UID=${HOST_UID}
+        - HOST_GID=${HOST_GID}
+    user: "${HOST_UID}:${HOST_GID}"
+    environment:
+      - HOST_UID=${HOST_UID}
+      - HOST_GID=${HOST_GID}
+    volumes:
+      - ./backend:/usr/src/app
+    ports:
+      - "3000:3000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ./docker/node/dev/Dockerfile
+      args:
+        - HOST_UID=${HOST_UID}
+        - HOST_GID=${HOST_GID}
+    user: "${HOST_UID}:${HOST_GID}"
+    environment:
+      - HOST_UID=${HOST_UID}
+      - HOST_GID=${HOST_GID}
+    volumes:
+      - ./frontend:/usr/src/app
+    ports:
+      - "5173:5173"
