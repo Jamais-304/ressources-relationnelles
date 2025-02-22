@@ -1,8 +1,7 @@
-import {PORT_BACKEND} from './config.ts'
+import { PORT_BACKEND } from './config.ts'
 import app from './src/app.ts'
 import http from 'http'
 
-const portBackend = PORT_BACKEND
 /**
  * Normalize the port value.
  * Converts a string to an integer if possible.
@@ -10,29 +9,29 @@ const portBackend = PORT_BACKEND
  * - Throws an error if the value is <= 0.
  * - Returns the original string if it's not a number.
  * - Returns `false` in unexpected cases (fallback).
- *
- * @param {string} portBackend - The port value as a string.
- * @returns {string | number | false} - The normalized port.
- */
-const normalize = (portBackend:string): string | number | false => {
+*
+* @param {string} portBackend - The port value as a string.
+* @returns {string | number | false} - The normalized port.
+*/
+const normalize = (portBackend: string): string | number | false => {
     const port = parseInt(portBackend, 10) // Convert port in integer
-    switch(true){
+    switch (true) {
         case isNaN(port):
-             return portBackend
+            return portBackend
         case port <= 0:
             throw new Error(`Value cannot be ≤ to 0: ${port}`)
         case port > 0:
             return port
         default:
             return false
-    }   
+    }
 }
 
-const port = normalize(process.env.PORT_BACKEND || '3000')
+const port = normalize(PORT_BACKEND || '3000')
 
 app.set('port', port) // Set port configuration in App
 
-const errorHandler = (error: any) => {
+const errorHandler = (error: NodeJS.ErrnoException) => {
     // If the error is not related to the 'listen' syscall, throw it
     if (error.syscall !== 'listen') {
         throw error; // Error handling for higher-level issues
@@ -61,7 +60,7 @@ const errorHandler = (error: any) => {
 
 const server = http.createServer(app)
 server.on('error', errorHandler)
-server.on('listening', () =>{
+server.on('listening', () => {
     const portEmot = {
         0: '0️⃣',
         1: '1️⃣',
@@ -75,10 +74,10 @@ server.on('listening', () =>{
         9: '9️⃣',
     }
     const portSplit = port
-    .toString()
-    .split('')
-    .map((digit) => portEmot[digit])
-    .join('  ')
+        .toString()
+        .split('')
+        .map((digit) => portEmot[digit])
+        .join('  ')
     const address = server.address()
     const bind = typeof address === 'string' ? `pipe ${address}` : `port ${portSplit}`
     console.log('Server start 🛫')
