@@ -5,3 +5,6 @@ backend/node_modules/*
 
 ## Frontend
 frontend/node_modules/*
+
+## Environement Dev
+.env
