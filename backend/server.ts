@@ -1,6 +1,7 @@
 import { PORT_BACKEND } from './config.ts'
 import app from './src/app.ts'
 import http from 'http'
+import {normalize} from './utils/normailze.ts'
 
 /**
  * Normalize the port value.
@@ -13,19 +14,6 @@ import http from 'http'
 * @param {string} portBackend - The port value as a string.
 * @returns {string | number | false} - The normalized port.
 */
-const normalize = (portBackend: string): string | number | false => {
-    const port = parseInt(portBackend, 10) // Convert port in integer
-    switch (true) {
-        case isNaN(port):
-            return portBackend
-        case port <= 0:
-            throw new Error(`Value cannot be ≤ to 0: ${port}`)
-        case port > 0:
-            return port
-        default:
-            return false
-    }
-}
 
 const port = normalize(PORT_BACKEND || '3000')
 
@@ -57,21 +45,20 @@ const errorHandler = (error: NodeJS.ErrnoException) => {
             throw error
     }
 }
-
 const server = http.createServer(app)
 server.on('error', errorHandler)
 server.on('listening', () => {
-    const portEmot = {
-        0: '0️⃣',
-        1: '1️⃣',
-        2: '2️⃣',
-        3: '3️⃣',
-        4: '4️⃣',
-        5: '5️⃣',
-        6: '6️⃣',
-        7: '7️⃣',
-        8: '8️⃣',
-        9: '9️⃣',
+    const portEmot: { [key: string]: string } = {  // Déclaration du type d'index
+        '0': '0️⃣',
+        '1': '1️⃣',
+        '2': '2️⃣',
+        '3': '3️⃣',
+        '4': '4️⃣',
+        '5': '5️⃣',
+        '6': '6️⃣',
+        '7': '7️⃣',
+        '8': '8️⃣',
+        '9': '9️⃣',
     }
     const portSplit = port
         .toString()
@@ -85,5 +72,6 @@ server.on('listening', () => {
 })
 
 server.listen(port)
+
 
 
