@@ -42,6 +42,12 @@ list = [
     "V:User",
     "V:Resources",
     "V:Comment",
+    "MI:User",
+    "T:Server", 
+    "S:Back",
+    "S:Middlewares",
+    "S:Front",
+    "S:Tests",
     "lib",
     "config",
 
