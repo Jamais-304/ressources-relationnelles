@@ -2,8 +2,12 @@ import express from 'express'
 import type { Request, Response, NextFunction } from 'express'
 import mongoose from 'mongoose'
 import { MONGO_URI } from '../config.ts'
+import yaml from 'yamljs'
+import swaggerUi from 'swagger-ui-express'
 
 const app = express()
+const swaggerDocs = yaml.load("swagger.yaml");
+
 // Conection to MongoDB Atlas DataBase
 mongoose.connect(MONGO_URI)
     .then(() => console.log('Connexion à MongoDB réussie ✅'))
@@ -20,6 +24,9 @@ app.use((req:Request, res:Response, next:NextFunction) => {
     next()
 })
 
+
 app.use(express.json())
+
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs)) 
 
 export default app

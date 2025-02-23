@@ -1,0 +1,298 @@
+openapi: 3.0.0
+info:
+  description: This is the API documentation for project (Re)SourcesRelationnelles
+  version: "1.0.0"
+  title: API (Re)SourcesRelationnelles
+  contact:
+    email: quentindumon3524a@gmail.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: Gestion compte super administrateurs
+    description: Gestion de la création, connexion, suppression et modification de compte des supers administrateurs
+  - name: Gestion compte administrateurs
+    description: Gestion de la création, connexion, suppression et modification de compte des administrateurs
+  - name: Gestion compte modérateurs
+    description: Gestion de la création, connexion, suppression et modification de compte des modérateurs
+  - name: Gestion compte utilisateurs
+    description: Gestion de la création, connexion, suppression et modification de compte des utilisateurs
+  - name: Gestion des ressources
+    description: Gestion de la création, modification et de la suppression des ressources
+paths:
+  /api/auth/super-admin/signup:
+    post:
+      tags:
+        - Gestion compte super administrateurs
+      summary: Création d'un super administrateur 👨‍💻
+      description: Route permettant d'enregistrer un super administrateur dans la base de données avec l'email et le password dans les paramètres ⚙️⚙️⚙️ de la requête 🛣 ️
+      operationId: createSuperAdmin
+      responses:
+          "201":
+              description: Super administrateur créé ✅
+          "400":
+              description: Requête invalide ⛔️
+          "500":
+              description: Erreur serveur ⛔️
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+  /api/auth/admin/signup:
+    post:
+      tags:
+        - Gestion compte administrateurs
+      summary: Création d'un administrateur 👨‍💻
+      description: Route permettant aux supers administrateurs d'enregistrer un administrateur dans la base de données avec l'email et le password dans les paramètres ⚙️⚙️⚙️ de la requête 🛣 ️
+      operationId: createAdmin
+      responses:
+          "201":
+              description: Administrateur créé ✅
+          "400":
+              description: Requête invalide ⛔️
+          "401":
+              description: Accès refusés ⛔️
+          "500":
+              description: Erreur serveur ⛔️
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                token:
+                  type: string
+  /api/auth/moderateur/signup:
+    post:
+      tags:
+        - Gestion compte modérateurs
+      summary: Création d'un moderateur 👨‍💻
+      description: Route permettant aux supers administrateurs d'enregistrer un moderateur dans la base de données avec l'email et le password dans les paramètres ⚙️⚙️⚙️ de la requête 🛣 ️
+      operationId: createModerateur
+      responses:
+          "201":
+              description: Modérateurs créé ✅
+          "400":
+              description: Requête invalide ⛔️
+          "500":
+              description: Erreur serveur ⛔️
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                token:
+                  type: string
+  /api/auth/admin/login:
+    post:
+      tags:
+        - Gestion compte super administrateurs
+        - Gestion compte administrateurs
+      summary: Connexion des administrateurs et supers administrateurs 👨‍💻
+      operationId: loginAmdin
+      description: Permet de se connecter et de récupérer le token de connexion dans la réponse 👌
+      parameters:
+        - in: query
+          name: Email
+          description: Email de l'administrateur
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: Password
+          description: Mot de passe de l'administrateur
+          required: true
+          schema:
+            type: string
+            minimum: 10
+      responses:
+        '200':
+          description: Opération réussite ✅
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                    userId:
+                      type: string
+                    token:
+                      type: string
+        "401":
+          description: Paire identifiant/mot de passe inccorrecte 🛑
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+  /api/auth/users/signup:
+    post:
+      tags:
+        - Gestion compte utilisateurs
+      summary: Création d'un utilisateur 👨‍💻
+      description: Route permettant aux citoyens de pouvoirenregistrer leur compte dans la base de données avec l'email et le password dans les paramètres ⚙️⚙️⚙️ de la requête 🛣 ️
+      operationId: createUtilisateur
+      responses:
+          "201":
+              description: Utilisateurs créé ✅
+          "400":
+              description: Requête invalide ⛔️
+          "500":
+              description: Erreur serveur ⛔️
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                token:
+                  type: string
+  /api/auth/users/login:
+    post:
+      tags:
+        - Gestion compte utilisateurs
+        - Gestion compte modérateurs
+      summary: Connexion moderateurs ou utilisateurs 👨‍💻
+      operationId: loginUsers
+      description: Permet de se connecter et de récupérer le token de connexion dans la réponse 👌
+      parameters:
+        - in: query
+          name: Email
+          description: Email de l'utilisateur
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: Password
+          description: Mot de passe de l'utilisateur
+          required: true
+          schema:
+            type: string
+            minimum: 10
+      responses:
+        '200':
+          description: Opération réussite ✅
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                    userId:
+                        type: string
+                    token:
+                        type: string
+        "401":
+          description: Paire identifiant/mot de passe inccorrecte 🛑
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+  /api/ressources:
+    post:
+      tags:
+        - Gestion des ressources
+      summary: Ajout d'une nouvelle ressource
+      operationId: addRessource
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Ressource'
+      responses:
+        "201":
+          description: Ressource créée ✅
+        "400":
+          description: Requête invalide ❌
+        "401":
+          description: Accès refusé 🛑
+    
+    get:
+      tags:
+        - Gestion des ressources
+      summary: Récupération de toutes les ressources
+      operationId: getAllRessources
+      responses:
+        "200":
+          description: Opération réussie ✅
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Ressource'
+        "400":
+          description: Requête invalide ❌
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Ressource:
+      type: object
+      required:
+        - title
+        - description
+        - tags
+        - releaseDate
+      properties:
+        title:
+          type: string
+          example: La santé mentale
+        releaseDate:
+          type: string
+          format: date-time
+          example: '2016-08-29T09:12:33.001Z'
+        description:
+          type: string
+          example: La santé mentale est un enjeu de santé publique
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["santé", "bien-être", "psychologie"]
+        media:
+          type: array
+          items:
+            type: string
+          example: ["image1.jpg", "video1.mp4"]
