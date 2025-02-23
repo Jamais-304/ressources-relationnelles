@@ -25,3 +25,7 @@ Please use Chrome or Firefox to read the documentation.
 
 - **Email address** : test@test.com
 - **Password** : testtest
+
+#### Tests
+
+Use the terminal commande `npm test`
