@@ -1,2 +1,2 @@
 export { Api } from './src/api'
-export { Role, roleFromString, roleToString } from './src/models/role'
+export { User, Role, roleFromString, roleToString } from './src/models/models'
