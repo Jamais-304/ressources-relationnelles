@@ -17,7 +17,7 @@ Use the terminal commande `npm install` to install the dependencies and use `nod
 
 #### Swagger
 
-The API documentation with Swagger is available at : http://localhost:3001/api/docs/
+The API documentation with Swagger is available at : http://localhost:3000/api/docs/
 
 Please use Chrome or Firefox to read the documentation.
 
