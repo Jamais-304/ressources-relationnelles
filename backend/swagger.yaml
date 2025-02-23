@@ -39,12 +39,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                password:
-                  type: string
+              $ref: '#/components/schemas/Utilisateur'
   /api/auth/admin/signup:
     post:
       tags:
@@ -62,18 +57,10 @@ paths:
           "500":
               description: Erreur serveur ⛔️
       requestBody:
-        required: true
         content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                password:
-                  type: string
-                token:
-                  type: string
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Utilisateur'
   /api/auth/moderateur/signup:
     post:
       tags:
@@ -93,14 +80,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                password:
-                  type: string
-                token:
-                  type: string
+              $ref: '#/components/schemas/Utilisateur'
   /api/auth/admin/login:
     post:
       tags:
@@ -272,27 +252,82 @@ components:
       type: object
       required:
         - title
-        - description
-        - tags
-        - releaseDate
+        - content
+        - category
+        - realationType
       properties:
         title:
           type: string
           example: La santé mentale
-        releaseDate:
-          type: string
-          format: date-time
-          example: '2016-08-29T09:12:33.001Z'
-        description:
+        content:
           type: string
           example: La santé mentale est un enjeu de santé publique
-        tags:
+        category:
           type: array
           items:
             type: string
           example: ["santé", "bien-être", "psychologie"]
+        relationType:
+          type: string
         media:
           type: array
           items:
             type: string
           example: ["image1.jpg", "video1.mp4"]
+    Utilisateur:
+        type: object
+        required:
+          - pseudonyme
+          - email
+          - mdp
+        properties:
+          pseudonyme:
+            type: string
+            example: "JohnDoe"
+          email:
+            type: string
+            format: email
+            example: "johndoe@example.com"
+          mdp:
+            type: string
+            format: password
+            example: "$2a$12$EIXR5dDf.aKDgK0TV5rR7u0xL8FlpO/Y/fpFQ.wb.E5HNt4cAc0yO"
+    Commentaire:
+      type: object
+      required:
+        - authorId
+        - contenu
+        - auteur
+        - ressourceId
+      properties:
+        contenu:
+          type: string
+          example: "Ce commentaire est très pertinent concernant la ressource."
+        authorId:
+          type: string
+          format: uuid
+          description: "ID de l'utilisateur auteur du commentaire"
+          example: "987e6543-e21b-43d3-a876-426617890000"
+        ressourceId:
+          type: string
+          format: uuid
+          description: "ID de la ressource à laquelle ce commentaire est associé"
+          example: "550e8400-e29b-41d4-a716-446655440000"
+    Statistique:
+      type: object
+      required:
+        - ressourcesId
+      properties:
+        ressourcesId:
+          type: string
+          format: uuid
+          description: "ID de la ressource à laquelle ces statistiques sont associées"
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        totalShare:
+          type: integer
+          description: "Nombre de fois que la ressource a été partagée"
+          example: 120
+        totalComents:
+          type: integer
+          description: "Nombre de commentaires associés à la ressource"
+          example: 45
