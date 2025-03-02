@@ -4,6 +4,7 @@ import mongoose from 'mongoose'
 import { MONGO_URI } from '../config.ts'
 import yaml from 'yamljs'
 import swaggerUi from 'swagger-ui-express'
+import userRouter from '../router/user.ts'
 
 const app = express()
 const swaggerDocs = yaml.load("swagger.yaml");
@@ -13,7 +14,7 @@ mongoose.connect(MONGO_URI)
     .then(() => console.log('Connexion à MongoDB réussie ✅'))
     .catch(() => console.log('Connexion à MongoDB échouée ❌'))
 
-app.use((req:Request, res:Response, next:NextFunction) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
     res.setHeader('Access-Control-Allow-Origin', '*') // Allows access to the API from any origin
     res.setHeader(
         'Access-Control-Allow-Headers',
@@ -26,7 +27,10 @@ app.use((req:Request, res:Response, next:NextFunction) => {
 
 
 app.use(express.json())
-
-app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs)) 
+// Routes Users
+app.use('/api', userRouter)
+// console.log(app.use('/api', userRouter))
+// Docuementation API
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs))
 
 export default app
