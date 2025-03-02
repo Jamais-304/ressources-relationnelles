@@ -20,6 +20,7 @@
   "homepage": "https://github.com/Jamais-304/ressources-relationnelles#readme",
   "devDependencies": {
     "@eslint/js": "^9.21.0",
+    "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
     "@types/mongoose-unique-validator": "^1.0.9",
@@ -37,6 +38,7 @@
     "typescript-eslint": "^8.24.1"
   },
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "mongoose": "^7.8.6",
