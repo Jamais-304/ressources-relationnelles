@@ -1,6 +1,6 @@
 import { Role, roleFromString, roleToString } from './role'
 
-interface UserData {
+export interface UserData {
   uuid: string
   email: string
   username: string
