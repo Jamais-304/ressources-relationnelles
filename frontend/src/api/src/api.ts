@@ -1,4 +1,4 @@
-import axios, { AxiosHeaders } from 'axios'
+import axios, { AxiosHeaders, type AxiosResponse } from 'axios'
 import { Authentication } from './authentication'
 import { UserService } from './services/services'
 
@@ -80,19 +80,23 @@ export class Api {
    * data.
    *
    * @param {string} endpoint - The API endpoint to send the GET request to.
-   * @returns {Promise<any>} A promise that resolves to the response data if the
+   * @returns {Promise<unknown>} A promise that resolves to the response data if the
    * request is successful.
    * @throws {Error} If the request fails or if the response status code
    * indicates an error.
    */
-  async get(endpoint: string): Promise<any> {
+  async get(endpoint: string): Promise<unknown> {
     try {
       const response = await axios.get(`${this.baseUrl}/${endpoint}`, {
         headers: this.headers,
       })
       return this.handleResponse(response)
-    } catch (error: any) {
-      throw new Error(`Failed to load data: ${error.response.status}`)
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(`Failed to load data: ${error.response?.status}`)
+      } else {
+        throw new Error(`Failed to load data: ${error}`)
+      }
     }
   }
 
@@ -100,12 +104,12 @@ export class Api {
    * Processes the response from an API request and returns the response data if
    * the status code indicates success.
    *
-   * @param {any} response - The response object returned by the Axios request.
-   * @returns {any} The response data if the status code is in the range
+   * @param {AxiosResponse} response - The response object returned by the Axios request.
+   * @returns {unknown} The response data if the status code is in the range
    * 200-299.
    * @throws {Error} If the response status code indicates a failure.
    */
-  private handleResponse(response: any): any {
+  private handleResponse(response: AxiosResponse): unknown {
     if (response.status >= 200 && response.status < 300) {
       return response.data
     } else {
