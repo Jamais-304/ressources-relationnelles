@@ -1,5 +1,6 @@
 import axios, { AxiosHeaders } from 'axios'
 import { Authentication } from './authentication'
+import { UserService } from './services/services'
 
 /**
  * The Api class facilitates interactions with a RESTful API.
@@ -9,6 +10,7 @@ import { Authentication } from './authentication'
 export class Api {
   auth: Authentication
   baseUrl: string
+  private userService?: UserService
 
   /**
    * Constructs an instance of the Api class.
@@ -30,6 +32,29 @@ export class Api {
   } = {}) {
     this.auth = auth
     this.baseUrl = baseUrl
+  }
+
+  /**
+   * Gets the UserService instance associated with this Api instance.
+   *
+   * This getter implements lazy initialization for the UserService. The first
+   * time it is accessed, it initializes the `userService` property with a new
+   * instance of UserService. Subsequent accesses return the already-initialized
+   * instance.
+   *
+   * @returns {UserService} The UserService instance associated with this Api
+   * instance.
+   *
+   * @remarks
+   * This pattern ensures that the UserService is only created when it is first
+   * needed, which can improve performance and resource management by avoiding
+   * unnecessary object creation.
+   */
+  get users(): UserService {
+    if (!this.userService) {
+      this.userService = new UserService(this)
+    }
+    return this.userService
   }
 
   /**
