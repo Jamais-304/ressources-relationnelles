@@ -1,9 +1,11 @@
 import { Router } from 'express'
-import { createUser } from '../controllers/user.ts'
+import { createUser, loginUser } from '../controllers/user.ts'
+import { loginUserValidationRules, signUpUserValidationRules } from "../middleware/validators/userValidator.ts"
+import { validationErrorHandler } from '../middleware/validationErrorHandler.ts'
 
 const router = Router()
-// console.log( createUser)
-// console.log(router.post('/user', createUser))
-router.post('/user', createUser)
+
+router.post('/inscription', signUpUserValidationRules, validationErrorHandler,  createUser)
+router.post('/connexion', loginUserValidationRules, validationErrorHandler, loginUser)
 
 export default router

@@ -28,8 +28,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use(express.json())
 // Routes Users
-app.use('/api', userRouter)
-// console.log(app.use('/api', userRouter))
+app.use('/api/user', userRouter)
 // Docuementation API
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs))
 
