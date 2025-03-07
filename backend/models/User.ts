@@ -22,11 +22,11 @@ const userSchema: Schema<IUser> = new mongoose.Schema(
             required: [true, 'Le mot de passe est requis'],
             trim: true,
             minlength: [8, 'Le mot de passe doit contenir au moins 8 caractères'],
-            maxlength: [55, 'Le mot de passe ne doit pas dépasser 55 caractères'],
-            match: [
-                /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+={}\[\]:;"\'<>,.?/\\|`~-]).{6,55}$/,
-                'Le mot de passe doit contenir au moins une lettre, un chiffre et un caractère spécial.'
-            ]
+            maxlength: [90, 'Le mot de passe ne doit pas dépasser 90 caractères'],
+            // match: [
+            //     /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+={}\[\]:;"\'<>,.?/\\|`~-]).{6,55}$/,
+            //     'Le mot de passe doit contenir au moins une lettre, un chiffre et un caractère spécial.'
+            // ]
         },
         pseudonyme: {
             type: String,
