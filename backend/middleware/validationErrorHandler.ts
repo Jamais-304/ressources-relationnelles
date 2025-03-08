@@ -1,8 +1,7 @@
-import type { Request, Response, NextFunction } from 'express'
+import type { Request, Response, NextFunction } from "express"
 import { validationResult } from "express-validator"
 
-export const validationErrorHandler = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
-
+export const validationErrorHandler = async (req: Request, res: Response, next: NextFunction) => {
     const error = validationResult(req)
 
     if (!error.isEmpty()) {
