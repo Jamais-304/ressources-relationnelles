@@ -3,6 +3,7 @@ import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import User from "../models/User.ts"
 import RefreshToken from "../models/RefreshToken.ts"
+import { formatResponse } from "../utils/formatResponse.ts"
 import { ROLE_HIERARCHY, type Role } from "../config.ts"
 import { type UserInterface } from "../interfaces/userInterfaces.ts"
 //////////////////////////////////////////////////*?Interfaces ////////////////////////////////////////
@@ -60,22 +61,22 @@ export const adminCreateUser = async (req: AuthRequest, res: Response): Promise<
         const newUserRole = reqUser.role
 
         if (!req.auth || !req.auth.userId) {
-            return res.status(401).json({ data: { message: "Accès non autorisé" } })
+            return res.status(401).json(formatResponse("Accès non autorisé"))
         }
 
         const userIdVerify = req.auth.userId
 
         const user = await User.findById(userIdVerify)
 
-        if (!user || !user.role) return res.status(401).json({ data: { message: "Accès non autorisé" } })
+        if (!user || !user.role) return res.status(401).json(formatResponse("Accès non autorisé"))
 
         const userRoleIndex = ROLE_HIERARCHY.indexOf(user.role)
         const reqUserRoleIndex = ROLE_HIERARCHY.indexOf(newUserRole)
 
-        if (userRoleIndex === -1 || reqUserRoleIndex === -1) return res.status(400).json({ data: { message: "Rôle invalide" } })
+        if (userRoleIndex === -1 || reqUserRoleIndex === -1) return res.status(400).json(formatResponse("Rôle invalide"))
         console.log(userRoleIndex > reqUserRoleIndex)
 
-        if (userRoleIndex > reqUserRoleIndex) return res.status(403).json({ data: { message: "Accès insuffisant" } })
+        if (userRoleIndex > reqUserRoleIndex) return res.status(403).json(formatResponse("Accès insuffisant"))
 
         const hashedPassword = await bcrypt.hash(reqUser.password, 10)
 
@@ -88,11 +89,11 @@ export const adminCreateUser = async (req: AuthRequest, res: Response): Promise<
 
         await newUser.save()
 
-        return res.status(201).json({ data: { message: "Utilisateur crée avec succès" } })
+        return res.status(201).json(formatResponse("Utilisateur crée avec succès"))
     } catch (error: unknown) {
         console.error(error)
 
-        return res.status(500).json({ data: { message: "Erreur serveur", error } })
+        return res.status(500).json(formatResponse("Erreur serveur", { error: error }))
     }
 }
 
@@ -111,11 +112,24 @@ export const createUser = async (req: Request, res: Response): Promise<Response>
 
         await newUser.save()
 
-        return res.status(201).json({ message: "Utilisateur crée avec succès", user: newUser })
+        const user = await User.findOne({ email: req.body.email })
+        
+        if (!user) return res.status(500).json(formatResponse("Erreur serveur"))
+        
+        const accesToken = generateAccesToken(user)
+
+        if (!accesToken) return res.status(500).json(formatResponse("Erreur serveur"))
+
+        const refreshToken = await generateRefreshToken(user)
+
+        if (!refreshToken) return res.status(500).json(formatResponse("Erreur serveur"))
+        
+        return res.status(201).json(formatResponse("Utilisateur crée", { tokens: { accesToken, refreshToken }}))
+
     } catch (error: unknown) {
         console.error(error)
 
-        return res.status(500).json({ message: "Erreur serveur", error })
+        return res.status(500).json(formatResponse("Erreur serveur", { error: error }))
     }
 }
 
@@ -125,24 +139,24 @@ export const loginUser = async (req: Request, res: Response): Promise<Response> 
     try {
         const user = await User.findOne({ email: req.body.email })
 
-        if (!user) return res.status(401).json({ message: "Paire identifiant/mot de passe incorrecte !" })
+        if (!user) return res.status(401).json(formatResponse("Paire identifiant/mot de passe incorrecte !"))
 
         const isValid = await bcrypt.compare(req.body.password, user.password)
 
-        if (!isValid) return res.status(401).json({ message: "Paire identifiant/mot de passe incorrecte !" })
+        if (!isValid) return res.status(401).json(formatResponse("Paire identifiant/mot de passe incorrecte !"))
 
         const accesToken = generateAccesToken(user)
 
-        if (!accesToken) return res.status(500).json({ message: "Erreur serveur" })
+        if (!accesToken) return res.status(500).json(formatResponse("Erreur serveur"))
 
         const refreshToken = await generateRefreshToken(user)
 
-        if (!refreshToken) return res.status(500).json({ message: "Erreur serveur" })
+        if (!refreshToken) return res.status(500).json(formatResponse("Erreur serveur"))
 
-        return res.status(200).json({ accesToken: accesToken, refreshToken: refreshToken })
+        return res.status(200).json(formatResponse("Connexion réussie", { tokens: { accesToken, refreshToken } }))
     } catch (error: unknown) {
         console.error(error)
-        return res.status(500).json({ message: "Erreur serveur", error })
+        return res.status(500).json(formatResponse("Erreur serveur", { error: error }))
     }
 }
 ////////////////////////////////* Controller for refresh token  ///////////////////////////////////////
@@ -151,18 +165,18 @@ export const refreshToken = async (req: Request, res: Response): Promise<Respons
     try {
         const refreshToken = req.body.refreshToken
 
-        if (!refreshToken) return res.status(401).json({ message: "Token invalide" })
+        if (!refreshToken) return res.status(401).json(formatResponse("Token invalide"))
 
         const secretKey: string | undefined = process.env.TOKEN_SECRET
 
         if (!secretKey) {
             console.error("La clé secrète n'est pas définie")
-            return res.status(500).json({ message: "Erreur serveur" })
+            return res.status(500).json(formatResponse("Erreur serveur"))
         }
 
         const storedToken = await RefreshToken.findOne({ refreshToken: refreshToken })
 
-        if (!storedToken) return res.status(403).json({ message: "Token invalide" })
+        if (!storedToken) return res.status(403).json(formatResponse("Token invalide"))
 
         try {
             const decoded = jwt.verify(refreshToken, secretKey) as DecodedToken
@@ -171,14 +185,14 @@ export const refreshToken = async (req: Request, res: Response): Promise<Respons
 
             const newAccesToken = generateAccesToken(user)
 
-            return res.status(201).json({ accesToken: newAccesToken })
+            return res.status(201).json(formatResponse("Token renouvlé", { tokens: { accesToken: newAccesToken } }))
         } catch (error: unknown) {
             console.error(error)
-            return res.status(403).json({ message: "Refresh Token expiré" })
+            return res.status(403).json(formatResponse("Refresh Token expiré"))
         }
     } catch (error: unknown) {
         console.error(error)
-        return res.status(500).json({ message: "Erreur serveur", error })
+        return res.status(500).json(formatResponse("Erreur serveur", { error: error }))
     }
 }
 
@@ -187,10 +201,13 @@ export const refreshToken = async (req: Request, res: Response): Promise<Respons
 export const logoutUser = async (req: Request, res: Response): Promise<Response> => {
     try {
         const refreshToken = req.body.refreshToken
+
         await RefreshToken.deleteOne({ refreshToken: refreshToken })
-        return res.status(200).json({ message: "Utilisateur déconnecté avec succès" })
+
+        return res.status(200).json(formatResponse("Utilisateur déconnecté avec succès"))
     } catch (error: unknown) {
         console.error(error)
-        return res.status(500).json({ message: "Erreur serveur", error })
+
+        return res.status(500).json(formatResponse("Erreur serveur", { error: error }))
     }
 }
