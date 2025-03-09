@@ -5,12 +5,12 @@ import { validationErrorHandler } from "../middleware/validationErrorHandler.ts"
 const router = Router()
 
 // POST /api/users/signup
-router.post("/signup", signUpUserValidationRules, validationErrorHandler, createUser)
+router.post("/v1/users/signup", signUpUserValidationRules, validationErrorHandler, createUser)
 // POST /api/users/login
-router.post("/login", loginUserValidationRules, validationErrorHandler, loginUser)
+router.post("/v1/users/login", loginUserValidationRules, validationErrorHandler, loginUser)
 // POST /api/users/refreshToken
-router.post("/refreshToken", refreshTokenValidationRule, validationErrorHandler, refreshToken)
+router.post("/v1/users/refreshToken", refreshTokenValidationRule, validationErrorHandler, refreshToken)
 // POST/api/users/logout
-router.post("/logout", refreshTokenValidationRule, validationErrorHandler, logoutUser)
+router.post("/v1/users/logout", refreshTokenValidationRule, validationErrorHandler, logoutUser)
 
 export default router

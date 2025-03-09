@@ -9,7 +9,7 @@ interface UserInterface {
     email: string
     password: string
     pseudonyme: string
-    role: "super-administrateur" | "administrateur" | "moderateur" | "utilisateur"
+    role? : "super-administrateur" | "administrateur" | "moderateur" | "utilisateur"
 }
 
 interface DecodedToken {
@@ -60,7 +60,7 @@ export const createUser = async (req: Request, res: Response): Promise<Response>
             email: req.body.email,
             password: hashedPassword,
             pseudonyme: req.body.pseudonyme,
-            role: req.body.role
+            role: "utilisateur"
         })
 
         await newUser.save()
