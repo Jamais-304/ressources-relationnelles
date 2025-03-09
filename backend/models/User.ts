@@ -1,13 +1,8 @@
 import mongoose, { Document, Schema } from "mongoose"
 import uniqueValidator from "mongoose-unique-validator"
-interface UserInterface {
-    email: string
-    password: string
-    pseudonyme: string
-    role: "super-administrateur" | "administrateur" | "moderateur" | "utilisateur"
-}
+import { type UserInterface } from "../interfaces/userInterfaces.ts"
 
-interface IUserSchema extends UserInterface, Document { }
+interface IUserSchema extends UserInterface, Document {}
 
 const userSchema: Schema<IUserSchema> = new mongoose.Schema(
     {
