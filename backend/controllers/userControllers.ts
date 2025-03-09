@@ -124,7 +124,7 @@ export const createUser = async (req: Request, res: Response): Promise<Response>
 
         if (!refreshToken) return res.status(500).json(formatResponse("Erreur serveur"))
         
-        return res.status(201).json(formatResponse("Utilisateur crée", { tokens: { accesToken, refreshToken }}))
+        return res.status(201).json(formatResponse("Utilisateur crée", { tokens: { accesToken, refreshToken }, user:{pseudonyme: user.pseudonyme, role: user.role}}))
 
     } catch (error: unknown) {
         console.error(error)
