@@ -54,51 +54,6 @@ const generateRefreshToken = async (user: IUserToken) => {
 
 ////////////////////////////////* Controller for user registration  //////////////////////////////////
 
-export const adminCreateUser = async (req: AuthRequest, res: Response): Promise<Response> => {
-    try {
-        const reqUser = req.body
-        delete reqUser.userId
-        const newUserRole = reqUser.role
-
-        if (!req.auth || !req.auth.userId) {
-            return res.status(401).json(formatResponse("Accès non autorisé"))
-        }
-
-        const userIdVerify = req.auth.userId
-
-        const user = await User.findById(userIdVerify)
-
-        if (!user || !user.role) return res.status(401).json(formatResponse("Accès non autorisé"))
-
-        const userRoleIndex = ROLE_HIERARCHY.indexOf(user.role)
-        const reqUserRoleIndex = ROLE_HIERARCHY.indexOf(newUserRole)
-
-        if (userRoleIndex === -1 || reqUserRoleIndex === -1) return res.status(400).json(formatResponse("Rôle invalide"))
-        console.log(userRoleIndex > reqUserRoleIndex)
-
-        if (userRoleIndex > reqUserRoleIndex) return res.status(403).json(formatResponse("Accès insuffisant"))
-
-        const hashedPassword = await bcrypt.hash(reqUser.password, 10)
-
-        const newUser = new User({
-            email: reqUser.email,
-            password: hashedPassword,
-            pseudonyme: reqUser.pseudonyme,
-            role: newUserRole
-        })
-
-        await newUser.save()
-
-        return res.status(201).json(formatResponse("Utilisateur crée avec succès"))
-    } catch (error: unknown) {
-        console.error(error)
-
-        return res.status(500).json(formatResponse("Erreur serveur", { error: error }))
-    }
-}
-
-////////////////////////////////* Controller for user registration  //////////////////////////////////
-
 export const createUser = async (req: Request, res: Response): Promise<Response> => {
     try {
         const hashedPassword = await bcrypt.hash(req.body.password, 10)
@@ -113,9 +68,9 @@ export const createUser = async (req: Request, res: Response): Promise<Response>
         await newUser.save()
 
         const user = await User.findOne({ email: req.body.email })
-        
+
         if (!user) return res.status(500).json(formatResponse("Erreur serveur"))
-        
+
         const accesToken = generateAccesToken(user)
 
         if (!accesToken) return res.status(500).json(formatResponse("Erreur serveur"))
@@ -123,9 +78,12 @@ export const createUser = async (req: Request, res: Response): Promise<Response>
         const refreshToken = await generateRefreshToken(user)
 
         if (!refreshToken) return res.status(500).json(formatResponse("Erreur serveur"))
-        
-        return res.status(201).json(formatResponse("Utilisateur crée", { tokens: { accesToken, refreshToken }, user:{pseudonyme: user.pseudonyme, role: user.role}}))
 
+        return res
+            .status(201)
+            .json(
+                formatResponse("Utilisateur crée", { tokens: { accesToken, refreshToken }, user: { pseudonyme: user.pseudonyme, role: user.role } })
+            )
     } catch (error: unknown) {
         console.error(error)
 
@@ -139,9 +97,9 @@ export const loginUser = async (req: Request, res: Response): Promise<Response> 
     try {
         const user = await User.findOne({ email: req.body.email })
 
-        if (!user) return res.status(401).json(formatResponse("Paire identifiant/mot de passe incorrecte !"))
+        if (!user || !user.password) return res.status(401).json(formatResponse("Paire identifiant/mot de passe incorrecte !"))
 
-        const isValid = await bcrypt.compare(req.body.password, user.password)
+        const isValid = bcrypt.compare(req.body.password, user.password)
 
         if (!isValid) return res.status(401).json(formatResponse("Paire identifiant/mot de passe incorrecte !"))
 
@@ -205,6 +163,123 @@ export const logoutUser = async (req: Request, res: Response): Promise<Response>
         await RefreshToken.deleteOne({ refreshToken: refreshToken })
 
         return res.status(200).json(formatResponse("Utilisateur déconnecté avec succès"))
+    } catch (error: unknown) {
+        console.error(error)
+
+        return res.status(500).json(formatResponse("Erreur serveur", { error: error }))
+    }
+}
+
+////////////////////////////////* Controller with auth for user/admin registration  //////////////////////////////////
+export const adminCreateUser = async (req: AuthRequest, res: Response): Promise<Response> => {
+    try {
+        const reqUser = req.body
+        delete reqUser.userId
+        const newUserRole = reqUser.role
+
+        if (!req.auth || !req.auth.userId) {
+            return res.status(401).json(formatResponse("Accès non autorisé"))
+        }
+
+        const user = await User.findById(req.auth.userId)
+
+        if (!user || !user.role) return res.status(401).json(formatResponse("Accès non autorisé"))
+
+        const userRoleIndex = ROLE_HIERARCHY.indexOf(user.role)
+        const reqUserRoleIndex = ROLE_HIERARCHY.indexOf(newUserRole)
+
+        if (userRoleIndex === -1 || reqUserRoleIndex === -1) return res.status(400).json(formatResponse("Rôle invalide"))
+
+        if (userRoleIndex > reqUserRoleIndex) return res.status(403).json(formatResponse("Accès insuffisant"))
+
+        const hashedPassword = await bcrypt.hash(reqUser.password, 10)
+
+        const newUser = new User({
+            email: reqUser.email,
+            password: hashedPassword,
+            pseudonyme: reqUser.pseudonyme,
+            role: newUserRole
+        })
+
+        await newUser.save()
+
+        return res.status(201).json(formatResponse("Utilisateur crée avec succès"))
+    } catch (error: unknown) {
+        console.error(error)
+
+        return res.status(500).json(formatResponse("Erreur serveur", { error: error }))
+    }
+}
+
+////////////////////////////////* Controller with auth for getAll user registration  //////////////////////////////////
+
+export const getAllUsers = async (req: AuthRequest, res: Response): Promise<Response> => {
+    try {
+        if (!req.auth || !req.auth.userId) {
+            return res.status(401).json(formatResponse("Accès non autorisé"))
+        }
+
+        const user = await User.findById(req.auth.userId)
+
+        if (!user || !user.role) return res.status(401).json(formatResponse("Accès non autorisé"))
+
+        const userRoleIndex = ROLE_HIERARCHY.indexOf(user.role)
+
+        if (userRoleIndex === -1) return res.status(400).json(formatResponse("Rôle invalide"))
+
+        if (userRoleIndex > 1) return res.status(403).json(formatResponse("Accès insuffisant"))
+
+        if (userRoleIndex === 0) {
+            const users = await User.find().select("_id email pseudonyme role createdAt updatedAt")
+            return res.status(200).json(formatResponse("Utilisateurs trouvés", { users: users }))
+        }
+
+        if (userRoleIndex === 1) {
+            const users = await User.find({ role: { $ne: "super-administrateur" } }).select("_id email pseudonyme role createdAt updatedAt")
+            return res.status(200).json(formatResponse("Utilisateurs trouvés", { users: users }))
+        }
+
+        return res.status(400).json(formatResponse("Aucune condition remplie"))
+    } catch (error: unknown) {
+        console.error(error)
+
+        return res.status(500).json(formatResponse("Erreur serveur", { error: error }))
+    }
+}
+
+////////////////////////////////* Controller with auth for delet user by id registration  //////////////////////////////////
+
+export const deleteUserById = async (req: AuthRequest, res: Response): Promise<Response> => {
+    try {
+
+        if (!req.auth || !req.auth.userId) {
+            return res.status(401).json(formatResponse("Accès non autorisé"))
+        }
+
+        const user = await User.findById(req.auth.userId)
+
+        if (!user || !user.role) return res.status(401).json(formatResponse("Accès non autorisé"))
+
+        const userRoleIndex = ROLE_HIERARCHY.indexOf(user.role)
+
+        if (userRoleIndex === -1) return res.status(400).json(formatResponse("Rôle invalide"))
+
+        if (userRoleIndex > 1) return res.status(403).json(formatResponse("Accès insuffisant"))
+        
+        const userIdToDelet = req.params.id
+
+        const userToDelet = await User.findById(userIdToDelet).select("role")
+
+        if (!userToDelet || !userToDelet.role) return res.status(400).json(formatResponse("Rôle invalide"))
+        
+        const userRoleToDeletIndex = ROLE_HIERARCHY.indexOf(userToDelet.role)
+
+        if (userRoleIndex > userRoleToDeletIndex) return res.status(403).json(formatResponse("Accès insuffisant"))
+        
+        await User.findByIdAndDelete(userIdToDelet)
+
+        return res.status(200).json(formatResponse("Utilisateur supprimé avec succès"))
+
     } catch (error: unknown) {
         console.error(error)
 
