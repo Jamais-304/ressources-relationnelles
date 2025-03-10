@@ -1,20 +1,12 @@
-import { type Role } from "../config.ts"
+import { type RessourceInterface } from "../interfaces/ressourceInterfaces.ts"
+import { type UserInterface } from "../interfaces/userInterfaces.ts"
+import { type TokensInterface } from "../interfaces/tokenInterfaces.ts"
 
 interface Data {
-    user?: {
-        email?: string
-        password?: string
-        pseudonyme?: string
-        role?: Role
-    }
-    ressource?: {
-        title?: string
-        // A développer
-    }
-    tokens?: {
-        accesToken?: string
-        refreshToken?: string
-    }
+    user?: UserInterface
+    users?: UserInterface[]
+    ressource?: RessourceInterface
+    tokens?: TokensInterface
     error?: unknown
 }
 
