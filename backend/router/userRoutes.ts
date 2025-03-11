@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { createUser, loginUser, logoutUser, refreshToken, adminCreateUser, getAllUsers, deleteUserById } from "../controllers/userControllers.ts"
+import { createUser, loginUser, logoutUser, refreshToken, adminCreateUser, getAllUsers, deleteUserById, modifyUser } from "../controllers/userControllers.ts"
 import { validationErrorHandler } from "../middleware/validationErrorHandler.ts"
 import { auth } from "../middleware/auth.ts"
 import { loginUserValidationRules, signUpUserValidationRules, refreshTokenValidationRule } from "../middleware/validators/userValidator.ts"
@@ -22,4 +22,6 @@ router.post("/v1/users/admin/create-user", signUpUserValidationRules, validation
 router.get("/v1/users/get-all-users", auth, getAllUsers)
 // DELETE /api/v1/users/delete-user/:id
 router.get("/v1/users/delete-user/:id", auth, deleteUserById)
+// PUT /api/v1/users/modify-user/:id
+router.put("/v1/users/modify-user/:id", auth, modifyUser)
 export default router
