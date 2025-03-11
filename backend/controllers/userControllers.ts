@@ -52,6 +52,36 @@ const generateRefreshToken = async (user: IUserToken) => {
     return refreshToken
 }
 
+//////////////////////////* Functions check auth and user role //////////////////////////
+
+const checkAuthentification = async (req: AuthRequest) => {
+    if (!req.auth || !req.auth.userId) throw new Error("Accès non autorisé")
+
+    const user = await User.findById(req.auth.userId)
+
+    if (!user || !user.role) throw new Error("Accès non autorisé")
+
+    return user
+}
+
+const checkUserRole = (userRole: Role) => {
+    const userRoleIndex = ROLE_HIERARCHY.indexOf(userRole)
+
+    if (userRoleIndex === -1) throw new Error("Rôle invalide")
+
+    return userRoleIndex
+}
+
+const checkUserParams = async (userParamsId: string) => {
+    const userParams = await User.findById(userParamsId)
+
+    if (!userParams || !userParams.role) throw new Error("Rôle invalide")
+
+    const userParamsRoleIndex = ROLE_HIERARCHY.indexOf(userParams.role)
+
+    return userParamsRoleIndex
+}
+
 ////////////////////////////////* Controller for user registration  //////////////////////////////////
 
 export const createUser = async (req: Request, res: Response): Promise<Response> => {
@@ -247,11 +277,10 @@ export const getAllUsers = async (req: AuthRequest, res: Response): Promise<Resp
     }
 }
 
-////////////////////////////////* Controller with auth for delet user by id registration  //////////////////////////////////
+////////////////////////////////* Controller with auth for delete user by id registration  //////////////////////////////////
 
 export const deleteUserById = async (req: AuthRequest, res: Response): Promise<Response> => {
     try {
-
         if (!req.auth || !req.auth.userId) {
             return res.status(401).json(formatResponse("Accès non autorisé"))
         }
@@ -265,22 +294,58 @@ export const deleteUserById = async (req: AuthRequest, res: Response): Promise<R
         if (userRoleIndex === -1) return res.status(400).json(formatResponse("Rôle invalide"))
 
         if (userRoleIndex > 1) return res.status(403).json(formatResponse("Accès insuffisant"))
-        
-        const userIdToDelet = req.params.id
 
-        const userToDelet = await User.findById(userIdToDelet).select("role")
+        const userIdToDelete = req.params.id
 
-        if (!userToDelet || !userToDelet.role) return res.status(400).json(formatResponse("Rôle invalide"))
-        
-        const userRoleToDeletIndex = ROLE_HIERARCHY.indexOf(userToDelet.role)
+        const userToDelete = await User.findById(userIdToDelete).select("role")
 
-        if (userRoleIndex > userRoleToDeletIndex) return res.status(403).json(formatResponse("Accès insuffisant"))
-        
-        await User.findByIdAndDelete(userIdToDelet)
+        if (!userToDelete || !userToDelete.role) return res.status(400).json(formatResponse("Rôle invalide"))
+
+        const userRoleIndexToDelete = ROLE_HIERARCHY.indexOf(userToDelete.role)
+
+        if (userRoleIndex > userRoleIndexToDelete) return res.status(403).json(formatResponse("Accès insuffisant"))
+
+        await User.findByIdAndDelete(userToDelete)
 
         return res.status(200).json(formatResponse("Utilisateur supprimé avec succès"))
+    } catch (error: unknown) {
+        console.error(error)
+
+        return res.status(500).json(formatResponse("Erreur serveur", { error: error }))
+    }
+}
+
+////////////////////////////////* Controller with auth for modify user by id registration  //////////////////////////////////
+
+export const modifyUser = async (req: AuthRequest, res: Response): Promise<Response> => {
+    try {
+        // Check auth and return user
+        const user = await checkAuthentification(req)
+        // Check user role and return userRoleIndex
+        const userRoleIndex = checkUserRole(user.role)
+        // Check userId role pass in params and return userParamsRoleIndex
+        const userRoleIndexToModify = await checkUserParams(req.params.id)
+
+        const userObject = req.body
+        
+        if (userRoleIndex >= 2 && req.auth && req.params.id == req.auth.userId) {
+            delete userObject.role
+            await User.updateOne({ _id: req.params.id }, { ...userObject, _id: req.params.id })
+            return res.status(200).json(formatResponse("Utilisateur modifié avec succès"))
+        } else if (userRoleIndex < userRoleIndexToModify) {
+            // ! TESTES à approfondir
+            if (userRoleIndex >= ROLE_HIERARCHY.indexOf(userObject.role)) return res.status(403).json(formatResponse("Accès insuffisant"))
+            await User.updateOne({ _id: req.params.id }, { ...userObject, _id: req.params.id })
+            return res.status(200).json(formatResponse("Utilisateur modifié avec succès"))
+        } else {
+            return res.status(401).json(formatResponse("Non autorisé"))
+        }
 
     } catch (error: unknown) {
+
+        if (error instanceof Error && error.message === "Rôle invalide") return res.status(400).json(formatResponse(error.message))
+        if (error instanceof Error && error.message === "Accès non autorisé") return res.status(401).json(formatResponse(error.message))
+
         console.error(error)
 
         return res.status(500).json(formatResponse("Erreur serveur", { error: error }))
