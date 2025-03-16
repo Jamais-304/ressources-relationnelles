@@ -1,6 +1,7 @@
 import axios, { AxiosHeaders, type AxiosResponse } from 'axios'
 import { Authentication } from './authentication'
 import { UserService } from './services/services'
+import { type Response } from './types/response'
 
 /**
  * The Api class facilitates interactions with a RESTful API.
@@ -109,7 +110,7 @@ export class Api {
    * 200-299.
    * @throws {Error} If the response status code indicates a failure.
    */
-  private handleResponse(response: AxiosResponse): unknown {
+  private handleResponse(response: AxiosResponse): Response {
     if (response.status >= 200 && response.status < 300) {
       return response.data
     } else {
