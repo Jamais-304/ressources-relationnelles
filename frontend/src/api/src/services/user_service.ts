@@ -1,5 +1,6 @@
-import { User, type UserData } from '../models/user'
+import { User, type UserData, type TokenData } from '../models/models'
 import { Api } from '../api'
+import { Token } from '../models/token'
 
 export class UserService {
   private api: Api
@@ -10,6 +11,18 @@ export class UserService {
    */
   constructor(api: Api) {
     this.api = api
+  }
+
+  async login(attrs: object): Promise<Token> {
+    const response = (await this.api.post(`users/login`, attrs))
+
+    try {
+      const tokenData = response.tokens as TokenData
+      const userToken = Token.fromJson(tokenData)
+      return userToken
+    } catch {
+      throw new Error('Response is expected to have the form of TokenData.')
+    }
   }
 
   /**

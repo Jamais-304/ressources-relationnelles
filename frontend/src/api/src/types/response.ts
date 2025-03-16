@@ -1,5 +1,6 @@
-import type { UserData } from '../models/user'
+import type { UserData, TokenData } from '../models/models'
 
 export interface Response {
-  user: UserData
+  user?: UserData
+  tokens?: TokenData
 }
