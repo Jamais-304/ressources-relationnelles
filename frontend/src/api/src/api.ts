@@ -26,7 +26,7 @@ export class Api {
    */
   constructor({
     auth = Authentication.anonymous(),
-    baseUrl = process.env.API_BASE_URL || 'http://localhost:3000/',
+    baseUrl = import.meta.env.VITE_API_BASE_URL,
   }: {
     auth?: Authentication
     baseUrl?: string
@@ -97,6 +97,22 @@ export class Api {
         throw new Error(`Failed to load data: ${error.response?.status}`)
       } else {
         throw new Error(`Failed to load data: ${error}`)
+      }
+    }
+  }
+
+  async post(endpoint: string, body: object): Promise<Response> {
+    try {
+      const response = await axios.post(`${this.baseUrl}/${endpoint}`, {
+        headers: this.headers,
+        body: body,
+      })
+      return this.handleResponse(response)
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(`Failed to send data: ${error.response?.status}`)
+      } else {
+        throw new Error(`Failed to send data: ${error}`)
       }
     }
   }
