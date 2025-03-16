@@ -37,6 +37,7 @@ list = [
     "C:Resources",
     "C:Users",
     "F:API",
+    "F:router",
     "M:Comment",
     "M:Resource",
     "M:User",
