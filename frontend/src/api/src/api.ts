@@ -103,10 +103,9 @@ export class Api {
 
   async post(endpoint: string, body: object): Promise<Response> {
     try {
-      const response = await axios.post(`${this.baseUrl}/${endpoint}`, {
-        headers: this.headers,
-        body: body,
-      })
+      const response = await axios.post(`${this.baseUrl}/${endpoint}`, body,
+        { headers: this.headers }
+      )
       return this.handleResponse(response)
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
@@ -128,7 +127,7 @@ export class Api {
    */
   private handleResponse(response: AxiosResponse): Response {
     if (response.status >= 200 && response.status < 300) {
-      return response.data
+      return response.data.data
     } else {
       throw new Error(`Failed to load data: ${response.status}`)
     }
