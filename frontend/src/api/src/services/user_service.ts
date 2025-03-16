@@ -44,4 +44,16 @@ export class UserService {
       throw new Error('Response is expected to have the form of UserData.')
     }
   }
+
+  async create(attrs: object): Promise<User> {
+    const response = await this.api.post(`users/signup`, attrs)
+
+    try {
+      const userData = response.user as UserData
+      const user = User.fromJson(userData)
+      return user
+    } catch {
+      throw new Error('Response is expected to have the form of UserData')
+    }
+  }
 }
