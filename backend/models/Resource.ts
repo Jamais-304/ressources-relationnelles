@@ -1,14 +1,43 @@
 import mongoose from 'mongoose';
 
 const resourceSchema = new mongoose.Schema({
-	authorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-	title: { type: String, required: true, trim: true },
-	contentGridfsId: { type: String, required: true },
-	category: { type: String, enum: ['TEXT', 'HTML', 'VIDEO', 'AUDIO', 'IMAGE'], required: true, trim: true },
-	relationType: { type: String, required: true, trim: true },
-	status: { type: String, enum: ['DRAFT', 'PENDING', 'PUBLISHED'], default: 'DRAFT' },
-	validatedAndPublishedAt: { type: Date },
-	validatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+	authorId: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'User',
+		required: [true, "Author's ID is required"]
+	},
+	title: {
+		type: String, 
+		required: [true, "Title is required"], 
+		trim: true 
+	},
+	contentGridfsId: { 
+		type: String, 
+		required: [true, "Content's GridFS ID is required"], 
+	},
+	category: { 
+		type: String, 
+		enum: ['TEXT', 'HTML', 'VIDEO', 'AUDIO', 'IMAGE'], 
+		required: [true, "Category is required"], 
+		trim: true 
+	},
+	relationType: { 
+		type: String, 
+		required: [true, "Relation type is required"], 
+		trim: true 
+	},
+	status: { 
+		type: String, 
+		enum: ['DRAFT', 'PENDING', 'PUBLISHED'], 
+		default: 'DRAFT' 
+	},
+	validatedAndPublishedAt: { 
+		type: Date 
+	},
+	validatedBy: { 
+		type: mongoose.Schema.Types.ObjectId, 
+		ref: 'User' 
+	},
 
 }, { timestamps: true }); // createdAt, updatedAt
 
