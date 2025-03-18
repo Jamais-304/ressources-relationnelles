@@ -6,7 +6,7 @@ import { formatResponse } from "../utils/formatResponse.ts"
 import { errorHandler } from "../utils/errorHandler.ts"
 import { generateAccesToken, generateRefreshToken } from "../utils/generateTokens.ts"
 import { checkAuthentification, checkUserParams, checkUserRole } from "../utils/checkAuth.ts"
-import { ROLE_HIERARCHY } from "../config.ts"
+import { ROLE_HIERARCHY, ROLES } from "../config.ts"
 import { type UserInterface, type UserReqBodyRequest } from "../interfaces/userInterfaces.ts"
 import { type AuthRequest } from "../interfaces/authInterface.ts"
 
@@ -351,6 +351,11 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<Respo
         // Extract user details from the request body
         const userObject: UserReqBodyRequest = req.body
 
+        const roleExiste = userObject.role && Object.values(ROLES).includes(userObject.role)
+        
+        if (!roleExiste){
+            return res.status(400).json(formatResponse("Invalid role"))
+        }
         // Remove any user IDs from the request body for security reasons
         delete userObject.id
         delete userObject.userId
@@ -362,12 +367,12 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<Respo
             // Update user information
             await User.updateOne({ _id: req.params.id }, { ...userObject, _id: req.params.id })
             return res.status(200).json(formatResponse("User updated successfully"))
-        } else if (userRoleIndex < userRoleIndexToModify) {
+        } else if (userRoleIndex <= userRoleIndexToModify) {
             // Ensure the role is valid and the authenticated user has sufficient permissions
             if (!userObject.role) {
                 return res.status(400).json(formatResponse("Invalid role"))
             }
-            if (userRoleIndex >= ROLE_HIERARCHY.indexOf(userObject.role)) {
+            if (userRoleIndex > ROLE_HIERARCHY.indexOf(userObject.role)) {
                 return res.status(403).json(formatResponse("Insufficient access"))
             }
 
