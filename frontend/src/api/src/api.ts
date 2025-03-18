@@ -154,6 +154,14 @@ export class Api {
     }
   }
 
+  /**
+   * Sends a POST request to the specified API endpoint.
+   *
+   * @param {string} endpoint - The API endpoint to send the request to
+   * @param {object} body - The data to send in the request body
+   * @returns {Promise<Response>} The parsed response data
+   * @throws {Error} When the request fails or returns an error status
+   */
   async post(endpoint: string, body: object): Promise<Response> {
     await this.handleTokens()
 
