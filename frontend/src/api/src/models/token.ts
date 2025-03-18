@@ -1,16 +1,16 @@
 export interface TokenData {
   accesToken: string
-  refreshToken: string
+  refreshToken?: string
 }
 
 export interface Token {
   access: string
-  refresh: string
+  refresh?: string
 }
 
 export class Token {
   access: string
-  refresh: string
+  refresh?: string
 
   /**
    * Creates an instance of Token.
