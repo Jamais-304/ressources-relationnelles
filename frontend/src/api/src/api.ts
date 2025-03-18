@@ -35,6 +35,7 @@ export class Api {
   } = {}) {
     this.auth = auth
     this.baseUrl = baseUrl
+    this.setupAxiosInterceptors()
   }
 
   /**
@@ -128,6 +129,18 @@ export class Api {
   }
 
   /**
+   * Configures axios request interceptors to handle token refresh
+   * and header setup before each request.
+   */
+  private setupAxiosInterceptors() {
+    axios.interceptors.request.use(async (config) => {
+      await this.handleTokens()
+      config.headers = this.headers
+      return config
+    })
+  }
+
+  /**
    * Sends a GET request to the specified endpoint and returns the response
    * data.
    *
@@ -138,12 +151,8 @@ export class Api {
    * indicates an error.
    */
   async get(endpoint: string): Promise<unknown> {
-    await this.handleTokens()
-
     try {
-      const response = await axios.get(`${this.baseUrl}/${endpoint}`, {
-        headers: this.headers,
-      })
+      const response = await axios.get(`${this.baseUrl}/${endpoint}`)
       return this.handleResponse(response)
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
@@ -163,12 +172,8 @@ export class Api {
    * @throws {Error} When the request fails or returns an error status
    */
   async post(endpoint: string, body: object): Promise<Response> {
-    await this.handleTokens()
-
     try {
-      const response = await axios.post(`${this.baseUrl}/${endpoint}`, body,
-        { headers: this.headers }
-      )
+      const response = await axios.post(`${this.baseUrl}/${endpoint}`, body)
       return this.handleResponse(response)
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
