@@ -1,0 +1,15 @@
+node_modules
+dist
+build
+coverage
+*.min.js
+eslint.config.js
+prettier.config.js
+swagger.json
+swagger.yaml
+jest.config.js
+tsconfig.json
+.eslintrc.json
+.env
+package-lock.json
+package.json
