@@ -1,53 +1,51 @@
-// Import de l'objet body depuis express-validator
+// Import the body object from express-validator
 import { body } from "express-validator"
-// Règles de validation pour l'inscription de l'utilisateur
+
+// Validation rules for user sign-up
 export const signUpUserValidationRules = [
-    // L'email : eamil, obligatoire, échapper les caractères spéciaux
+    // Email: must be a valid email, escape special characters
     body("email")
         .isEmail()
-        .withMessage("L'email doit être une adresse email valide")
-        .normalizeEmail() // Normaliser l'email
+        .withMessage("Email must be a valid email address")
+        .normalizeEmail() // Normalize the email
         .escape()
-        .trim(), // Enlever les espaces en début et fin de chaîne
-    // Le mot de passe : chaîne de caractères , obligatoire, échapper les caractères spéciaux
+        .trim(), // Remove leading and trailing spaces
+
+    // Password: string, required, escape special characters
     body("password")
         .isString()
         .isLength({ min: 8, max: 25 })
-        .withMessage("Le mot de passe doit contenir au moins 8 caractère et faire moins de 26 caractères")
+        .withMessage("Password must be at least 8 characters and less than 26 characters")
         .escape()
-        .trim(), // Enlever les espaces en début et fin de chaîne
-    // Le mot de passe : chaîne de caractères , obligatoire, échapper les caractères spéciaux
+        .trim(), // Remove leading and trailing spaces
+
+    // Pseudonym: string, required, escape special characters
     body("pseudonyme")
         .isString()
         .isLength({ min: 5, max: 40 })
-        .withMessage("Le pseudonyme doit contenir au moins 5 caractère et faire moins de 40 caractères")
+        .withMessage("Pseudonym must be at least 5 characters and less than 40 characters")
         .escape()
-        .trim() // Enlever les espaces en début et fin de chaîne
+        .trim() // Remove leading and trailing spaces
 ]
 
-// Règles de validation pour la connexion de l'utilisateur
+// Validation rules for user login
 export const loginUserValidationRules = [
-    // L'email : eamil, obligatoire, échapper les caractères spéciaux
+    // Email: must be a valid email, escape special characters
     body("email")
         .isEmail()
-        .withMessage("L'email doit être une adresse email valide")
-        .normalizeEmail() // Normaliser l'email
+        .withMessage("Email must be a valid email address")
+        .normalizeEmail() // Normalize the email
         .escape()
-        .trim(), // Enlever les espaces en début et fin de chaîne
-    // Le mot de passe : chaîne de caractères , obligatoire, échapper les caractères spéciaux
+        .trim(), // Remove leading and trailing spaces
+
+    // Password: string, required, escape special characters
     body("password")
         .isString()
         .isLength({ min: 8, max: 25 })
-        .withMessage("Le mot de passe doit contenir au moins 8 caractère et faire moins de 26 caractères")
+        .withMessage("Password must be at least 8 characters and less than 26 characters")
         .escape()
         .trim()
 ]
-// Règles pour le refreshtoken
-export const refreshTokenValidationRule = [
-    body("refreshToken")
-        .isString()
-        .withMessage("Le refresh token doit être une chaîne de caractères")
-        .escape()
-        .trim() // Enlever les espaces en début et fin de chaîne
-]
 
+// Validation rules for updating user information
+export const updateUserValidationRules = [...signUpUserValidationRules]
