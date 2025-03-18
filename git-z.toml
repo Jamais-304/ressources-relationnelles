@@ -39,6 +39,7 @@ list = [
     "F:API",
     "F:App",
     "F:router",
+    "F:utils",
     "M:Comment",
     "M:Resource",
     "M:User",
