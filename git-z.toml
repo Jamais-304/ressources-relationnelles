@@ -51,6 +51,7 @@ list = [
     "T:Server",
     "V:Comment",
     "V:Home",
+    "V:Login",
     "V:Resources",
     "V:User",
     "lib",
