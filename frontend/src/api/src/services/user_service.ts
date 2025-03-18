@@ -1,6 +1,7 @@
-import { User, type UserData } from '../models/user'
+import { User, type UserData, type TokenData } from '../models/models'
 import { Api } from '../api'
-
+import { Token } from '../models/token'
+import { setToken } from '@/utils/cookies'
 export class UserService {
   private api: Api
 
@@ -13,11 +14,34 @@ export class UserService {
   }
 
   /**
+   * Authenticates a user and stores their tokens in cookies.
+   *
+   * @param {object} attrs - User credentials for authentication
+   * @returns {Promise<Token>} A Token object with access and refresh attrs.
+   * @throws {Error} When the API response doesn't match the TokenData format.
+   */
+  async login(attrs: object): Promise<Token> {
+    const response = await this.api.post(`users/login`, attrs)
+
+    try {
+      const tokenData = response.tokens as TokenData
+      const userToken = Token.fromJson(tokenData)
+
+      setToken('accessToken', userToken.access)
+      userToken.refresh && setToken('refreshToken', userToken.refresh)
+      setToken('tokenExpiryTime', (Date.now() + 14 * 60 * 1000).toString())
+      return userToken
+    } catch {
+      throw new Error('Response is expected to have the form of TokenData.')
+    }
+  }
+
+  /**
    * List all users.
    * @returns A list of instantiated Users.
    */
   async list(): Promise<User[]> {
-    const response = await this.api.get(`users`)
+    const response = await this.api.get(`users/get-all-users`)
 
     try {
       const usersData = response as UserData[]
@@ -45,6 +69,13 @@ export class UserService {
     }
   }
 
+  /**
+   * Creates a new user account.
+   *
+   * @param {object} attrs - User attributes for registration
+   * @returns {Promise<User>} A User object containing the created user.
+   * @throws {Error} When the API response doesn't match UserData format.
+   */
   async create(attrs: object): Promise<User> {
     const response = await this.api.post(`users/signup`, attrs)
 
