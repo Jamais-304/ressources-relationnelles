@@ -1,8 +1,8 @@
 import axios, { AxiosHeaders, type AxiosResponse } from 'axios'
 import { Authentication } from './authentication'
-import { UserService } from './services/services'
+import { UserService, TokenService } from './services/services'
 import { type Response } from './types/response'
-
+import { getToken } from '@/utils/cookies'
 /**
  * The Api class facilitates interactions with a RESTful API.
  * It handles authentication, sets up request headers, and manages HTTP
@@ -11,6 +11,8 @@ import { type Response } from './types/response'
 export class Api {
   auth: Authentication
   baseUrl: string
+  private isRefreshing = false
+  private tokenService?: TokenService
   private userService?: UserService
 
   /**
@@ -33,6 +35,19 @@ export class Api {
   } = {}) {
     this.auth = auth
     this.baseUrl = baseUrl
+  }
+
+  /**
+   * Gets or creates a TokenService instance.
+   * Implements lazy initialization of the TokenService.
+   *
+   * @returns {TokenService} The TokenService instance
+   */
+  get token(): TokenService {
+    if (!this.tokenService) {
+      this.tokenService = new TokenService(this)
+    }
+    return this.tokenService
   }
 
   /**
@@ -77,6 +92,42 @@ export class Api {
   }
 
   /**
+   * Manages token refresh logic before API requests.
+   *
+   * Checks if access token is expired or close to expiring (within 1 minute buffer).
+   * If needed, refreshes the token using the refresh token. Updates authentication
+   * with new tokens.
+   */
+  private async handleTokens(): Promise<void> {
+    if (this.isRefreshing) {
+      return
+    }
+
+    const accessToken = getToken('accessToken')
+    const refreshToken = getToken('refreshToken')
+
+    if (!accessToken || !refreshToken) {
+      return
+    }
+
+    const tokenExpiryTime = parseInt(getToken('tokenExpiryTime') || '0', 10)
+    const bufferTime = 60 * 1000 // 1 minute buffer
+    const isTokenExpired = Date.now() >= tokenExpiryTime - bufferTime
+
+    if (isTokenExpired) {
+      this.isRefreshing = true
+      try {
+        const newToken = await this.token.refresh(refreshToken)
+        this.auth = Authentication.bearerToken(newToken.access)
+      } finally {
+        this.isRefreshing = false
+      }
+    } else {
+      this.auth = Authentication.bearerToken(accessToken)
+    }
+  }
+
+  /**
    * Sends a GET request to the specified endpoint and returns the response
    * data.
    *
@@ -87,6 +138,8 @@ export class Api {
    * indicates an error.
    */
   async get(endpoint: string): Promise<unknown> {
+    await this.handleTokens()
+
     try {
       const response = await axios.get(`${this.baseUrl}/${endpoint}`, {
         headers: this.headers,
@@ -102,6 +155,8 @@ export class Api {
   }
 
   async post(endpoint: string, body: object): Promise<Response> {
+    await this.handleTokens()
+
     try {
       const response = await axios.post(`${this.baseUrl}/${endpoint}`, body,
         { headers: this.headers }
