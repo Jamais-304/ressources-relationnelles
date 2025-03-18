@@ -2,7 +2,7 @@ import { type UserInterface } from "../interfaces/userInterfaces.ts"
 import { type Role } from "../config.ts"
 
 export interface TokensInterface {
-    accesToken?: string
+    accessToken?: string
     refreshToken?: string
 }
 

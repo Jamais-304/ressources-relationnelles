@@ -43,8 +43,8 @@ export const createUser = async (req: Request, res: Response): Promise<Response>
         }
 
         // Generate an access token for the new user
-        const accesToken: string | undefined = generateAccesToken(user)
-        if (!accesToken) {
+        const accessToken: string | undefined = generateAccesToken(user)
+        if (!accessToken) {
             return res.status(500).json(formatResponse("Server error"))
         }
 
@@ -57,7 +57,7 @@ export const createUser = async (req: Request, res: Response): Promise<Response>
         // Return the user details and tokens in the response
         return res.status(201).json(
             formatResponse("User created", {
-                tokens: { accesToken, refreshToken },
+                tokens: { accessToken, refreshToken },
                 user: { pseudonyme: user.pseudonyme, role: user.role }
             })
         )
@@ -96,8 +96,8 @@ export const loginUser = async (req: Request, res: Response): Promise<Response> 
         }
 
         // Generate an access token for the authenticated user
-        const accesToken: string | undefined = generateAccesToken(user)
-        if (!accesToken) {
+        const accessToken: string | undefined = generateAccesToken(user)
+        if (!accessToken) {
             return res.status(500).json(formatResponse("Server error"))
         }
 
@@ -108,7 +108,7 @@ export const loginUser = async (req: Request, res: Response): Promise<Response> 
         }
 
         // Return the tokens in the response
-        return res.status(200).json(formatResponse("Login successful", { tokens: { accesToken, refreshToken } }))
+        return res.status(200).json(formatResponse("Login successful", { tokens: { accessToken, refreshToken } }))
     } catch (error: unknown) {
         // Handle unexpected errors
         const statusCode: number = errorHandler(error) || 500
