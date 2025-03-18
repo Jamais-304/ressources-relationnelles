@@ -50,6 +50,7 @@ list = [
     "S:Tests",
     "T:Server",
     "V:Comment",
+    "V:Home",
     "V:Resources",
     "V:User",
     "lib",
