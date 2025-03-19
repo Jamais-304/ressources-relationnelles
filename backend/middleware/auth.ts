@@ -1,25 +1,28 @@
 import jwt from "jsonwebtoken"
-import type { Request, Response, NextFunction } from "express"
+import type { Response, NextFunction } from "express"
+import { type AuthRequest } from "../interfaces/authInterface.ts"
+import { type DecodedToken } from "../interfaces/tokenInterfaces.ts"
+/**
+ * Middleware function to authenticate requests using JSON Web Tokens (JWT).
+ *
+ * This function extracts the JWT from the Authorization header, verifies it using a secret key,
+ * and attaches the decoded user ID to the request object for use in subsequent middleware or route handlers.
+ * If the token is invalid or missing, it responds with a 401 Unauthorized status.
+ *
+ */
 
-interface AuthRequest extends Request {
-    auth?: {
-        userId: string
-    }
-}
-
-interface DecodedToken {
-    userId: string
-}
 export const auth = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         const authorization = req.header("authorization")
-        if (!authorization) return res.status(401).send("Accès non autorisé")
+        if (!authorization) {
+            return res.status(401).send("Unauthorized access")
+        }
 
         const token = authorization.split(" ")[1]
         const secretKey: string | undefined = process.env.TOKEN_SECRET
 
         if (!secretKey) {
-            console.error("La clé secrète n'est pas définie")
+            console.error("Secret key is not defined")
             return
         }
 
@@ -34,6 +37,6 @@ export const auth = async (req: AuthRequest, res: Response, next: NextFunction) 
         next()
     } catch (error: unknown) {
         console.error(error)
-        return res.status(401).send("Accès non autorisé")
+        return res.status(401).send("Unauthorized access")
     }
 }

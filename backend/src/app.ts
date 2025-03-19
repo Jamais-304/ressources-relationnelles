@@ -5,6 +5,7 @@ import { MONGO_URI } from "../config.ts"
 import yaml from "yamljs"
 import swaggerUi from "swagger-ui-express"
 import userRouter from "../router/userRoutes.ts"
+import refreshTokenRouter from "../router/refreshTokenRoute.ts"
 
 const app = express()
 const swaggerDocs = yaml.load("swagger.yaml")
@@ -24,7 +25,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use(express.json())
 // Routes Users
-app.use("/api", userRouter)
+app.use("/api", userRouter, refreshTokenRouter)
 // Docuementation API
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs))
 
