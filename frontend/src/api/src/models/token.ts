@@ -1,5 +1,5 @@
 export interface TokenData {
-  accesToken: string
+  accessToken: string
   refreshToken?: string
 }
 
@@ -17,7 +17,7 @@ export class Token {
    * @param data - The data to initialize the User instance.
    */
   constructor(data: TokenData) {
-    this.access = data.accesToken
+    this.access = data.accessToken
     this.refresh = data.refreshToken
   }
 
@@ -37,7 +37,7 @@ export class Token {
    */
   toJson(): TokenData {
     return {
-      accesToken: this.access,
+      accessToken: this.access,
       refreshToken: this.refresh,
     }
   }
