@@ -5,7 +5,7 @@ interface ErrorMapping {
 /**
  * Array of error mappings used to determine the HTTP status code based on the error message.
  */
-const ErrorMappings: ErrorMapping[] = [
+export const ErrorMappings: ErrorMapping[] = [
     { message: "Invalid role", statusCode: 400 },
     { message: "Missing information", statusCode: 400 },
     { message: "No conditions met", statusCode: 400 },
@@ -29,7 +29,6 @@ const ErrorMappings: ErrorMapping[] = [
  * @returns {number} - The HTTP status code corresponding to the error.
  */
 export const errorHandler = (error: unknown): number => {
-    console.error(error)
     if (error instanceof Error) {
         const mapping = ErrorMappings.find(mapping => mapping.message === error.message)
         return mapping ? mapping.statusCode : 500
