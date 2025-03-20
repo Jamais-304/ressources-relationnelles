@@ -15,8 +15,7 @@ import jwt from "jsonwebtoken"
 export const generateAccesToken = (user: IUserToken): string | undefined => {
     const secretKey: string | undefined = process.env.TOKEN_SECRET
     if (!secretKey) {
-        console.error("Secret key is not defined")
-        return
+        throw new Error("Missing secret key")
     }
 
     const accesToken = jwt.sign({ userId: user._id, role: user.role }, secretKey, { expiresIn: "15m" })
@@ -39,8 +38,7 @@ export const generateRefreshToken = async (user: IUserToken): Promise<string | u
     const secretKey: string | undefined = process.env.TOKEN_SECRET
 
     if (!secretKey) {
-        console.error("Secret key is not defined")
-        return
+        throw new Error("Missing secret key")
     }
 
     const refreshToken = jwt.sign({ userId: user._id, role: user.role }, secretKey, { expiresIn: "7d" })
