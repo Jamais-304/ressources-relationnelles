@@ -1,7 +1,7 @@
 import { checkAuthentification, checkUserRole, checkUserParams } from "../../utils/checkAuth"
 import User from "../../models/User.ts"
 import { AuthRequest } from "../../interfaces/authInterface.ts"
-import { Role, ROLE_HIERARCHY } from "../../config.ts"
+import { Role, ROLE_HIERARCHY } from "../../../config.ts"
 
 jest.mock("../../models/User.ts")
 

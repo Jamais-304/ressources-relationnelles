@@ -11,11 +11,12 @@ import { type DecodedToken } from "../interfaces/tokenInterfaces.ts"
  *
  */
 
-export const auth = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const auth = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
         const authorization = req.header("authorization")
         if (!authorization) {
-            return res.status(401).send("Unauthorized access")
+            res.status(401).send("Unauthorized access")
+            return 
         }
 
         const token = authorization.split(" ")[1]
@@ -37,6 +38,7 @@ export const auth = async (req: AuthRequest, res: Response, next: NextFunction) 
         next()
     } catch (error: unknown) {
         console.error(error)
-        return res.status(401).send("Unauthorized access")
+        res.status(401).send("Unauthorized access")
+        return 
     }
 }
