@@ -4,8 +4,8 @@ import mongoose from "mongoose"
 import { MONGO_URI } from "../config.ts"
 import yaml from "yamljs"
 import swaggerUi from "swagger-ui-express"
-import userRouter from "../router/userRoutes.ts"
-import refreshTokenRouter from "../router/refreshTokenRoute.ts"
+import userRouter from "./router/userRoutes.ts"
+import refreshTokenRouter from "./router/refreshTokenRoute.ts"
 
 const app = express()
 const swaggerDocs = yaml.load("swagger.yaml")
