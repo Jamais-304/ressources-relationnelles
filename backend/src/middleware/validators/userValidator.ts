@@ -14,6 +14,7 @@ export const signUpUserValidationRules = [
     // Password: string, required, escape special characters
     body("password")
         .isString()
+        .withMessage("Password must be a string")
         .isLength({ min: 8, max: 25 })
         .withMessage("Password must be at least 8 characters and less than 26 characters")
         .escape()
@@ -22,6 +23,7 @@ export const signUpUserValidationRules = [
     // Pseudonym: string, required, escape special characters
     body("pseudonyme")
         .isString()
+        .withMessage("Pseudonym must be a string")
         .isLength({ min: 5, max: 40 })
         .withMessage("Pseudonym must be at least 5 characters and less than 40 characters")
         .escape()
