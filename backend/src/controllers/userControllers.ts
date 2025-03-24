@@ -153,9 +153,12 @@ export const logoutUser = async (req: Request, res: Response): Promise<void> => 
         // Extract the refresh token from the request body
         const refreshToken: string = req.body.refreshToken
 
+         if (!refreshToken) {
+             res.status(400).json(formatResponse("Refresh token is requiered"))
+             return
+         }
         // Delete the refresh token from the database
         await RefreshToken.deleteOne({ refreshToken: refreshToken })
-
         // Return a success message
         res.status(200).json(formatResponse("User logged out successfully"))
         return

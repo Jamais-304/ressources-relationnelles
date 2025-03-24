@@ -28,7 +28,7 @@ router.post("/v1/users/admin/create-user", signUpUserValidationRules, validation
 // GET /api/v1/users/get-all-users
 router.get("/v1/users/get-all-users", auth, getAllUsers)
 // DELETE /api/v1/users/delete-user/:id
-router.get("/v1/users/delete-user/:id", auth, deleteUserById)
+router.delete("/v1/users/delete-user/:id", auth, deleteUserById)
 // PUT /api/v1/users/modify-user/:id
 router.put("/v1/users/update-user/:id", updateUserValidationRules, auth, updateUser)
 
