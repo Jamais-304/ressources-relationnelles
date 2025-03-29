@@ -19,19 +19,24 @@ export class TokenService {
    * @returns a Token.
    */
   async refresh(refreshToken: string): Promise<Token> {
-    const response = await this.api.post(`users/refresh-token`, {
-      refreshToken,
-    })
+    this.api.disableTokenHandling()
 
     try {
+      const response = await this.api.post(`users/refresh-token`, {
+        refreshToken,
+      })
+
       const tokenData = response.tokens as TokenData
       const userToken = Token.fromJson(tokenData)
 
       setToken('accessToken', userToken.access)
       setToken('tokenExpiryTime', (Date.now() + 14 * 60 * 1000).toString())
+
       return userToken
     } catch {
       throw new Error('Response is expected to have the form of TokenData.')
+    } finally {
+      this.api.enableTokenHandling()
     }
   }
 }

@@ -12,6 +12,7 @@ export class Api {
   auth: Authentication
   baseUrl: string
   private isRefreshing = false
+  private skipTokenHandling = false
   private tokenService?: TokenService
   private userService?: UserService
 
@@ -100,7 +101,7 @@ export class Api {
    * with new tokens.
    */
   private async handleTokens(): Promise<void> {
-    if (this.isRefreshing) {
+    if (this.isRefreshing || this.skipTokenHandling) {
       return
     }
 
@@ -126,6 +127,20 @@ export class Api {
     } else {
       this.auth = Authentication.bearerToken(accessToken)
     }
+  }
+
+  /**
+   * Temporarily disables token handling for specific requests
+   */
+  disableTokenHandling(): void {
+    this.skipTokenHandling = true
+  }
+
+  /**
+   * Re-enables token handling after it was disabled
+   */
+  enableTokenHandling(): void {
+    this.skipTokenHandling = false
   }
 
   /**

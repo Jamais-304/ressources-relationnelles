@@ -21,18 +21,23 @@ export class UserService {
    * @throws {Error} When the API response doesn't match the TokenData format.
    */
   async login(attrs: object): Promise<Token> {
-    const response = await this.api.post(`users/login`, attrs)
+    this.api.disableTokenHandling()
 
     try {
+      const response = await this.api.post(`users/login`, attrs)
+
       const tokenData = response.tokens as TokenData
       const userToken = Token.fromJson(tokenData)
 
       setToken('accessToken', userToken.access)
       userToken.refresh && setToken('refreshToken', userToken.refresh)
       setToken('tokenExpiryTime', (Date.now() + 14 * 60 * 1000).toString())
+
       return userToken
     } catch {
       throw new Error('Response is expected to have the form of TokenData.')
+    } finally {
+      this.api.enableTokenHandling()
     }
   }
 
