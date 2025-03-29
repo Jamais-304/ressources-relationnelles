@@ -2,7 +2,8 @@ import axios, { AxiosHeaders, type AxiosResponse } from 'axios'
 import { Authentication } from './authentication'
 import { UserService, TokenService } from './services/services'
 import { type Response } from './types/response'
-import { getToken } from '@/utils/cookies'
+import { getToken, removeToken } from '@/utils/cookies'
+import router from '@/routes/router'
 /**
  * The Api class facilitates interactions with a RESTful API.
  * It handles authentication, sets up request headers, and manages HTTP
@@ -153,6 +154,19 @@ export class Api {
       config.headers = this.headers
       return config
     })
+
+    axios.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        if (error.response?.status === 401) {
+          removeToken('accessToken')
+          removeToken('refreshToken')
+          removeToken('tokenExpiryTime')
+          router.push('/login')
+        }
+        return Promise.reject(error)
+      }
+    )
   }
 
   /**
