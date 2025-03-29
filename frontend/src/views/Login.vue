@@ -2,6 +2,7 @@
 import { Api } from '@/api/api'
 import router from '@/routes/router'
 import { ref } from 'vue'
+import { toast } from 'vue3-toastify'
 
 const api = new Api()
 
@@ -13,10 +14,12 @@ async function login() {
     email: email.value,
     password: password.value
   }
-
-  const response = await api.users.login(attrs)
-
-  response.access && router.push('/')
+  try {
+    const response = await api.users.login(attrs)
+    response.access && toast.success('Bienvenue !') && router.push('/')
+  } catch (error) {
+    toast.error(error)
+  }
 }
 
 </script>
