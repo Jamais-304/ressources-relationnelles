@@ -22,14 +22,26 @@ import { type AuthRequest } from "../interfaces/authInterface.ts"
  */
 export const createUser = async (req: Request, res: Response): Promise<void> => {
     try {
+        // Extract user details from the request body
+        const userObject: UserReqBodyRequest = req.body
+
+        // Remove any user IDs from the request body for security reasons
+        delete userObject.id
+        delete userObject.userId
+
+        // Validate the presence of required fields in the request body
+        if (!userObject.role || !userObject.password || !userObject.email || !userObject.pseudonyme) {
+            res.status(400).json(formatResponse("Missing information"))
+            return
+        }
         // Hash the user's password
-        const hashedPassword: string = await bcrypt.hash(req.body.password, 10)
+        const hashedPassword: string = await bcrypt.hash(userObject.password, 10)
 
         // Create a new user instance with the hashed password
         const newUser = new User({
-            email: req.body.email,
+            email: userObject.email,
             password: hashedPassword,
-            pseudonyme: req.body.pseudonyme,
+            pseudonyme: userObject.pseudonyme,
             role: "utilisateur"
         })
 
@@ -37,7 +49,8 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
         await newUser.save()
 
         // Retrieve the newly created user from the database
-        const user = await User.findOne({ email: req.body.email })
+        const user = await User.findOne({ email: userObject.email })
+
         if (!user) {
             res.status(500).json(formatResponse("Server error"))
             return
@@ -49,7 +62,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
         } catch (error: unknown) {
             const statusCode: number = errorHandler(error) || 500
             res.status(statusCode).json(formatResponse("Server error", { error: error }))
-            return  
+            return
         }
 
         // Generate a refresh token for the new user
@@ -189,14 +202,14 @@ export const adminCreateUser = async (req: AuthRequest, res: Response): Promise<
         delete userObject.id
         delete userObject.userId
 
-        // Check authentication and retrieve the authenticated user
-        const user: UserInterface | null = await checkAuthentification(req)
-
         // Validate the presence of required fields in the request body
         if (!userObject.role || !userObject.password || !userObject.email || !userObject.pseudonyme) {
             res.status(400).json(formatResponse("Missing information"))
             return
         }
+        // Check authentication and retrieve the authenticated user
+        const user: UserInterface | null = await checkAuthentification(req)
+
 
         let userRoleIndex: number = -1
         let reqUserRoleIndex: number = -1
