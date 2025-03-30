@@ -5,17 +5,13 @@ import mongoose from "mongoose"
 // Validation rules for comments
 export const commentsValidationRules = [
     // Content: string, required, unique, trim
-    body("content")
-        .isString()
-        .withMessage("Content must be a string")
-        .notEmpty()
-        .withMessage("Content cannot be empty")
-        .trim()
-        .escape(),
+    body("content").isString().withMessage("Content must be a string").notEmpty().withMessage("Content cannot be empty").trim().escape(),
     // Author ID: string, required, min length 8, max length 90, trim, UUID format
     body("authorId")
         .isString()
         .withMessage("Author ID must be a string")
+        .notEmpty()
+        .withMessage("Content cannot be empty")
         .isLength({ max: 35 })
         .withMessage("Author ID must be not exceed 35 characters")
         .trim()
@@ -30,6 +26,8 @@ export const commentsValidationRules = [
     body("resourceId")
         .isString()
         .withMessage("Resource ID must be a string")
+        .notEmpty()
+        .withMessage("Content cannot be empty")
         .isLength({ max: 35 })
         .withMessage("Resource ID must be not exceed 35 characters")
         .trim()
