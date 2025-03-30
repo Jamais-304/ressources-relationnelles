@@ -1,23 +1,22 @@
 import mongoose, { Document, Schema } from "mongoose"
-import { type commentsInterface } from "../interfaces/commentsInterface.ts"
+import { type CommentsInterface } from "../interfaces/commentsInterface.ts"
 
-interface ICommentsSchema extends commentsInterface, Document {}
+interface ICommentsSchema extends CommentsInterface, Document {}
 
 const commentsSchema: Schema<ICommentsSchema> = new mongoose.Schema(
     {
-        contenu: {
+        content: {
             type: String,
             required: [true, "Content cannot be empty"],
-            unique: true,
             trim: true
         },
-        auteurId: {
+        authorId: {
             type: String,
             required: [true, "Author ID is required"],
             trim: true,
             maxlength: [35, "Author ID must not exceed 45 characters"]
         },
-        ressourceId: {
+        resourceId: {
             type: String,
             required: [true, "Resource ID is required"],
             trim: true,
