@@ -2,7 +2,8 @@ import axios, { AxiosHeaders, type AxiosResponse } from 'axios'
 import { Authentication } from './authentication'
 import { UserService, TokenService } from './services/services'
 import { type Response } from './types/response'
-import { getToken } from '@/utils/cookies'
+import { getToken, removeToken } from '@/utils/cookies'
+import router from '@/routes/router'
 /**
  * The Api class facilitates interactions with a RESTful API.
  * It handles authentication, sets up request headers, and manages HTTP
@@ -12,6 +13,7 @@ export class Api {
   auth: Authentication
   baseUrl: string
   private isRefreshing = false
+  private skipTokenHandling = false
   private tokenService?: TokenService
   private userService?: UserService
 
@@ -100,7 +102,7 @@ export class Api {
    * with new tokens.
    */
   private async handleTokens(): Promise<void> {
-    if (this.isRefreshing) {
+    if (this.isRefreshing || this.skipTokenHandling) {
       return
     }
 
@@ -129,6 +131,20 @@ export class Api {
   }
 
   /**
+   * Temporarily disables token handling for specific requests
+   */
+  disableTokenHandling(): void {
+    this.skipTokenHandling = true
+  }
+
+  /**
+   * Re-enables token handling after it was disabled
+   */
+  enableTokenHandling(): void {
+    this.skipTokenHandling = false
+  }
+
+  /**
    * Configures axios request interceptors to handle token refresh
    * and header setup before each request.
    */
@@ -138,6 +154,19 @@ export class Api {
       config.headers = this.headers
       return config
     })
+
+    axios.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        if (error.response?.status === 401) {
+          removeToken('accessToken')
+          removeToken('refreshToken')
+          removeToken('tokenExpiryTime')
+          router.push('/login')
+        }
+        return Promise.reject(error)
+      }
+    )
   }
 
   /**
