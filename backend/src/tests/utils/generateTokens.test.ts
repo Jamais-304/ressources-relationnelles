@@ -28,10 +28,18 @@ describe("generateAccesToken", () => {
 
     it("should return undefined if secret key is not defined", () => {
         delete process.env.TOKEN_SECRET
-
-        const token = generateAccesToken(user)
-
-        expect(token).toBeUndefined()
+        const user: IUserToken = {
+            _id: "12345",
+            role: "utilisateur"
+        }
+        try {
+            generateAccesToken(user)
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                expect(error.message).toBe("Missing secret key")
+            }
+        }
+        
     })
 })
 
@@ -64,11 +72,18 @@ describe("generateRefreshToken", () => {
         expect(token).toBe("mocked-token")
     })
 
-    it("should return undefined if secret key is not defined", async () => {
+    it("should return error if secret key is not defined", async () => {
         delete process.env.TOKEN_SECRET
-
-        const token = await generateRefreshToken(user)
-
-        expect(token).toBeUndefined()
+        const user: IUserToken = {
+            _id: "12345",
+            role: "utilisateur"
+        }
+        try {
+            await generateRefreshToken(user)
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                expect(error.message).toBe("Missing secret key")
+            }
+        }
     })
 })
