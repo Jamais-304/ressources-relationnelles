@@ -17,7 +17,7 @@ const emailRules = [
   (v: string) => /.+@.+\..+/.test(v) || "L'adresse email n'est pas valide.",
 ]
 
-const { setAuthUser, getAuthUser } = useAuthUserStore()
+const { setAuthUser } = useAuthUserStore()
 
 async function login() {
   if (validLoginForm.value) {
@@ -29,9 +29,7 @@ async function login() {
       const response = await api.users.login(attrs)
       if (response instanceof User) {
         setAuthUser(response)
-        const user = getAuthUser()
-
-        // toast.success(`Bienvenue ${user.username} !`)
+        toast.success(`Bienvenue ${response.username} !`)
         await router.push('/')
       }
     } catch (error) {

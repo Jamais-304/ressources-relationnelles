@@ -29,6 +29,9 @@ async function logout() {
       <v-btn v-else class="mr-2" @click="logout">
         <RouterLink to="/">logout</RouterLink></v-btn
       >
+      <v-btn v-if="!isAuthenticated" class="mr-2">
+        <RouterLink to="/signup">signup</RouterLink></v-btn
+      >
     </div>
   </v-app-bar>
 </template>

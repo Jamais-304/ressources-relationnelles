@@ -53,6 +53,7 @@ list = [
     "V:Home",
     "V:Login",
     "V:Resources",
+    "V:Signup",
     "V:User",
     "lib",
     "config",
