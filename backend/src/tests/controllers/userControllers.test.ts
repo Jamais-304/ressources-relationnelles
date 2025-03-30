@@ -134,12 +134,14 @@ describe("User Controller - Login", () => {
         const response = await request(app).post("/api/v1/users/login").send(errorLoginData)
         // Ensure that User.findOne was called with the correct email
         expect(User.findOne).toHaveBeenCalledWith({ email: errorLoginData.email })
-        // Verify that the response contains the 'message' property
-        expect(response.body).toHaveProperty("message")
+        // Verify that the response contains the 'error' property
+        expect(response.body).toHaveProperty("error")
+        // Verify that the response contains the 'msg' property
+        expect(response.body.error).toHaveProperty("msg")
         // Check that the response status is 401 (Unauthorized) as no user was found
         expect(response.status).toBe(401)
         // Ensure the error message is "Incorrect username/password pair!"
-        expect(response.body.message).toBe("Incorrect username/password pair!")
+        expect(response.body.error.msg).toBe("Incorrect username/password pair!")
     })
 
     it("should return error if the password does not match the stored password", async () => {
@@ -151,12 +153,14 @@ describe("User Controller - Login", () => {
         const response = await request(app).post("/api/v1/users/login").send(errorLoginData)
         // Ensure that User.findOne was called with the correct email
         expect(User.findOne).toHaveBeenCalledWith({ email: errorLoginData.email })
-        // Verify that the response contains the 'message' property
-        expect(response.body).toHaveProperty("message")
+        // Verify that the response contains the 'error' property
+        expect(response.body).toHaveProperty("error")
+        // Verify that the response contains the 'msg' property
+        expect(response.body.error).toHaveProperty("msg")
         // Check that the response status is 401 (Unauthorized) as the password did not match
         expect(response.status).toBe(401)
         // Ensure the error message is "Incorrect username/password pair!"
-        expect(response.body.message).toBe("Incorrect username/password pair!")
+        expect(response.body.error.msg).toBe("Incorrect username/password pair!")
     })
 })
 
@@ -199,9 +203,9 @@ describe("User Controller - Logout", () => {
         // Assert that the response body contains an error property
         expect(response.body).toHaveProperty("error")
         // Assert that the error message indicates the refresh token must be a string
-        expect(response.body.error[0]).toHaveProperty("msg", "Refresh token must be a string")
+        expect(response.body.error.errors[0]).toHaveProperty("msg", "Refresh token must be a string")
         // Assert that the error path is "refreshToken"
-        expect(response.body.error[0]).toHaveProperty("path", "refreshToken")
+        expect(response.body.error.errors[0]).toHaveProperty("path", "refreshToken")
     })
 })
 
