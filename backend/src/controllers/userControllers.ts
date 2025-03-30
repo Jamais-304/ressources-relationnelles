@@ -2,11 +2,11 @@ import type { Request, Response } from "express"
 import bcrypt from "bcrypt"
 import User from "../models/User.ts"
 import RefreshToken from "../models/RefreshToken.ts"
-import { formatResponse } from "../utils/formatResponse.ts"
+import { dataResponse, errorResponse } from "../utils/formatResponse.ts"
 import { errorHandler } from "../utils/errorHandler.ts"
 import { generateAccesToken, generateRefreshToken } from "../utils/generateTokens.ts"
 import { checkAuthentification, checkUserParams, checkUserRole } from "../utils/checkAuth.ts"
-import { ROLE_HIERARCHY, ROLES } from "../config.ts"
+import { ROLE_HIERARCHY, ROLES } from "../../config.ts"
 import { type UserInterface, type UserReqBodyRequest } from "../interfaces/userInterfaces.ts"
 import { type AuthRequest } from "../interfaces/authInterface.ts"
 
@@ -20,16 +20,28 @@ import { type AuthRequest } from "../interfaces/authInterface.ts"
  * @param {Response} res - The response object to send the created user details and tokens or an error message.
  * @returns {Promise<Response>} - A promise that resolves to the response object with user details and tokens or an error message.
  */
-export const createUser = async (req: Request, res: Response): Promise<Response> => {
+export const createUser = async (req: Request, res: Response): Promise<void> => {
     try {
+        // Extract user details from the request body
+        const userObject: UserReqBodyRequest = req.body
+
+        // Remove any user IDs from the request body for security reasons
+        delete userObject.id
+        delete userObject.userId
+
+        // Validate the presence of required fields in the request body
+        if (!userObject.role || !userObject.password || !userObject.email || !userObject.pseudonyme) {
+            res.status(400).json(errorResponse({ location: "body", msg: "Missing information" }))
+            return
+        }
         // Hash the user's password
-        const hashedPassword: string = await bcrypt.hash(req.body.password, 10)
+        const hashedPassword: string = await bcrypt.hash(userObject.password, 10)
 
         // Create a new user instance with the hashed password
         const newUser = new User({
-            email: req.body.email,
+            email: userObject.email,
             password: hashedPassword,
-            pseudonyme: req.body.pseudonyme,
+            pseudonyme: userObject.pseudonyme,
             role: "utilisateur"
         })
 
@@ -37,34 +49,48 @@ export const createUser = async (req: Request, res: Response): Promise<Response>
         await newUser.save()
 
         // Retrieve the newly created user from the database
-        const user = await User.findOne({ email: req.body.email })
-        if (!user) {
-            return res.status(500).json(formatResponse("Server error"))
-        }
+        const user = await User.findOne({ email: userObject.email })
 
+        if (!user) {
+            res.status(500).json(errorResponse({ msg: "Server error" }))
+            return
+        }
         // Generate an access token for the new user
-        const accessToken: string | undefined = generateAccesToken(user)
-        if (!accessToken) {
-            return res.status(500).json(formatResponse("Server error"))
+        let accessToken: string | undefined = undefined
+        try {
+            accessToken = generateAccesToken(user)
+        } catch (error: unknown) {
+            const statusCode: number = errorHandler(error) || 500
+            console.error(error)
+            res.status(statusCode).json(errorResponse({ msg: "Server error" }))
+            return
         }
 
         // Generate a refresh token for the new user
-        const refreshToken: string | undefined = await generateRefreshToken(user)
-        if (!refreshToken) {
-            return res.status(500).json(formatResponse("Server error"))
+        let refreshToken: string | undefined = undefined
+        try {
+            refreshToken = await generateRefreshToken(user)
+        } catch (error: unknown) {
+            const statusCode: number = errorHandler(error) || 500
+            console.error(error)
+            res.status(statusCode).json(errorResponse({ msg: "Server error" }))
+            return
         }
 
         // Return the user details and tokens in the response
-        return res.status(201).json(
-            formatResponse("User created", {
+        res.status(201).json(
+            dataResponse("User created", {
                 tokens: { accessToken, refreshToken },
-                user: { pseudonyme: user.pseudonyme, role: user.role }
+                user: { pseudonyme: user.pseudonyme, role: user.role, email: user.email }
             })
         )
+        return
     } catch (error: unknown) {
         // Handle unexpected errors
         const statusCode: number = errorHandler(error) || 500
-        return res.status(statusCode).json(formatResponse("Server error", { error: error }))
+        console.error(error)
+        res.status(statusCode).json(errorResponse({ msg: "Server error" }))
+        return
     }
 }
 
@@ -78,41 +104,61 @@ export const createUser = async (req: Request, res: Response): Promise<Response>
  * @param {Response} res - The response object to send the tokens or an error message.
  * @returns {Promise<Response>} - A promise that resolves to the response object with tokens or an error message.
  */
-export const loginUser = async (req: Request, res: Response): Promise<Response> => {
+export const loginUser = async (req: Request, res: Response): Promise<void> => {
     try {
         // Find the user by email
         const user = await User.findOne({ email: req.body.email })
 
         // Check if the user exists and has a password
         if (!user || !user.password) {
-            return res.status(401).json(formatResponse("Incorrect username/password pair!"))
+            res.status(401).json(errorResponse({ location: "body", msg: "Incorrect username/password pair!" }))
+
+            return
         }
 
         // Verify the provided password with the stored hashed password
         const isValid: boolean = await bcrypt.compare(req.body.password, user.password)
 
         if (!isValid) {
-            return res.status(401).json(formatResponse("Incorrect username/password pair!"))
+            res.status(401).json(errorResponse({ location: "body", msg: "Incorrect username/password pair!" }))
+            return
         }
 
-        // Generate an access token for the authenticated user
-        const accessToken: string | undefined = generateAccesToken(user)
-        if (!accessToken) {
-            return res.status(500).json(formatResponse("Server error"))
+        // Generate an access token for the new user
+        let accessToken: string | undefined = undefined
+        try {
+            accessToken = generateAccesToken(user)
+        } catch (error: unknown) {
+            const statusCode: number = errorHandler(error) || 500
+            console.error(error)
+            res.status(statusCode).json(errorResponse({ msg: "Server error" }))
+            return
         }
 
-        // Generate a refresh token for the authenticated user
-        const refreshToken: string | undefined = await generateRefreshToken(user)
-        if (!refreshToken) {
-            return res.status(500).json(formatResponse("Server error"))
+        // Generate a refresh token for the new user
+        let refreshToken: string | undefined = undefined
+        try {
+            refreshToken = await generateRefreshToken(user)
+        } catch (error: unknown) {
+            const statusCode: number = errorHandler(error) || 500
+            console.error(error)
+            res.status(statusCode).json(errorResponse({ msg: "Server error" }))
+            return
         }
 
+        const userObject = user.toObject ? user.toObject() : user
+
+        // Remove user password before sending response
+        delete userObject.password
         // Return the tokens in the response
-        return res.status(200).json(formatResponse("Login successful", { tokens: { accessToken, refreshToken } }))
+        res.status(200).json(dataResponse("Login successful", { tokens: { accessToken, refreshToken }, user: userObject }))
+        return
     } catch (error: unknown) {
         // Handle unexpected errors
         const statusCode: number = errorHandler(error) || 500
-        return res.status(statusCode).json(formatResponse("Server error", { error: error }))
+        console.error(error)
+        res.status(statusCode).json(errorResponse({ msg: "Server error" }))
+        return
     }
 }
 
@@ -126,20 +172,26 @@ export const loginUser = async (req: Request, res: Response): Promise<Response> 
  * @param {Response} res - The response object to send a success message or an error message.
  * @returns {Promise<Response>} - A promise that resolves to the response object with a success message or an error message.
  */
-export const logoutUser = async (req: Request, res: Response): Promise<Response> => {
+export const logoutUser = async (req: Request, res: Response): Promise<void> => {
     try {
         // Extract the refresh token from the request body
         const refreshToken: string = req.body.refreshToken
 
+        if (!refreshToken) {
+            res.status(400).json(errorResponse({ location: "body", msg: "Refresh token is required" }))
+            return
+        }
         // Delete the refresh token from the database
         await RefreshToken.deleteOne({ refreshToken: refreshToken })
-
         // Return a success message
-        return res.status(200).json(formatResponse("User logged out successfully"))
+        res.status(200).json(dataResponse("User logged out successfully"))
+        return
     } catch (error: unknown) {
         // Handle unexpected errors
         const statusCode: number = errorHandler(error) || 500
-        return res.status(statusCode).json(formatResponse("Server error", { error: error }))
+        console.error(error)
+        res.status(statusCode).json(errorResponse({ msg: "Server error" }))
+        return
     }
 }
 
@@ -153,7 +205,7 @@ export const logoutUser = async (req: Request, res: Response): Promise<Response>
  * @param {Response} res - The response object to send a success message or an error message.
  * @returns {Promise<Response>} - A promise that resolves to the response object with a success message or an error message.
  */
-export const adminCreateUser = async (req: AuthRequest, res: Response): Promise<Response> => {
+export const adminCreateUser = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         // Extract user details from the request body
         const userObject: UserReqBodyRequest = req.body
@@ -162,13 +214,13 @@ export const adminCreateUser = async (req: AuthRequest, res: Response): Promise<
         delete userObject.id
         delete userObject.userId
 
-        // Check authentication and retrieve the authenticated user
-        const user: UserInterface | null = await checkAuthentification(req)
-
         // Validate the presence of required fields in the request body
         if (!userObject.role || !userObject.password || !userObject.email || !userObject.pseudonyme) {
-            return res.status(400).json(formatResponse("Missing information"))
+            res.status(400).json(errorResponse({ location: "body", msg: "Missing information" }))
+            return
         }
+        // Check authentication and retrieve the authenticated user
+        const user: UserInterface | null = await checkAuthentification(req)
 
         let userRoleIndex: number = -1
         let reqUserRoleIndex: number = -1
@@ -180,17 +232,21 @@ export const adminCreateUser = async (req: AuthRequest, res: Response): Promise<
         } catch (error: unknown) {
             // Handle errors in role checking
             const statusCode: number = errorHandler(error) || 500
-            return res.status(statusCode).json(formatResponse("Server error", { error: error }))
+            console.error(error)
+            res.status(statusCode).json(errorResponse({ msg: "Server error" }))
+            return
         }
 
         // Ensure both roles are valid
         if (userRoleIndex === -1 || reqUserRoleIndex === -1) {
-            return res.status(400).json(formatResponse("Invalid role"))
+            res.status(400).json(errorResponse({ msg: "Invalid role" }))
+            return
         }
 
         // Ensure the authenticated user has sufficient permissions to create the requested user role
         if (userRoleIndex > reqUserRoleIndex) {
-            return res.status(403).json(formatResponse("Insufficient access"))
+            res.status(403).json(errorResponse({ msg: "Insufficient access" }))
+            return
         }
 
         // Hash the new user's password
@@ -208,11 +264,14 @@ export const adminCreateUser = async (req: AuthRequest, res: Response): Promise<
         await newUser.save()
 
         // Return a success message
-        return res.status(201).json(formatResponse("User created successfully"))
+        res.status(201).json(dataResponse("User created successfully"))
+        return
     } catch (error: unknown) {
         // Handle unexpected errors
         const statusCode: number = errorHandler(error) || 500
-        return res.status(statusCode).json(formatResponse("Server error", { error: error }))
+        console.error(error)
+        res.status(statusCode).json(errorResponse({ msg: "Server error" }))
+        return
     }
 }
 
@@ -226,7 +285,7 @@ export const adminCreateUser = async (req: AuthRequest, res: Response): Promise<
  * @param {Response} res - The response object to send the list of users or an error message.
  * @returns {Promise<Response>} - A promise that resolves to the response object with the list of users or an error message.
  */
-export const getAllUsers = async (req: AuthRequest, res: Response): Promise<Response> => {
+export const getAllUsers = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         // Check authentication and retrieve the authenticated user
         const user: UserInterface | null = await checkAuthentification(req)
@@ -239,32 +298,40 @@ export const getAllUsers = async (req: AuthRequest, res: Response): Promise<Resp
         } catch (error: unknown) {
             // Handle errors in role checking
             const statusCode: number = errorHandler(error) || 500
-            return res.status(statusCode).json(formatResponse("Server error", { error: error }))
+            console.error(error)
+            res.status(statusCode).json(errorResponse({ msg: "Server error" }))
+            return
         }
 
         // Ensure the authenticated user has sufficient permissions to access user data
         if (userRoleIndex > 1) {
-            return res.status(403).json(formatResponse("Insufficient access"))
+            res.status(403).json(errorResponse({ msg: "Insufficient access" }))
+            return
         }
 
         // Super-administrator: Retrieve all users
         if (userRoleIndex === 0) {
             const users = await User.find().select("_id email pseudonyme role createdAt updatedAt")
-            return res.status(200).json(formatResponse("Users found", { users: users }))
+            res.status(200).json(dataResponse("Users found", { users: users }))
+            return
         }
 
         // Administrator: Retrieve all users except super-administrators
         if (userRoleIndex === 1) {
             const users = await User.find({ role: { $ne: "super-administrateur" } }).select("_id email pseudonyme role createdAt updatedAt")
-            return res.status(200).json(formatResponse("Users found", { users: users }))
+            res.status(200).json(dataResponse("Users found", { users: users }))
+            return
         }
 
         // Return an error if no conditions are met
-        return res.status(400).json(formatResponse("No conditions met"))
+        res.status(400).json(errorResponse({ msg: "No conditions met" }))
+        return
     } catch (error: unknown) {
         // Handle unexpected errors
         const statusCode: number = errorHandler(error) || 500
-        return res.status(statusCode).json(formatResponse("Server error", { error: error }))
+        console.error(error)
+        res.status(statusCode).json(errorResponse({ msg: "Server error" }))
+        return
     }
 }
 
@@ -278,7 +345,7 @@ export const getAllUsers = async (req: AuthRequest, res: Response): Promise<Resp
  * @param {Response} res - The response object to send a success message or an error message.
  * @returns {Promise<Response>} - A promise that resolves to the response object with a success message or an error message.
  */
-export const deleteUserById = async (req: AuthRequest, res: Response): Promise<Response> => {
+export const deleteUserById = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         // Check authentication and retrieve the authenticated user
         const user: UserInterface | null = await checkAuthentification(req)
@@ -291,12 +358,15 @@ export const deleteUserById = async (req: AuthRequest, res: Response): Promise<R
         } catch (error: unknown) {
             // Handle errors in role checking
             const statusCode: number = errorHandler(error) || 500
-            return res.status(statusCode).json(formatResponse("Server error", { error: error }))
+            console.error(error)
+            res.status(statusCode).json(errorResponse({ msg: "Server error" }))
+            return
         }
 
         // Ensure the authenticated user has sufficient permissions to delete a user
         if (userRoleIndex > 1) {
-            return res.status(403).json(formatResponse("Insufficient access"))
+            res.status(403).json(errorResponse({ msg: "Insufficient access" }))
+            return
         }
 
         // Check the role of the user to be deleted
@@ -304,18 +374,22 @@ export const deleteUserById = async (req: AuthRequest, res: Response): Promise<R
 
         // Ensure the authenticated user has the authority to delete the specified user
         if (userRoleIndex > userRoleIndexToDelete) {
-            return res.status(403).json(formatResponse("Insufficient access"))
+            res.status(403).json(errorResponse({ msg: "Insufficient access" }))
+            return
         }
 
         // Delete the user by ID
         await User.findByIdAndDelete(req.params.id)
 
         // Return a success message
-        return res.status(200).json(formatResponse("User deleted successfully"))
+        res.status(200).json(dataResponse("User deleted successfully"))
+        return
     } catch (error: unknown) {
         // Handle unexpected errors
         const statusCode: number = errorHandler(error) || 500
-        return res.status(statusCode).json(formatResponse("Server error", { error: error }))
+        console.error(error)
+        res.status(statusCode).json(errorResponse({ msg: "Server error" }))
+        return
     }
 }
 
@@ -329,7 +403,7 @@ export const deleteUserById = async (req: AuthRequest, res: Response): Promise<R
  * @param {Response} res - The response object to send a success message or an error message.
  * @returns {Promise<Response>} - A promise that resolves to the response object with a success message or an error message.
  */
-export const updateUser = async (req: AuthRequest, res: Response): Promise<Response> => {
+export const updateUser = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         // Check authentication and retrieve the authenticated user
         const user: UserInterface | null = await checkAuthentification(req)
@@ -342,7 +416,9 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<Respo
         } catch (error: unknown) {
             // Handle errors in role checking
             const statusCode: number = errorHandler(error) || 500
-            return res.status(statusCode).json(formatResponse("Server error", { error: error }))
+            console.error(error)
+            res.status(statusCode).json(errorResponse({ msg: "Server error" }))
+            return
         }
 
         // Check the role of the user to be modified
@@ -352,9 +428,10 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<Respo
         const userObject: UserReqBodyRequest = req.body
 
         const roleExiste = userObject.role && Object.values(ROLES).includes(userObject.role)
-        
-        if (!roleExiste){
-            return res.status(400).json(formatResponse("Invalid role"))
+
+        if (!roleExiste) {
+            res.status(400).json(errorResponse({ msg: "Invalid role" }))
+            return
         }
         // Remove any user IDs from the request body for security reasons
         delete userObject.id
@@ -366,26 +443,33 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<Respo
             delete userObject.role
             // Update user information
             await User.updateOne({ _id: req.params.id }, { ...userObject, _id: req.params.id })
-            return res.status(200).json(formatResponse("User updated successfully"))
+            res.status(200).json(dataResponse("User updated successfully"))
+            return
         } else if (userRoleIndex <= userRoleIndexToModify) {
             // Ensure the role is valid and the authenticated user has sufficient permissions
             if (!userObject.role) {
-                return res.status(400).json(formatResponse("Invalid role"))
+                res.status(400).json(errorResponse({ msg: "Invalid role" }))
+                return
             }
             if (userRoleIndex > ROLE_HIERARCHY.indexOf(userObject.role)) {
-                return res.status(403).json(formatResponse("Insufficient access"))
+                res.status(403).json(errorResponse({ msg: "Insufficient access" }))
+                return
             }
 
             // Update user information
             await User.updateOne({ _id: req.params.id }, { ...userObject, _id: req.params.id })
-            return res.status(200).json(formatResponse("User updated successfully"))
+            res.status(200).json(dataResponse("User updated successfully"))
+            return
         } else {
             // Return an error if the authenticated user is not authorized to modify the specified user
-            return res.status(401).json(formatResponse("Not authorized"))
+            res.status(401).json(errorResponse({ msg: "Not authorized" }))
+            return
         }
     } catch (error: unknown) {
         // Handle unexpected errors
         const statusCode: number = errorHandler(error) || 500
-        return res.status(statusCode).json(formatResponse("Server error", { error: error }))
+        console.error(error)
+        res.status(statusCode).json(errorResponse({ msg: "Server error" }))
+        return
     }
 }

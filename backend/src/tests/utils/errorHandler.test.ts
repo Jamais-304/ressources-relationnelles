@@ -8,7 +8,7 @@ describe("errorHandler", () => {
 
     it("should return the correct status code for known errors", () => {
         const knownError = new Error("Known Error")
-        const mapping = { message: "Known Error", statusCode: 404 }
+        const mapping = { msg: "Known Error", statusCode: 404 }
         ErrorMappings.push(mapping)
 
         const result = errorHandler(knownError)

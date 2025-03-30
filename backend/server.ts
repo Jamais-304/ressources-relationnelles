@@ -1,7 +1,7 @@
 import { PORT_BACKEND } from "./config.ts"
 import app from "./src/app.ts"
 import http from "http"
-import { normalize } from "./utils/normailze.ts"
+import { normalize } from "./src/utils/normailze.ts"
 
 /**
  * Normalize the port value.

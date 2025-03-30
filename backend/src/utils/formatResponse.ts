@@ -9,8 +9,17 @@ interface Data {
     users?: UserInterface[]
     ressource?: RessourceInterface
     tokens?: TokensInterface
-    error?: unknown
 }
+
+interface ErrorDataItem {
+    location?: string
+    msg?: string
+    path?: string
+    type?: string
+    errors?: unknown
+}
+
+type ErrorData = ErrorDataItem | ErrorDataItem[]
 /**
  * Function to format a response with a message and optional data.
  *
@@ -19,6 +28,10 @@ interface Data {
  * a list of users, resource information, tokens, or an error.
  *
  */
-export const formatResponse = (message: string, data?: Data) => {
+export const dataResponse = (message: string, data?: Data) => {
     return { message: message, data: data }
+}
+
+export const errorResponse = (error: ErrorData) => {
+    return { error: error }
 }
