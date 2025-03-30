@@ -1,33 +1,52 @@
 import { Role, roleFromString, roleToString } from './role'
 
 export interface UserData {
-  uuid: string
+  _id?: string
   email: string
-  username: string
-  firstName?: string
-  lastName?: string
-  role: string[]
+  pseudonyme: string
+  password?: string
+  // firstName?: string
+  // lastName?: string
+  role: string
+  createdAt?: string
+  updatedAt?: string
 }
 
-export class User {
-  uuid: string
+export interface IUser {
+  uuid?: string
+  email: string
+  password?: string
+  username: string
+  // firstName?: string
+  // lastName?: string
+  role: Role
+  createdAt?: string
+  updatedAt?: string
+}
+
+export class User implements IUser {
+  uuid?: string
   email: string
   username: string
-  firstName?: string
-  lastName?: string
-  roles: Role[]
+  // firstName?: string
+  // lastName?: string
+  role: Role
+  createdAt?: string
+  updatedAt?: string
 
   /**
    * Creates an instance of User.
    * @param data - The data to initialize the User instance.
    */
   constructor(data: UserData) {
-    this.uuid = data.uuid
+    this.uuid = data._id
     this.email = data.email
-    this.username = data.username
-    this.firstName = data.firstName
-    this.lastName = data.lastName
-    this.roles = data.role.map(roleFromString)
+    this.username = data.pseudonyme
+    // this.firstName = data.firstName
+    // this.lastName = data.lastName
+    this.role = roleFromString(data.role)
+    this.createdAt = data.createdAt
+    this.updatedAt = data.updatedAt
   }
 
   /**
@@ -43,14 +62,17 @@ export class User {
    * Converts the User instance to a JSON object.
    * @returns A JSON object representing the User instance.
    */
-  toJson(): UserData {
+  static toJson(attrs: IUser): UserData {
     return {
-      uuid: this.uuid,
-      email: this.email,
-      username: this.username,
-      firstName: this.firstName,
-      lastName: this.lastName,
-      role: this.roles.map(roleToString),
+      _id: attrs.uuid,
+      email: attrs.email,
+      pseudonyme: attrs.username,
+      password: attrs.password,
+      // firstName: attrs.firstName,
+      // lastName: attrs.lastName,
+      role: roleToString(attrs.role),
+      createdAt: attrs.createdAt,
+      updatedAt: attrs.updatedAt,
     }
   }
 }

@@ -4,17 +4,17 @@ import { computed, ref } from 'vue'
 
 export interface AuthUser {
   username: string | null
-  roles: Role[]
+  role: Role
   isAuthenticated: boolean
 }
 
 export const useAuthUserStore = defineStore('user', () => {
   const username = ref<string | null>(null)
-  const roles = ref<Role[]>([])
+  const role = ref<Role | null>(null)
   const isAuthenticated = ref<boolean>(false)
 
   const isAdmin = computed(() => {
-    return roles.value.includes(Role.Admin)
+    return role.value && role.value.includes(Role.Admin || Role.SuperAdmin)
   })
 
   function initializeFromSessionStorage() {
@@ -23,12 +23,12 @@ export const useAuthUserStore = defineStore('user', () => {
       if (storedAuthUser) {
         const {
           username: storedUsername,
-          roles: storedRoles,
+          role: storedRole,
           isAuthenticated: storedIsAuthenticated,
         } = JSON.parse(storedAuthUser)
 
         username.value = storedUsername
-        roles.value = storedRoles
+        role.value = storedRole
         isAuthenticated.value = storedIsAuthenticated
       }
     } catch (error) {
@@ -40,21 +40,21 @@ export const useAuthUserStore = defineStore('user', () => {
   function getAuthUser() {
     return {
       username: username.value,
-      roles: roles.value,
+      role: role.value,
       isAuthenticated: isAuthenticated.value,
     }
   }
 
   function setAuthUser(user: User) {
     username.value = user.username
-    roles.value = user.roles
+    role.value = user.role
     isAuthenticated.value = true
 
     sessionStorage.setItem(
       'authUser',
       JSON.stringify({
         username: user.username,
-        roles: user.roles,
+        role: user.role,
         isAuthenticated: true,
       })
     )
@@ -62,7 +62,7 @@ export const useAuthUserStore = defineStore('user', () => {
 
   function resetAuthUser() {
     username.value = null
-    roles.value = []
+    role.value = null
     isAuthenticated.value = false
 
     sessionStorage.removeItem('authUser')
@@ -70,7 +70,7 @@ export const useAuthUserStore = defineStore('user', () => {
 
   return {
     username,
-    roles,
+    role,
     isAuthenticated,
     isAdmin,
     initializeFromSessionStorage,

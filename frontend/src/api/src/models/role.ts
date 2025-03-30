@@ -13,13 +13,13 @@ export enum Role {
  */
 export function roleFromString(role: string): Role {
   switch (role) {
-    case 'user':
+    case 'utilisateur':
       return Role.User
-    case 'moderator':
+    case 'moderateur':
       return Role.Moderator
-    case 'admin':
+    case 'administrateur':
       return Role.Admin
-    case 'super-admin':
+    case 'super-administrateur':
       return Role.SuperAdmin
     default:
       throw new Error(`Unrecognized role: ${role}`)
@@ -32,5 +32,16 @@ export function roleFromString(role: string): Role {
  * @returns The corresponding string role.
  */
 export function roleToString(role: Role): string {
-  return role.toString()
+  switch (role) {
+    case Role.User:
+      return 'utilisateur'
+    case Role.Moderator:
+      return 'moderateur'
+    case Role.Admin:
+      return 'administrateur'
+    case Role.SuperAdmin:
+      return 'super-administrateur'
+    default:
+      throw new Error(`Unrecognized role: ${role}`)
+  }
 }
