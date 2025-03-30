@@ -20,7 +20,7 @@ export class UserService {
    * @returns {Promise<Token>} A Token object with access and refresh attrs.
    * @throws {Error} When the API response doesn't match the TokenData format.
    */
-  async login(attrs: object): Promise<Token> {
+  async login(attrs: object): Promise<User> {
     this.api.disableTokenHandling()
 
     try {
@@ -33,7 +33,15 @@ export class UserService {
       userToken.refresh && setToken('refreshToken', userToken.refresh)
       setToken('tokenExpiryTime', (Date.now() + 14 * 60 * 1000).toString())
 
-      return userToken
+      // TODO: Get the user from API response after backend update.
+      const user = new User({
+        uuid: 'aiuenettn',
+        username: 'Guillaume',
+        email: 'test@test.com',
+        role: ['user'],
+      })
+
+      return user
     } catch {
       throw new Error('Response is expected to have the form of TokenData.')
     } finally {

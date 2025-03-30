@@ -9,13 +9,13 @@ export interface UserData {
   role: string[]
 }
 
-export class User implements UserData {
+export class User {
   uuid: string
   email: string
   username: string
   firstName?: string
   lastName?: string
-  role: Role[]
+  roles: Role[]
 
   /**
    * Creates an instance of User.
@@ -27,7 +27,7 @@ export class User implements UserData {
     this.username = data.username
     this.firstName = data.firstName
     this.lastName = data.lastName
-    this.role = data.role.map(roleFromString)
+    this.roles = data.role.map(roleFromString)
   }
 
   /**
@@ -50,7 +50,7 @@ export class User implements UserData {
       username: this.username,
       firstName: this.firstName,
       lastName: this.lastName,
-      role: this.role.map(roleToString),
+      role: this.roles.map(roleToString),
     }
   }
 }
