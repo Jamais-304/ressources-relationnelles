@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { Api } from '@/api/api'
+import { Api, User } from '@/api/api'
 import router from '@/routes/router'
+import { useAuthUserStore } from '@/stores/authUserStore'
 import { ref } from 'vue'
 import { toast } from 'vue3-toastify'
 
@@ -16,6 +17,8 @@ const emailRules = [
   (v: string) => /.+@.+\..+/.test(v) || "L'adresse email n'est pas valide.",
 ]
 
+const { setAuthUser, getAuthUser } = useAuthUserStore()
+
 async function login() {
   if (validLoginForm.value) {
     const attrs = {
@@ -24,7 +27,13 @@ async function login() {
     }
     try {
       const response = await api.users.login(attrs)
-      response.access && toast.success('Bienvenue !') && router.push('/')
+      if (response instanceof User) {
+        setAuthUser(response)
+        const user = getAuthUser()
+
+        // toast.success(`Bienvenue ${user.username} !`)
+        await router.push('/')
+      }
     } catch (error) {
       toast.error(error)
     }
