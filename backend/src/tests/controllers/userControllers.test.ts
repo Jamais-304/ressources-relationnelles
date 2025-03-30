@@ -22,6 +22,7 @@ jest.mock("../../middleware/auth.ts", () => ({
     })
 }))
 
+
 const accessToken = "accessToken"
 const refreshToken = "refreshToken"
 
@@ -32,12 +33,14 @@ const adminUser = {
     pseudonyme: "usertest",
     password: "hashedPassword"
 }
+
 const newUser = {
     email: "test@test.com",
     password: "testtest",
     pseudonyme: "usertest",
     role: "utilisateur"
 }
+
 const loginData = { email: "test@test.com", password: "testtest" }
 
 const errorLoginData = { email: "error@test.com", password: "errorError" }
@@ -213,7 +216,7 @@ describe("User Controller - Admin create user", () => {
             _id: "123"
         })
     })
-    // Test case to verify successful user creation by an admin
+
     it("should successfully create a user by an admin", async () => {
         // Send a POST request to the admin create user endpoint with new user data
         const response = await request(app).post("/api/v1/users/admin/create-user").send(newUser)
