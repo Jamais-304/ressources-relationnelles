@@ -224,7 +224,7 @@ export class Api {
    */
   private handleResponse(response: AxiosResponse): Response {
     if (response.status >= 200 && response.status < 300) {
-      return response.data.data
+      return response.data
     } else {
       throw new Error(`Failed to load data: ${response.status}`)
     }

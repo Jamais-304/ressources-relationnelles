@@ -2,6 +2,7 @@ import { User, type UserData, type TokenData } from '../models/models'
 import { Api } from '../api'
 import { Token } from '../models/token'
 import { setToken } from '@/utils/cookies'
+import type { Response } from '../types/response'
 export class UserService {
   private api: Api
 
@@ -26,14 +27,14 @@ export class UserService {
     try {
       const response = await this.api.post(`users/login`, attrs)
 
-      const tokenData = response.tokens as TokenData
+      const tokenData = response?.data?.tokens as TokenData
       const userToken = Token.fromJson(tokenData)
 
       setToken('accessToken', userToken.access)
       userToken.refresh && setToken('refreshToken', userToken.refresh)
       setToken('tokenExpiryTime', (Date.now() + 14 * 60 * 1000).toString())
 
-      const userData = response.user as UserData
+      const userData = response?.data?.user as UserData
       const user = User.fromJson(userData)
 
       // NOTE: A non-admin user instance for dev purposes.
@@ -61,7 +62,7 @@ export class UserService {
   async list(): Promise<User[]> {
     try {
       const response = await this.api.get(`users/get-all-users`)
-      const usersData = response.users as UserData[]
+      const usersData = response?.data?.users as UserData[]
       const users = usersData.map((user: UserData) => User.fromJson(user))
       return users
     } catch (error) {
@@ -80,7 +81,7 @@ export class UserService {
     const response = await this.api.get(`users/${uuid}`)
 
     try {
-      const userData = response as UserData
+      const userData = response?.data?.user as UserData
       const user = User.fromJson(userData)
       return user
     } catch {
@@ -99,14 +100,14 @@ export class UserService {
     try {
       const response = await this.api.post(`users/create-user`, attrs)
 
-      const tokenData = response.tokens as TokenData
+      const tokenData = response?.data?.tokens as TokenData
       const userToken = Token.fromJson(tokenData)
 
       setToken('accessToken', userToken.access)
       userToken.refresh && setToken('refreshToken', userToken.refresh)
       setToken('tokenExpiryTime', (Date.now() + 14 * 60 * 1000).toString())
 
-      const userData = response.user as UserData
+      const userData = response?.data?.user as UserData
       const user = User.fromJson(userData)
 
       return user
