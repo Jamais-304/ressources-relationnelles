@@ -117,4 +117,23 @@ export class UserService {
       )
     }
   }
+
+  /**
+   * Deletes the given user account.
+   *
+   * @param {object} user - User attributes for registration
+   * @returns {Promise<User>} A User object containing the created user.
+   * @throws {Error} When the API response doesn't match UserData format.
+   */
+  async delete(user: User): Promise<Response> {
+    const uuid = user.uuid
+    try {
+      const response = await this.api.delete(`users/delete-user/${uuid}`)
+      return response
+    } catch (error) {
+      throw new Error(
+        `Response is expected to have the form of UserData. Error: ${error}`
+      )
+    }
+  }
 }
