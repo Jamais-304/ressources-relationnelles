@@ -214,6 +214,26 @@ export class Api {
   }
 
   /**
+   * Sends a DELETE request to the specified API endpoint.
+   *
+   * @param {string} endpoint - The API endpoint to send the request to
+   * @returns {Promise<Response>} The parsed response data
+   * @throws {Error} When the request fails or returns an error status
+   */
+  async delete(endpoint: string): Promise<Response> {
+    try {
+      const response = await axios.delete(`${this.baseUrl}/${endpoint}`)
+      return this.handleResponse(response)
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(`Failed to send data: ${error.response?.status}`)
+      } else {
+        throw new Error(`Failed to send data: ${error}`)
+      }
+    }
+  }
+
+  /**
    * Processes the response from an API request and returns the response data if
    * the status code indicates success.
    *
