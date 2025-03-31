@@ -54,7 +54,7 @@ list = [
     "V:Login",
     "V:Resources",
     "V:Signup",
-    "V:User",
+    "V:Users",
     "lib",
     "config",
 

@@ -5,6 +5,7 @@ import { storeToRefs } from 'pinia'
 
 const authUserStore = useAuthUserStore()
 const { isAuthenticated } = storeToRefs(authUserStore)
+const { isAdmin } = storeToRefs(authUserStore)
 const { resetAuthUser } = authUserStore
 
 async function logout() {
@@ -20,6 +21,9 @@ async function logout() {
     <v-app-bar-nav-icon icon="mdi-home" href="/"></v-app-bar-nav-icon>
     <v-app-bar-title>(RE)SOURCES RELATIONNELLES</v-app-bar-title>
     <div class="mr-4">
+      <v-btn v-if="isAdmin" class="mr-2">
+        <RouterLink to="/users">Gestion des utilisateurs</RouterLink>
+      </v-btn>
       <v-btn class="mr-2">
         <RouterLink to="/about">À propos</RouterLink>
       </v-btn>
