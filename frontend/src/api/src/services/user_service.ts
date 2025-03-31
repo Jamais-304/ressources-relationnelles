@@ -59,14 +59,15 @@ export class UserService {
    * @returns A list of instantiated Users.
    */
   async list(): Promise<User[]> {
-    const response = await this.api.get(`users/get-all-users`)
-
     try {
-      const usersData = response as UserData[]
+      const response = await this.api.get(`users/get-all-users`)
+      const usersData = response.users as UserData[]
       const users = usersData.map((user: UserData) => User.fromJson(user))
       return users
-    } catch {
-      throw new Error('Response is expected to have the form of UserData[].')
+    } catch (error) {
+      throw new Error(
+        `Response is expected to have the form of UserData[]. Error: ${error}`
+      )
     }
   }
 

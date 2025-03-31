@@ -179,7 +179,7 @@ export class Api {
    * @throws {Error} If the request fails or if the response status code
    * indicates an error.
    */
-  async get(endpoint: string): Promise<unknown> {
+  async get(endpoint: string): Promise<Response> {
     try {
       const response = await axios.get(`${this.baseUrl}/${endpoint}`)
       return this.handleResponse(response)
