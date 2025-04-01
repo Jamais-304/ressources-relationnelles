@@ -22,11 +22,8 @@ async function signup() {
     role: Role.User,
   }
 
-  const JSONattrs = User.toJson(attrs)
-  console.log(JSONattrs)
-
   try {
-    const response = await api.users.create(JSONattrs)
+    const response = await api.users.create(attrs)
     if (response instanceof User) {
       setAuthUser(response)
       toast.success(`Compte utilisateur créé avec succès !`)

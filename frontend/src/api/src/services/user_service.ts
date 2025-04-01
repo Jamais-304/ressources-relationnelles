@@ -3,6 +3,7 @@ import { Api } from '../api'
 import { Token } from '../models/token'
 import { setToken } from '@/utils/cookies'
 import type { Response } from '../types/response'
+import type { IUser } from '../models/user'
 export class UserService {
   private api: Api
 
@@ -96,9 +97,10 @@ export class UserService {
    * @returns {Promise<User>} A User object containing the created user.
    * @throws {Error} When the API response doesn't match UserData format.
    */
-  async create(attrs: object): Promise<User> {
+  async create(attrs: IUser): Promise<User> {
+    const JSONattrs = User.toJson(attrs)
     try {
-      const response = await this.api.post(`users/create-user`, attrs)
+      const response = await this.api.post(`users/create-user`, JSONattrs)
 
       const tokenData = response?.data?.tokens as TokenData
       const userToken = Token.fromJson(tokenData)
