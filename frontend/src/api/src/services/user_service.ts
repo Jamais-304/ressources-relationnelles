@@ -119,6 +119,29 @@ export class UserService {
   }
 
   /**
+   * Creates a user account.
+   *
+   * @param {object} attrs - User attributes for registration
+   * @returns {Promise<User>} A User object containing the created user.
+   * @throws {Error} When the API response doesn't match UserData format.
+   */
+  async update(user: User, attrs: object): Promise<User> {
+    const uuid = user.uuid
+    try {
+      const response = await this.api.put(`users/update-user/${uuid}`, attrs)
+
+      const userData = response?.data?.user as UserData
+      const user = User.fromJson(userData)
+
+      return user
+    } catch (error) {
+      throw new Error(
+        `Response is expected to have the form of UserData. Error: ${error}`
+      )
+    }
+  }
+
+  /**
    * Deletes the given user account.
    *
    * @param {object} user - User attributes for registration
