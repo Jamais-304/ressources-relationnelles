@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { Api, User } from '@/api/api'
 import ConfirmationModal from '@/components/ConfirmationModal.vue'
+import { useUsersManagement } from '@/composables/useUsersManagement'
 import { onMounted, ref } from 'vue'
 import { toast } from 'vue3-toastify'
 
 const api = new Api()
 
-const users = ref<User[]>()
-const currentUser = ref<User>()
+const {
+  references: { users, currentUser },
+} = useUsersManagement()
 
 const confirmationModalVisible = ref(false)
 const confirmationModalMessage = ref('')
