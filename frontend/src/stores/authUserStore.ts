@@ -9,26 +9,27 @@ export interface AuthUser {
 }
 
 export const useAuthUserStore = defineStore('user', () => {
-  const username = ref<string | null>(null)
-  const role = ref<Role | null>(null)
+  const authUser = ref<User>()
   const isAuthenticated = ref<boolean>(false)
 
   const isAdmin = computed(() => {
-    return role.value && role.value.includes(Role.Admin || Role.SuperAdmin)
+    console.log(authUser.value?.role)
+    return (
+      authUser.value &&
+      authUser.value.role.includes(Role.Admin || Role.SuperAdmin)
+    )
   })
 
   function initializeFromSessionStorage() {
     try {
-      const storedAuthUser = sessionStorage.getItem('authUser')
-      if (storedAuthUser) {
+      const storedAuthData = sessionStorage.getItem('authUser')
+      if (storedAuthData) {
         const {
-          username: storedUsername,
-          role: storedRole,
+          authUser: storedAuthUser,
           isAuthenticated: storedIsAuthenticated,
-        } = JSON.parse(storedAuthUser)
+        } = JSON.parse(storedAuthData)
 
-        username.value = storedUsername
-        role.value = storedRole
+        authUser.value = storedAuthUser
         isAuthenticated.value = storedIsAuthenticated
       }
     } catch (error) {
@@ -39,38 +40,33 @@ export const useAuthUserStore = defineStore('user', () => {
 
   function getAuthUser() {
     return {
-      username: username.value,
-      role: role.value,
+      authUser: authUser.value,
       isAuthenticated: isAuthenticated.value,
     }
   }
 
   function setAuthUser(user: User) {
-    username.value = user.username
-    role.value = user.role
+    authUser.value = user
     isAuthenticated.value = true
 
     sessionStorage.setItem(
       'authUser',
       JSON.stringify({
-        username: user.username,
-        role: user.role,
+        authUser: user,
         isAuthenticated: true,
       })
     )
   }
 
   function resetAuthUser() {
-    username.value = null
-    role.value = null
+    authUser.value = undefined
     isAuthenticated.value = false
 
     sessionStorage.removeItem('authUser')
   }
 
   return {
-    username,
-    role,
+    authUser,
     isAuthenticated,
     isAdmin,
     initializeFromSessionStorage,

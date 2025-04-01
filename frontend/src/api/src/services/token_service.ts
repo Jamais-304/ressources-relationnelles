@@ -26,7 +26,7 @@ export class TokenService {
         refreshToken,
       })
 
-      const tokenData = response.tokens as TokenData
+      const tokenData = response?.data?.tokens as TokenData
       const userToken = Token.fromJson(tokenData)
 
       setToken('accessToken', userToken.access)

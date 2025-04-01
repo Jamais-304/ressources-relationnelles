@@ -10,12 +10,33 @@ import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
+import { fr } from 'vuetify/locale'
 
 const pinia = createPinia()
 const app = createApp(App)
 const vuetify = createVuetify({
   components,
   directives,
+  locale: {
+    locale: 'fr',
+    fallback: 'fr',
+    messages: {
+      fr: {
+        ...fr,
+        dataFooter: {
+          itemsPerPageText: 'Éléments par page',
+          itemsPerPageAll: 'Tous',
+          nextPage: 'Page suivante',
+          prevPage: 'Page précédente',
+          firstPage: 'Première page',
+          lastPage: 'Dernière page',
+          pageText: '{0}-{1} sur {2}',
+        },
+        noDataText: 'Aucune donnée disponible',
+        loading: 'Chargement...',
+      },
+    },
+  },
 })
 
 app

@@ -2,6 +2,8 @@ import { User, type UserData, type TokenData } from '../models/models'
 import { Api } from '../api'
 import { Token } from '../models/token'
 import { setToken } from '@/utils/cookies'
+import type { Response } from '../types/response'
+import type { IUser } from '../models/user'
 export class UserService {
   private api: Api
 
@@ -26,14 +28,14 @@ export class UserService {
     try {
       const response = await this.api.post(`users/login`, attrs)
 
-      const tokenData = response.tokens as TokenData
+      const tokenData = response?.data?.tokens as TokenData
       const userToken = Token.fromJson(tokenData)
 
       setToken('accessToken', userToken.access)
       userToken.refresh && setToken('refreshToken', userToken.refresh)
       setToken('tokenExpiryTime', (Date.now() + 14 * 60 * 1000).toString())
 
-      const userData = response.user as UserData
+      const userData = response?.data?.user as UserData
       const user = User.fromJson(userData)
 
       // NOTE: A non-admin user instance for dev purposes.
@@ -59,14 +61,15 @@ export class UserService {
    * @returns A list of instantiated Users.
    */
   async list(): Promise<User[]> {
-    const response = await this.api.get(`users/get-all-users`)
-
     try {
-      const usersData = response as UserData[]
+      const response = await this.api.get(`users/get-all-users`)
+      const usersData = response?.data?.users as UserData[]
       const users = usersData.map((user: UserData) => User.fromJson(user))
       return users
-    } catch {
-      throw new Error('Response is expected to have the form of UserData[].')
+    } catch (error) {
+      throw new Error(
+        `Response is expected to have the form of UserData[]. Error: ${error}`
+      )
     }
   }
 
@@ -79,7 +82,7 @@ export class UserService {
     const response = await this.api.get(`users/${uuid}`)
 
     try {
-      const userData = response as UserData
+      const userData = response?.data?.user as UserData
       const user = User.fromJson(userData)
       return user
     } catch {
@@ -94,21 +97,67 @@ export class UserService {
    * @returns {Promise<User>} A User object containing the created user.
    * @throws {Error} When the API response doesn't match UserData format.
    */
-  async create(attrs: object): Promise<User> {
+  async create(attrs: IUser): Promise<User> {
+    const JSONattrs = User.toJson(attrs)
     try {
-      const response = await this.api.post(`users/create-user`, attrs)
+      const response = await this.api.post(`users/create-user`, JSONattrs)
 
-      const tokenData = response.tokens as TokenData
+      const tokenData = response?.data?.tokens as TokenData
       const userToken = Token.fromJson(tokenData)
 
       setToken('accessToken', userToken.access)
       userToken.refresh && setToken('refreshToken', userToken.refresh)
       setToken('tokenExpiryTime', (Date.now() + 14 * 60 * 1000).toString())
 
-      const userData = response.user as UserData
+      const userData = response?.data?.user as UserData
       const user = User.fromJson(userData)
 
       return user
+    } catch (error) {
+      throw new Error(
+        `Response is expected to have the form of UserData. Error: ${error}`
+      )
+    }
+  }
+
+  /**
+   * Creates a user account.
+   *
+   * @param {object} attrs - User attributes for registration
+   * @returns {Promise<User>} A User object containing the created user.
+   * @throws {Error} When the API response doesn't match UserData format.
+   */
+  async update(uuid: string, attrs: IUser): Promise<User> {
+    const JSONattrs = User.toJson(attrs)
+    try {
+      const response = await this.api.put(
+        `users/update-user/${uuid}`,
+        JSONattrs
+      )
+
+      const userData = response?.data?.user as UserData
+      const user = User.fromJson(userData)
+
+      return user
+    } catch (error) {
+      throw new Error(
+        `Response is expected to have the form of UserData. Error: ${error}`
+      )
+    }
+  }
+
+  /**
+   * Deletes the given user account.
+   *
+   * @param {object} user - User attributes for registration
+   * @returns {Promise<User>} A User object containing the created user.
+   * @throws {Error} When the API response doesn't match UserData format.
+   */
+  async delete(user: User): Promise<Response> {
+    const uuid = user.uuid
+    try {
+      const response = await this.api.delete(`users/delete-user/${uuid}`)
+      return response
     } catch (error) {
       throw new Error(
         `Response is expected to have the form of UserData. Error: ${error}`

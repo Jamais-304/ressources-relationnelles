@@ -179,7 +179,7 @@ export class Api {
    * @throws {Error} If the request fails or if the response status code
    * indicates an error.
    */
-  async get(endpoint: string): Promise<unknown> {
+  async get(endpoint: string): Promise<Response> {
     try {
       const response = await axios.get(`${this.baseUrl}/${endpoint}`)
       return this.handleResponse(response)
@@ -214,6 +214,47 @@ export class Api {
   }
 
   /**
+   * Sends a PUT request to the specified API endpoint.
+   *
+   * @param {string} endpoint - The API endpoint to send the request to
+   * @param {object} body - The data to send in the request body
+   * @returns {Promise<Response>} The parsed response data
+   * @throws {Error} When the request fails or returns an error status
+   */
+  async put(endpoint: string, body: object): Promise<Response> {
+    try {
+      const response = await axios.put(`${this.baseUrl}/${endpoint}`, body)
+      return this.handleResponse(response)
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(`Failed to send data: ${error.response?.status}`)
+      } else {
+        throw new Error(`Failed to send data: ${error}`)
+      }
+    }
+  }
+
+  /**
+   * Sends a DELETE request to the specified API endpoint.
+   *
+   * @param {string} endpoint - The API endpoint to send the request to
+   * @returns {Promise<Response>} The parsed response data
+   * @throws {Error} When the request fails or returns an error status
+   */
+  async delete(endpoint: string): Promise<Response> {
+    try {
+      const response = await axios.delete(`${this.baseUrl}/${endpoint}`)
+      return this.handleResponse(response)
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(`Failed to send data: ${error.response?.status}`)
+      } else {
+        throw new Error(`Failed to send data: ${error}`)
+      }
+    }
+  }
+
+  /**
    * Processes the response from an API request and returns the response data if
    * the status code indicates success.
    *
@@ -224,7 +265,7 @@ export class Api {
    */
   private handleResponse(response: AxiosResponse): Response {
     if (response.status >= 200 && response.status < 300) {
-      return response.data.data
+      return response.data
     } else {
       throw new Error(`Failed to load data: ${response.status}`)
     }
