@@ -37,7 +37,7 @@ const adminUser = {
 
 const newUser = {
     email: "test@test.com",
-    password: "testtest",
+    password: "testtest?A123NN",
     pseudonyme: "usertest",
     role: "utilisateur"
 }
@@ -49,7 +49,7 @@ const errorLoginData = { email: "error@test.com", password: "errorError" }
 const errorLoginPassword = {
     _id: "123",
     email: "error@test.com",
-    password: "hashedPassword",
+    password: "hashedPasswordA12!",
     pseudonyme: "usertest",
     role: "utilisateur"
 }
@@ -60,7 +60,7 @@ beforeEach(() => {
     const mockUser = {
         _id: "123",
         email: "test@test.com",
-        password: "hashedPassword",
+        password: "hashedPasswordA12!",
         pseudonyme: "usertest",
         role: "utilisateur"
     }

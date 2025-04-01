@@ -17,8 +17,10 @@ export const signUpUserValidationRules = [
         .exists()
         .isString()
         .withMessage("Password must be a string")
-        .isLength({ min: 8, max: 25 })
-        .withMessage("Password must be at least 8 characters and less than 26 characters")
+        .isLength({ min: 8, max: 50 })
+        .withMessage("Password must be at least 8 characters and less than 50 characters")
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&,]{8,50}$/)
+        .withMessage("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character")
         .escape()
         .trim(), // Remove leading and trailing spaces
 
@@ -51,8 +53,10 @@ export const adminCreateUserValidationRules = [
         .exists()
         .isString()
         .withMessage("Password must be a string")
-        .isLength({ min: 8, max: 25 })
-        .withMessage("Password must be at least 8 characters and less than 26 characters")
+        .isLength({ min: 8, max: 50 })
+        .withMessage("Password must be at least 8 characters and less than 50 characters")
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&,]{8,50}$/)
+        .withMessage("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character")
         .escape()
         .trim(), // Remove leading and trailing spaces
 
@@ -111,13 +115,27 @@ export const updateUserValidationRules = [
         .escape()
         .trim(), // Remove leading and trailing spaces
 
+    // // Password: string, required, escape special characters
+    // body("newPassword")
+    //     .optional()
+    //     .isString()
+    //     .withMessage("Password must be a string")
+    //     .isLength({ min: 8, max: 50 })
+    //     .withMessage("Password must be at least 8 characters and less than 50 characters")
+    //     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&,]{8,50}$/)
+    //     .withMessage("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character")
+    //     .escape()
+    //     .trim(), // Remove leading and trailing spaces
+
     // Password: string, required, escape special characters
     body("password")
         .optional()
         .isString()
         .withMessage("Password must be a string")
-        .isLength({ min: 8, max: 25 })
-        .withMessage("Password must be at least 8 characters and less than 26 characters")
+        .isLength({ min: 8, max: 50 })
+        .withMessage("Password must be at least 8 characters and less than 50 characters")
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&,]{8,50}$/)
+        .withMessage("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character")
         .escape()
         .trim(), // Remove leading and trailing spaces
 
@@ -132,12 +150,5 @@ export const updateUserValidationRules = [
         .trim(), // Remove leading and trailing spaces
 
     // Role: string, required, equals escape special characters
-    body("role")
-        .optional()
-        .isString()
-        .withMessage("Role must be a string")
-        .equals("utilisateur")
-        .withMessage("Invalid role")
-        .escape()
-        .trim() // Remove leading and trailing spaces
+    body("role").optional().isString().withMessage("Role must be a string").equals("utilisateur").withMessage("Invalid role").escape().trim() // Remove leading and trailing spaces
 ]
