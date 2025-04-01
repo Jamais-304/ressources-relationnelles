@@ -1,7 +1,6 @@
 @import './base.css';
 @import 'tailwindcss';
 
-/* Déclaration des polices Marianne */
 @font-face {
   font-family: 'Marianne';
   src: url('./font/Marianne-Light.woff2') format('woff2'),
@@ -42,7 +41,6 @@
   font-style: normal;
 }
 
-/* Styles de base */
 html {
   @apply h-full bg-[#F6F6F6];
 }
