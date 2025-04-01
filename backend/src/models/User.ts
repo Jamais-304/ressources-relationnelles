@@ -8,31 +8,31 @@ const userSchema: Schema<IUserSchema> = new mongoose.Schema(
     {
         email: {
             type: String,
-            required: [true, "L'email est requis"],
+            required: [true, "Email is required"],
             unique: true,
             trim: true,
-            match: [/^\S+@\S+\.\S+$/, "Adresse email invalide"]
+            match: [/^\S+@\S+\.\S+$/, "Invalid email address"]
         },
         password: {
             type: String,
-            required: [true, "Le mot de passe est requis"],
+            required: [true, "Password is required"],
             trim: true,
-            minlength: [8, "Le mot de passe doit contenir au moins 8 caractères"],
-            maxlength: [90, "Le mot de passe ne doit pas dépasser 90 caractères"]
+            minlength: [8, "Password must be at least 8 characters long"],
+            maxlength: [90, "Password must not exceed 90 characters"]
         },
         pseudonyme: {
             type: String,
-            required: [true, "Le pseudonyme est requis"],
+            required: [true, "Pseudonym is required"],
             trim: true,
-            minlength: [5, "Le pseudonyme doit contenir au moins 5 caractères"],
-            maxlength: [40, "Le pseudonyme de passe ne doit pas dépasser 40 caractères"]
+            minlength: [5, "Pseudonym must be at least 5 characters long"],
+            maxlength: [40, "Pseudonym must not exceed 40 characters"]
         },
         role: {
             type: String,
-            required: [true, "Le rôle est requis"],
+            required: [true, "Role is required"],
             enum: {
                 values: ["super-administrateur", "administrateur", "moderateur", "utilisateur"],
-                message: 'Le rôle "{VALUE}" est invalide.'
+                message: 'The role "{VALUE}" is invalid.'
             },
             default: "utilisateur"
         }
