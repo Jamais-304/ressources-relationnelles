@@ -14,4 +14,5 @@ export interface UserReqBodyRequest extends UserInterface {
     userId?: string
     uuid?: string
     _id?: string
+    newPassword?: string
 }
