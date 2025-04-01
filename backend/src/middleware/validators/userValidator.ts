@@ -6,32 +6,30 @@ import User from "../../models/User.ts"
 export const signUpUserValidationRules = [
     // Email: must be a valid email, escape special characters
     body("email")
+        .exists()
         .isEmail()
         .withMessage("Email must be a valid email address")
         .normalizeEmail() // Normalize the email
         .escape()
-        .trim() // Remove leading and trailing spaces
-        .custom(async (value) => {
-            const existingUser = await User.findOne({ email: value })
-            if (existingUser) {
-                throw new Error("Email must be unique")
-            }
-            return true
-        }),
+        .trim(), // Remove leading and trailing spaces
 
     // Password: string, required, escape special characters
     body("password")
+        .exists()
         .isString()
         .withMessage("Password must be a string")
         .notEmpty()
         .withMessage("Content cannot be empty")
-        .isLength({ min: 8, max: 25 })
-        .withMessage("Password must be at least 8 characters and less than 26 characters")
+        .isLength({ min: 8, max: 50 })
+        .withMessage("Password must be at least 8 characters and less than 50 characters")
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&,]{8,50}$/)
+        .withMessage("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character")
         .escape()
         .trim(), // Remove leading and trailing spaces
 
     // Pseudonym: string, required, escape special characters
     body("pseudonyme")
+        .exists()
         .isString()
         .withMessage("Pseudonym must be a string")
         .notEmpty()
@@ -56,6 +54,7 @@ export const signUpUserValidationRules = [
 export const adminCreateUserValidationRules = [
     // Email: must be a valid email, escape special characters
     body("email")
+        .exists()
         .isEmail()
         .withMessage("Email must be a valid email address")
         .normalizeEmail() // Normalize the email
@@ -64,17 +63,21 @@ export const adminCreateUserValidationRules = [
 
     // Password: string, required, escape special characters
     body("password")
+        .exists()
         .isString()
         .withMessage("Password must be a string")
         .notEmpty()
         .withMessage("Content cannot be empty")
-        .isLength({ min: 8, max: 25 })
-        .withMessage("Password must be at least 8 characters and less than 26 characters")
+        .isLength({ min: 8, max: 50 })
+        .withMessage("Password must be at least 8 characters and less than 50 characters")
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&,]{8,50}$/)
+        .withMessage("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character")
         .escape()
         .trim(), // Remove leading and trailing spaces
 
     // Pseudonym: string, required, escape special characters
     body("pseudonyme")
+        .exists()
         .isString()
         .withMessage("Pseudonym must be a string")
         .notEmpty()
@@ -86,6 +89,7 @@ export const adminCreateUserValidationRules = [
 
     // Role: string, required, escape special characters
     body("role")
+        .exists()
         .isString()
         .withMessage("Role must be a string")
         .notEmpty()
@@ -102,6 +106,7 @@ export const adminCreateUserValidationRules = [
 export const loginUserValidationRules = [
     // Email: must be a valid email, escape special characters
     body("email")
+        .exists()
         .isEmail()
         .withMessage("Email must be a valid email address")
         .normalizeEmail() // Normalize the email
@@ -110,6 +115,7 @@ export const loginUserValidationRules = [
 
     // Password: string, required, escape special characters
     body("password")
+        .exists()
         .isString()
         .notEmpty()
         .withMessage("Content cannot be empty")
@@ -120,4 +126,50 @@ export const loginUserValidationRules = [
 ]
 
 // Validation rules for updating user information
-export const updateUserValidationRules = [...signUpUserValidationRules]
+export const updateUserValidationRules = [
+    // Email: must be a valid email, escape special characters
+    body("email")
+        .optional()
+        .isEmail()
+        .withMessage("Email must be a valid email address")
+        .normalizeEmail() // Normalize the email
+        .escape()
+        .trim(), // Remove leading and trailing spaces
+
+    // // Password: string, required, escape special characters
+    // body("newPassword")
+    //     .optional()
+    //     .isString()
+    //     .withMessage("Password must be a string")
+    //     .isLength({ min: 8, max: 50 })
+    //     .withMessage("Password must be at least 8 characters and less than 50 characters")
+    //     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&,]{8,50}$/)
+    //     .withMessage("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character")
+    //     .escape()
+    //     .trim(), // Remove leading and trailing spaces
+
+    // Password: string, required, escape special characters
+    body("password")
+        .optional()
+        .isString()
+        .withMessage("Password must be a string")
+        .isLength({ min: 8, max: 50 })
+        .withMessage("Password must be at least 8 characters and less than 50 characters")
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&,]{8,50}$/)
+        .withMessage("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character")
+        .escape()
+        .trim(), // Remove leading and trailing spaces
+
+    // Pseudonym: string, required, escape special characters
+    body("pseudonyme")
+        .optional()
+        .isString()
+        .withMessage("Pseudonym must be a string")
+        .isLength({ min: 5, max: 40 })
+        .withMessage("Pseudonym must be at least 5 characters and less than 40 characters")
+        .escape()
+        .trim(), // Remove leading and trailing spaces
+
+    // Role: string, required, equals escape special characters
+    body("role").optional().isString().withMessage("Role must be a string").equals("utilisateur").withMessage("Invalid role").escape().trim() // Remove leading and trailing spaces
+]

@@ -12,4 +12,6 @@ export interface UserInterface {
 export interface UserReqBodyRequest extends UserInterface {
     id?: string
     userId?: string
+    uuid?: string
+    _id?: string
 }

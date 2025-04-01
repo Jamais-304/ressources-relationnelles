@@ -65,7 +65,7 @@ describe("User Validator", () => {
         expect(response.body.error.errors).toContainEqual({
             type: "field",
             value: "test",
-            msg: "Password must be at least 8 characters and less than 26 characters",
+            msg: "Password must be at least 8 characters and less than 50 characters",
             path: "password",
             location: "body"
         })
@@ -92,7 +92,7 @@ describe("User Validator", () => {
         expect(response.body.error.errors).toContainEqual({
             type: "field",
             value: 123,
-            msg: "Password must be at least 8 characters and less than 26 characters",
+            msg: "Password must be at least 8 characters and less than 50 characters",
             path: "password",
             location: "body"
         })
@@ -138,7 +138,7 @@ describe("User Validator", () => {
         expect(response.body.error.errors).toContainEqual({
             type: "field",
             value: 123,
-            msg: "Password must be at least 8 characters and less than 26 characters",
+            msg: "Password must be at least 8 characters and less than 50 characters",
             path: "password",
             location: "body"
         })

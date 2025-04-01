@@ -14,14 +14,15 @@ jest.mock("../../utils/generateTokens.ts", () => ({
     generateAccesToken: jest.fn(),
     generateRefreshToken: jest.fn()
 }))
+
 jest.mock("../../utils/checkAuth.ts")
+
 jest.mock("../../middleware/auth.ts", () => ({
     auth: jest.fn((req, res, next) => {
         req.auth = { userId: "1234" }
         next()
     })
 }))
-
 
 const accessToken = "accessToken"
 const refreshToken = "refreshToken"
@@ -36,7 +37,7 @@ const adminUser = {
 
 const newUser = {
     email: "test@test.com",
-    password: "testtest",
+    password: "testtest?A123NN",
     pseudonyme: "usertest",
     role: "utilisateur"
 }
@@ -48,7 +49,7 @@ const errorLoginData = { email: "error@test.com", password: "errorError" }
 const errorLoginPassword = {
     _id: "123",
     email: "error@test.com",
-    password: "hashedPassword",
+    password: "hashedPasswordA12!",
     pseudonyme: "usertest",
     role: "utilisateur"
 }
@@ -59,7 +60,7 @@ beforeEach(() => {
     const mockUser = {
         _id: "123",
         email: "test@test.com",
-        password: "hashedPassword",
+        password: "hashedPasswordA12!",
         pseudonyme: "usertest",
         role: "utilisateur"
     }
@@ -76,6 +77,7 @@ beforeEach(() => {
 
 describe("User Controller", () => {
     it("should create a new user", async () => {
+        jest.spyOn(User, "findOne").mockResolvedValue(null)
         // Send a POST request to the user creation endpoint with the new user data
         const response = await request(app).post("/api/v1/users/create-user").send(newUser)
         // Check that the response status is 201 (Created)
@@ -99,6 +101,8 @@ describe("User Controller", () => {
         // Check that the response contains the correct user information (pseudonyme and role)
         expect(response.body.data.user).toHaveProperty("pseudonyme", "usertest")
         expect(response.body.data.user).toHaveProperty("role", "utilisateur")
+        // Assert that the response body contains the success message
+        expect(response.body).toHaveProperty("message", "User created successfully")
     })
 })
 
@@ -222,6 +226,7 @@ describe("User Controller - Admin create user", () => {
     })
 
     it("should successfully create a user by an admin", async () => {
+        jest.spyOn(User, "findOne").mockResolvedValue(null)
         // Send a POST request to the admin create user endpoint with new user data
         const response = await request(app).post("/api/v1/users/admin/create-user").send(newUser)
         // Assert that the response status is 201 (Created)
