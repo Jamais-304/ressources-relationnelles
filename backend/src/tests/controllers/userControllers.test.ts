@@ -42,9 +42,9 @@ const newUser = {
     role: "utilisateur"
 }
 
-const loginData = { email: "test@test.com", password: "testtest" }
+const loginData = { email: "test@test.com", password: "Test!test1R?" }
 
-const errorLoginData = { email: "error@test.com", password: "errorError" }
+const errorLoginData = { email: "error@test.com", password: "errorError1E!" }
 
 const errorLoginPassword = {
     _id: "123",
@@ -136,6 +136,7 @@ describe("User Controller - Login", () => {
         ;(User.findOne as jest.Mock).mockResolvedValue(null)
         // Send a POST request to the login endpoint with invalid login data
         const response = await request(app).post("/api/v1/users/login").send(errorLoginData)
+        console.log(response)
         // Ensure that User.findOne was called with the correct email
         expect(User.findOne).toHaveBeenCalledWith({ email: errorLoginData.email })
         // Verify that the response contains the 'error' property
