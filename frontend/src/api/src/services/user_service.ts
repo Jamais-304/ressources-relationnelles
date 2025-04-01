@@ -127,10 +127,13 @@ export class UserService {
    * @returns {Promise<User>} A User object containing the created user.
    * @throws {Error} When the API response doesn't match UserData format.
    */
-  async update(user: User, attrs: object): Promise<User> {
-    const uuid = user.uuid
+  async update(uuid: string, attrs: IUser): Promise<User> {
+    const JSONattrs = User.toJson(attrs)
     try {
-      const response = await this.api.put(`users/update-user/${uuid}`, attrs)
+      const response = await this.api.put(
+        `users/update-user/${uuid}`,
+        JSONattrs
+      )
 
       const userData = response?.data?.user as UserData
       const user = User.fromJson(userData)

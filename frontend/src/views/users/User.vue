@@ -17,7 +17,7 @@ const user = ref<User>()
 const confirmationModalVisible = ref(false)
 const confirmationModalMessage = ref('')
 
-async function getUser() {
+async function initUser() {
   user.value = currentUser.value
 }
 
@@ -28,19 +28,24 @@ function askForUpdateConfirmation() {
 }
 
 async function updateUser() {
-  const userData = user.value as User
+  if (!user.value) {
+    return
+  }
+
+  const uuid = user.value.uuid ?? ''
+
   try {
-    const response = await api.users.update(userData, userData)
+    const response = await api.users.update(uuid, user.value)
     if (response instanceof User) {
       toast.success('Utilisateur mis à jour avec succès !')
     }
-    await getUser()
+    user.value = response
   } catch (error) {
     toast.error(`Error while listing users: ${error}.`)
   }
 }
 
-onMounted(() => getUser())
+onMounted(() => initUser())
 </script>
 
 <template>
