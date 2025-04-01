@@ -413,6 +413,7 @@ export const deleteUserById = async (req: AuthRequest, res: Response): Promise<v
  * @param {Response} res - The response object to send a success message or an error message.
  * @returns {Promise<Response>} - A promise that resolves to the response object with a success message or an error message.
  */
+
 export const updateUser = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         // Check authentication and retrieve the authenticated user
@@ -439,6 +440,62 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<void>
             res.status(400).json(errorResponse({ msg: "Role is unavailable" }))
             return
         }
+
+        if ((userObject.password && !userObject.newPassword) || (!userObject.password && userObject.newPassword)) {
+            res.status(400).json(
+                errorResponse({
+                    location: "body",
+                    msg: userObject.password
+                        ? "'newPassword' is required when updating the password."
+                        : "'password' is required to confirm identity before changing it."
+                })
+            )
+            return
+        }
+
+        // Find the user by email
+        const userReq: UserInterface | null = await User.findOne({ email: req.body.email })
+
+        // Check if the user exists and has a password
+        if (!userReq) {
+            res.status(404).json(
+                errorResponse({
+                    location: "body",
+                    msg: "User not found. Please check the provided email."
+                })
+            )
+            return
+        }
+
+        if (!userReq.password) {
+            res.status(400).json(
+                errorResponse({
+                    location: "body",
+                    msg: "No password is set for this account. Password update is not possible."
+                })
+            )
+            return
+        }
+
+        if (userObject.password){
+            // Verify the provided password with the stored hashed password
+            const isValid: boolean = await bcrypt.compare(userObject.password, userReq.password)
+            if (!isValid) {
+                res.status(401).json(
+                    errorResponse({
+                        location: "body",
+                        msg: "Incorrect password. Please try again."
+                    })
+                )
+                return
+            }
+        }
+
+        if (userObject.newPassword) {
+            const hashedPassword: string = await bcrypt.hash(userObject.newPassword, 10)
+            userObject.password = hashedPassword
+            delete userObject.newPassword // Supprimer newPassword pour éviter de l'enregistrer par erreur
+        }
         // Remove any user IDs from the request body for security reasons
         delete userObject.id
         delete userObject.userId
@@ -450,10 +507,6 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<void>
             return
         }
 
-        if (userObject.password) {
-            const hashedPassword: string = await bcrypt.hash(userObject.password, 10)
-            userObject.password = hashedPassword
-        }
         // Allow users and moderators to update their own information
         if (userRoleIndex >= 1 && req.auth && req.params.id == req.auth.userId) {
             // Remove role from the request body for security reasons
@@ -468,13 +521,11 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<void>
             return
         } else if (userRoleIndex <= userRoleIndexToModify) {
             // Ensure the role is valid and the authenticated user has sufficient permissions
-            if (!userObject.role) {
-                res.status(400).json(errorResponse({ msg: "Invalid role" }))
-                return
-            }
-            if (userRoleIndex > ROLE_HIERARCHY.indexOf(userObject.role)) {
-                res.status(403).json(errorResponse({ msg: "Insufficient access" }))
-                return
+            if (userObject.role) {
+                if (userRoleIndex > ROLE_HIERARCHY.indexOf(userObject.role)) {
+                    res.status(403).json(errorResponse({ msg: "Insufficient access" }))
+                    return
+                }
             }
             // Update user information
             const updateUser: UserInterface | null = await User.findByIdAndUpdate(req.params.id, { $set: { ...userObject } }, { new: true })
