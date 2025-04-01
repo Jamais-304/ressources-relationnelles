@@ -1,36 +1,56 @@
 @import './base.css';
 @import 'tailwindcss';
 
+/* Déclaration des polices Marianne */
+@font-face {
+  font-family: 'Marianne';
+  src: url('./font/Marianne-Light.woff2') format('woff2'),
+       url('./font/Marianne-Light.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Marianne';
+  src: url('./font/Marianne-Regular.woff2') format('woff2'),
+       url('./font/Marianne-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Marianne';
+  src: url('./font/Marianne-Medium.woff2') format('woff2'),
+       url('./font/Marianne-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Marianne';
+  src: url('./font/Marianne-Bold.woff2') format('woff2'),
+       url('./font/Marianne-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Marianne';
+  src: url('./font/Marianne-ExtraBold.woff2') format('woff2'),
+       url('./font/Marianne-ExtraBold.woff') format('woff');
+  font-weight: 800;
+  font-style: normal;
+}
+
+/* Styles de base */
+html {
+  @apply h-full bg-[#F6F6F6];
+}
+
+body {
+  @apply h-full m-0 p-0 font-marianne text-[#161616];
+}
+
 #app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
-}
-
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
-}
-
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
-}
-
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
-
-  #app {
-    display: flex;
-    flex-direction: column;
-    padding: 0 2rem;
-  }
+  @apply min-h-full flex flex-col bg-[#F6F6F6];
 }
