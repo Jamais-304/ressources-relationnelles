@@ -2,6 +2,7 @@
 import { Api, User } from '@/api/api'
 import ConfirmationModal from '@/components/ConfirmationModal.vue'
 import { useUsersManagement } from '@/composables/useUsersManagement'
+import router from '@/routes/router'
 import { onMounted, ref } from 'vue'
 import { toast } from 'vue3-toastify'
 
@@ -56,6 +57,11 @@ async function listUsers() {
   }
 }
 
+function showUser(user: User) {
+  currentUser.value = user
+  router.push(`/users/${user.uuid}`)
+}
+
 function askForDeleteConfirmation(user: User) {
   currentUser.value = user
   confirmationModalVisible.value = true
@@ -83,6 +89,7 @@ onMounted(() => listUsers())
     <v-data-table :items="users" :headers="headers">
       <template #item.actions="{ item }">
         <span class="flex gap-2">
+          <v-btn color="#cddeef" @click="() => showUser(item)">Voir</v-btn>
           <v-btn color="#f1c6be" @click="() => askForDeleteConfirmation(item)">
             Supprimer
           </v-btn>

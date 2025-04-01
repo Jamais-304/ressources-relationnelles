@@ -5,9 +5,9 @@ import About from '../views/About.vue'
 import Login from '../views/accounts/Login.vue'
 import Signup from '../views/accounts/Signup.vue'
 import Users from '@/views/users/Users.vue'
+import User from '@/views/users/User.vue'
 import NotAllowed from '@/views/NotAllowed.vue'
 import { useAuthUserStore } from '@/stores/authUserStore'
-// import User from '../views/users/User.vue'
 
 const routes = [
   { path: '/', name: 'home', component: Home },
@@ -24,8 +24,15 @@ const routes = [
       requiresAdmin: true,
     },
   },
-  // The line below is an example of a route with a dynamic parameter (:id)
-  // { path: '/users/:id', component: User },
+  {
+    path: '/users/:uuid',
+    name: 'show user',
+    component: User,
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
+    },
+  },
 ]
 
 const router = createRouter({
