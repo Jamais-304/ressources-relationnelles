@@ -521,13 +521,11 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<void>
             return
         } else if (userRoleIndex <= userRoleIndexToModify) {
             // Ensure the role is valid and the authenticated user has sufficient permissions
-            if (!userObject.role) {
-                res.status(400).json(errorResponse({ msg: "Invalid role" }))
-                return
-            }
-            if (userRoleIndex > ROLE_HIERARCHY.indexOf(userObject.role)) {
-                res.status(403).json(errorResponse({ msg: "Insufficient access" }))
-                return
+            if (userObject.role) {
+                if (userRoleIndex > ROLE_HIERARCHY.indexOf(userObject.role)) {
+                    res.status(403).json(errorResponse({ msg: "Insufficient access" }))
+                    return
+                }
             }
             // Update user information
             const updateUser: UserInterface | null = await User.findByIdAndUpdate(req.params.id, { $set: { ...userObject } }, { new: true })
