@@ -477,28 +477,18 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<void>
             return
         }
 
-        // Vérifier que l'utilisateur a bien fourni son mot de passe actuel
-        if (!userObject.password) {
-            res.status(400).json(
-                errorResponse({
-                    location: "body",
-                    msg: "Current password is required to update your password."
-                })
-            )
-            return
-        }
-
-        // Verify the provided password with the stored hashed password
-        const isValid: boolean = await bcrypt.compare(userObject.password, userReq.password)
-
-        if (!isValid) {
-            res.status(401).json(
-                errorResponse({
-                    location: "body",
-                    msg: "Incorrect password. Please try again."
-                })
-            )
-            return
+        if (userObject.password){
+            // Verify the provided password with the stored hashed password
+            const isValid: boolean = await bcrypt.compare(userObject.password, userReq.password)
+            if (!isValid) {
+                res.status(401).json(
+                    errorResponse({
+                        location: "body",
+                        msg: "Incorrect password. Please try again."
+                    })
+                )
+                return
+            }
         }
 
         if (userObject.newPassword) {
