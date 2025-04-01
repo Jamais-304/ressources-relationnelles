@@ -24,11 +24,15 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
     try {
         // Extract user details from the request body
         const userObject: UserReqBodyRequest = req.body
+        // Check if the user is exist
+        const userExist = await User.findOne({ email: userObject.email })
 
+        if (userExist) {
+            res.status(409).json(errorResponse({ location: "body", msg: "Unable to create account with the provided information" }))
+        }
         // Remove any user IDs from the request body for security reasons
         delete userObject.id
         delete userObject.userId
-
         // Validate the presence of required fields in the request body
         if (!userObject.role || !userObject.password || !userObject.email || !userObject.pseudonyme) {
             res.status(400).json(errorResponse({ location: "body", msg: "Missing information" }))
@@ -46,19 +50,16 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
         })
 
         // Save the new user to the database
-        await newUser.save()
+        const savedUser = await newUser.save()
 
-        // Retrieve the newly created user from the database
-        const user = await User.findOne({ email: userObject.email })
-
-        if (!user) {
+        if (!savedUser) {
             res.status(500).json(errorResponse({ msg: "Server error" }))
             return
         }
         // Generate an access token for the new user
         let accessToken: string | undefined = undefined
         try {
-            accessToken = generateAccesToken(user)
+            accessToken = generateAccesToken(savedUser)
         } catch (error: unknown) {
             const statusCode: number = errorHandler(error) || 500
             console.error(error)
@@ -69,7 +70,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
         // Generate a refresh token for the new user
         let refreshToken: string | undefined = undefined
         try {
-            refreshToken = await generateRefreshToken(user)
+            refreshToken = await generateRefreshToken(savedUser)
         } catch (error: unknown) {
             const statusCode: number = errorHandler(error) || 500
             console.error(error)
@@ -79,9 +80,9 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
 
         // Return the user details and tokens in the response
         res.status(201).json(
-            dataResponse("User created", {
+            dataResponse("User created successfully", {
                 tokens: { accessToken, refreshToken },
-                user: { pseudonyme: user.pseudonyme, role: user.role, email: user.email }
+                user: { pseudonyme: savedUser.pseudonyme, role: savedUser.role, email: savedUser.email }
             })
         )
         return
@@ -209,7 +210,12 @@ export const adminCreateUser = async (req: AuthRequest, res: Response): Promise<
     try {
         // Extract user details from the request body
         const userObject: UserReqBodyRequest = req.body
+        // Check if the user is exist
+        const userExist = await User.findOne({ email: userObject.email })
 
+        if (userExist) {
+            res.status(409).json(errorResponse({ location: "body", msg: "Unable to create account with the provided information" }))
+        }
         // Remove any user IDs from the request body for security reasons
         delete userObject.id
         delete userObject.userId
@@ -261,10 +267,14 @@ export const adminCreateUser = async (req: AuthRequest, res: Response): Promise<
         })
 
         // Save the new user to the database
-        await newUser.save()
+        const savedUser = await newUser.save()
 
         // Return a success message
-        res.status(201).json(dataResponse("User created successfully"))
+        res.status(201).json(
+            dataResponse("User created successfully", {
+                user: { pseudonyme: savedUser.pseudonyme, role: savedUser.role, email: savedUser.email }
+            })
+        )
         return
     } catch (error: unknown) {
         // Handle unexpected errors
@@ -420,30 +430,41 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<void>
             res.status(statusCode).json(errorResponse({ msg: "Server error" }))
             return
         }
-
         // Check the role of the user to be modified
         const userRoleIndexToModify: number = await checkUserParams(req.params.id)
 
         // Extract user details from the request body
         const userObject: UserReqBodyRequest = req.body
-
-        const roleExiste = userObject.role && Object.values(ROLES).includes(userObject.role)
-
-        if (!roleExiste) {
-            res.status(400).json(errorResponse({ msg: "Invalid role" }))
+        if (userObject.role && !Object.values(ROLES).includes(userObject.role)) {
+            res.status(400).json(errorResponse({ msg: "Role is unavailable" }))
             return
         }
         // Remove any user IDs from the request body for security reasons
         delete userObject.id
         delete userObject.userId
+        delete userObject._id
+        delete userObject.uuid
 
+        if (Object.keys(userObject).length === 0) {
+            res.status(400).json(errorResponse({ msg: "No fields provided for update" }))
+            return
+        }
+
+        if (userObject.password) {
+            const hashedPassword: string = await bcrypt.hash(userObject.password, 10)
+            userObject.password = hashedPassword
+        }
         // Allow users and moderators to update their own information
         if (userRoleIndex >= 1 && req.auth && req.params.id == req.auth.userId) {
             // Remove role from the request body for security reasons
             delete userObject.role
             // Update user information
-            await User.updateOne({ _id: req.params.id }, { ...userObject, _id: req.params.id })
-            res.status(200).json(dataResponse("User updated successfully"))
+            const updateUser = await User.findByIdAndUpdate(req.params.id, { $set: { ...userObject } }, { new: true })
+            if (!updateUser) {
+                res.status(404).json(errorResponse({ msg: "Not found" }))
+                return
+            }
+            res.status(200).json(dataResponse("User updated successfully", { user: updateUser }))
             return
         } else if (userRoleIndex <= userRoleIndexToModify) {
             // Ensure the role is valid and the authenticated user has sufficient permissions
@@ -455,10 +476,14 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<void>
                 res.status(403).json(errorResponse({ msg: "Insufficient access" }))
                 return
             }
-
             // Update user information
-            await User.updateOne({ _id: req.params.id }, { ...userObject, _id: req.params.id })
-            res.status(200).json(dataResponse("User updated successfully"))
+            const updateUser: UserInterface | null = await User.findByIdAndUpdate(req.params.id, { $set: { ...userObject } }, { new: true })
+
+            if (!updateUser) {
+                res.status(404).json(errorResponse({ msg: "Not found" }))
+                return
+            }
+            res.status(200).json(dataResponse("User updated successfully", { user: updateUser }))
             return
         } else {
             // Return an error if the authenticated user is not authorized to modify the specified user
