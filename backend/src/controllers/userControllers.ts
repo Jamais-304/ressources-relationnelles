@@ -62,8 +62,8 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
             accessToken = generateAccesToken(savedUser)
         } catch (error: unknown) {
             const statusCode: number = errorHandler(error) || 500
-            console.error(error)
-            res.status(statusCode).json(errorResponse({ msg: "Server error" }))
+            const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred"
+            res.status(statusCode).json(errorResponse({ msg: errorMessage }))
             return
         }
 
@@ -73,8 +73,8 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
             refreshToken = await generateRefreshToken(savedUser)
         } catch (error: unknown) {
             const statusCode: number = errorHandler(error) || 500
-            console.error(error)
-            res.status(statusCode).json(errorResponse({ msg: "Server error" }))
+            const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred"
+            res.status(statusCode).json(errorResponse({ msg: errorMessage }))
             return
         }
 
@@ -131,8 +131,8 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
             accessToken = generateAccesToken(user)
         } catch (error: unknown) {
             const statusCode: number = errorHandler(error) || 500
-            console.error(error)
-            res.status(statusCode).json(errorResponse({ msg: "Server error" }))
+            const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred"
+            res.status(statusCode).json(errorResponse({ msg: errorMessage }))
             return
         }
 
@@ -142,8 +142,8 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
             refreshToken = await generateRefreshToken(user)
         } catch (error: unknown) {
             const statusCode: number = errorHandler(error) || 500
-            console.error(error)
-            res.status(statusCode).json(errorResponse({ msg: "Server error" }))
+            const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred"
+            res.status(statusCode).json(errorResponse({ msg: errorMessage }))
             return
         }
 
@@ -238,8 +238,8 @@ export const adminCreateUser = async (req: AuthRequest, res: Response): Promise<
         } catch (error: unknown) {
             // Handle errors in role checking
             const statusCode: number = errorHandler(error) || 500
-            console.error(error)
-            res.status(statusCode).json(errorResponse({ msg: "Server error" }))
+            const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred"
+            res.status(statusCode).json(errorResponse({ msg: errorMessage }))
             return
         }
 
@@ -308,8 +308,8 @@ export const getAllUsers = async (req: AuthRequest, res: Response): Promise<void
         } catch (error: unknown) {
             // Handle errors in role checking
             const statusCode: number = errorHandler(error) || 500
-            console.error(error)
-            res.status(statusCode).json(errorResponse({ msg: "Server error" }))
+            const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred"
+            res.status(statusCode).json(errorResponse({ msg: errorMessage }))
             return
         }
 
@@ -368,8 +368,8 @@ export const deleteUserById = async (req: AuthRequest, res: Response): Promise<v
         } catch (error: unknown) {
             // Handle errors in role checking
             const statusCode: number = errorHandler(error) || 500
-            console.error(error)
-            res.status(statusCode).json(errorResponse({ msg: "Server error" }))
+            const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred"
+            res.status(statusCode).json(errorResponse({ msg: errorMessage }))
             return
         }
 
@@ -426,8 +426,8 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<void>
         } catch (error: unknown) {
             // Handle errors in role checking
             const statusCode: number = errorHandler(error) || 500
-            console.error(error)
-            res.status(statusCode).json(errorResponse({ msg: "Server error" }))
+            const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred"
+            res.status(statusCode).json(errorResponse({ msg: errorMessage }))
             return
         }
         // Check the role of the user to be modified
