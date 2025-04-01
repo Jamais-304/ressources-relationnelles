@@ -5,9 +5,10 @@ export interface UserData {
   email: string
   pseudonyme: string
   password?: string
+  newPassword?: string
   // firstName?: string
   // lastName?: string
-  role: string
+  role?: string
   createdAt?: string
   updatedAt?: string
 }
@@ -16,10 +17,11 @@ export interface IUser {
   uuid?: string
   email: string
   password?: string
+  newPassword?: string
   username: string
   // firstName?: string
   // lastName?: string
-  role: Role
+  role?: Role
   createdAt?: string
   updatedAt?: string
 }
@@ -68,6 +70,7 @@ export class User implements IUser {
       email: attrs.email,
       pseudonyme: attrs.username,
       password: attrs.password,
+      newPassword: attrs.newPassword,
       // firstName: attrs.firstName,
       // lastName: attrs.lastName,
       role: roleToString(attrs.role),

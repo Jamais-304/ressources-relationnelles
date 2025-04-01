@@ -11,7 +11,7 @@ export enum Role {
  * @returns The corresponding Role enum value.
  * @throws An error if the role is not recognized.
  */
-export function roleFromString(role: string): Role {
+export function roleFromString(role: string | undefined): Role {
   switch (role) {
     case 'utilisateur':
       return Role.User
@@ -31,7 +31,11 @@ export function roleFromString(role: string): Role {
  * @param role - The Role enum value to convert.
  * @returns The corresponding string role.
  */
-export function roleToString(role: Role): string {
+export function roleToString(role: Role | undefined): string | undefined {
+  if (!role) {
+    return undefined
+  }
+
   switch (role) {
     case Role.User:
       return 'utilisateur'
