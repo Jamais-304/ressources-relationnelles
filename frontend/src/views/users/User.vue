@@ -49,21 +49,26 @@ onMounted(() => initUser())
 </script>
 
 <template>
-  <UserForm
-    v-if="user"
-    v-model:username="user.username"
-    v-model:email="user.email"
-    v-model:role="user.role"
-    show-username
+  <div class="min-h-screen flex items-center justify-center">
+    <div class="w-full max-w-md mx-auto px-4 py-32">
+      <div class="bg-white p-8 rounded-lg border border-[#E5E5E5]">
+        <UserForm
+          v-if="user"
+          v-model:username="user.username"
+          v-model:email="user.email"
+          v-model:role="user.role"
+          show-username
     show-email
-    show-role
-    @save="askForUpdateConfirmation"
-  >
-  </UserForm>
-  <ConfirmationModal
-    v-model="confirmationModalVisible"
-    :message="confirmationModalMessage"
-    :item="currentUser"
-    @confirm="updateUser"
-  ></ConfirmationModal>
+      show-role
+          @save="askForUpdateConfirmation"
+        />
+        <ConfirmationModal
+          v-model="confirmationModalVisible"
+          :message="confirmationModalMessage"
+          :item="currentUser"
+          @confirm="updateUser"
+        />
+      </div>
+    </div>
+  </div>
 </template>
