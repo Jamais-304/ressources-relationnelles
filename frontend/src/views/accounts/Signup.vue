@@ -7,7 +7,6 @@ import { ref } from 'vue'
 import { toast } from 'vue3-toastify'
 
 const api = new Api()
-
 const { setAuthUser } = useAuthUserStore()
 
 const username = ref('')
@@ -36,14 +35,28 @@ async function signup() {
 </script>
 
 <template>
-  <UserForm
-    v-model:username="username"
-    v-model:email="email"
-    v-model:password="password"
-    button-text="Créer mon compte"
-    show-username
-    show-email
-    show-password
-    @save="signup"
-  />
+  <div class="min-h-screen flex items-center justify-center">
+    <div class="w-full max-w-md mx-auto px-4 py-32">
+      <div class="bg-white p-8 rounded-lg border border-[#E5E5E5]">
+        <div class="mb-6">
+          <RouterLink to="/" class="text-[#000091] hover:text-[#1212ff]">
+            ← Retour à l'accueil
+          </RouterLink>
+        </div>
+
+        <h1 class="text-2xl font-bold mb-8 text-center">Inscription</h1>
+
+        <UserForm
+          v-model:username="username"
+          v-model:email="email"
+          v-model:password="password"
+          :show-username="true"
+          :show-email="true"
+          :show-password="true"
+          button-text="S'inscrire"
+          @save="signup"
+        />
+      </div>
+    </div>
+  </div>
 </template>
