@@ -1,5 +1,7 @@
 @import './base.css';
-@import 'tailwindcss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @font-face {
   font-family: 'Marianne';
