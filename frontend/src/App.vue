@@ -14,8 +14,10 @@ onMounted(() => initializeFromSessionStorage())
     <header>
       <NavBar />
     </header>
-    <v-main class="mt-10">
-      <RouterView />
+    <v-main class="bg-[#F6F6F6]">
+      <div class="mt-[96px]">
+        <RouterView />
+      </div>
     </v-main>
   </v-app>
 </template>
