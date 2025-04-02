@@ -10,7 +10,7 @@ const api = new Api()
 const { setAuthUser } = useAuthUserStore()
 
 const email = ref('admintest@test.com')
-const password = ref('admintest')
+const password = ref('Admin123!')
 
 async function login() {
   const attrs = {
