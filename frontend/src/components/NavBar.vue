@@ -1,47 +1,44 @@
 <script setup lang="ts">
-import { removeToken } from '../utils/cookies'
+import { useRouter } from 'vue-router'
 import { useAuthUserStore } from '../stores/authUserStore'
 import { storeToRefs } from 'pinia'
 import logo from '../assets/logo.svg'
 import AppButton from './common/AppButton.vue'
 
+const router = useRouter()
 const authUserStore = useAuthUserStore()
-const { isAuthenticated } = storeToRefs(authUserStore)
-const { isAdmin } = storeToRefs(authUserStore)
-const { resetAuthUser } = authUserStore
+const { isAuthenticated, isAdmin } = storeToRefs(authUserStore)
 
-async function logout() {
-  resetAuthUser()
-  removeToken('accessToken')
-  removeToken('refreshToken')
-  removeToken('tokenExpiryTime')
+const logout = async () => {
+  await authUserStore.resetAuthUser()
+  router.push('/')
 }
 </script>
 
 <template>
   <div class="w-full fixed top-0 left-0 right-0 z-[1000]">
-    <div class="w-full bg-[#000091] text-white py-3">
-      <div class="w-full px-8">
+    <div class="w-full bg-[#000091] text-white">
+      <div class="w-full px-4 py-2">
         <div class="flex justify-between items-center">
-          <div class="flex items-center gap-6">
-            <img :src="logo" alt="Logo Marianne" class="h-16 w-auto" />
-            <span class="text-xl font-bold font-marianne text-white">(RE)SOURCES RELATIONNELLES</span>
+          <div class="flex items-center gap-4">
+            <img :src="logo" alt="Logo Marianne" class="h-8 w-8" />
+            <span class="text-lg font-bold font-marianne">(RE)SOURCES RELATIONNELLES</span>
           </div>
-          <AppButton 
-          v-if="isAdmin" 
-          variant="text"
-          color="white"
-          class="hover:!bg-[#1212ff]"
-          to="/users"
+          <AppButton
+            v-if="isAdmin"
+            variant="text"
+            color="white"
+            class="!text-sm hover:!bg-[#1212ff]"
+            to="/users"
           >
             Gestion des utilisateurs
           </AppButton>
-          <div class="flex gap-4">
+          <div class="flex gap-2">
             <AppButton
               v-if="!isAuthenticated"
               variant="text"
               color="white"
-              class="hover:!bg-[#1212ff]"
+              class="!text-sm hover:!bg-[#1212ff]"
               to="/login"
             >
               Se connecter
@@ -50,7 +47,7 @@ async function logout() {
               v-if="!isAuthenticated"
               variant="text"
               color="white"
-              class="hover:!bg-[#1212ff]"
+              class="!text-sm hover:!bg-[#1212ff]"
               to="/signup"
             >
               S'inscrire
@@ -59,7 +56,7 @@ async function logout() {
               v-else
               variant="text"
               color="white"
-              class="hover:!bg-[#1212ff]"
+              class="!text-sm hover:!bg-[#1212ff]"
               @click="logout"
               to="/"
             >
@@ -70,22 +67,21 @@ async function logout() {
       </div>
     </div>
 
-    <div class="w-full bg-white border-b border-[#E5E5E5]">
-      <div class="w-full px-8">
-        <nav class="flex gap-6 py-2">
+    <div class="w-full bg-white shadow-sm">
+      <div class="w-full px-4">
+        <nav class="flex gap-4">
           <AppButton
             variant="text"
             color="default"
-            class="hover:!bg-[#F5F5FE] hover:!text-[#000091]"
+            class="!text-sm hover:!bg-[#F5F5FE] hover:!text-[#000091]"
             to="/"
-            icon="mdi-home"
           >
             Accueil
           </AppButton>
           <AppButton
             variant="text"
             color="default"
-            class="hover:!bg-[#F5F5FE] hover:!text-[#000091]"
+            class="!text-sm hover:!bg-[#F5F5FE] hover:!text-[#000091]"
             to="/about"
           >
             À propos
@@ -96,8 +92,8 @@ async function logout() {
   </div>
 </template>
 
-<style>
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+<style scoped>
+.v-btn {
+  text-transform: none;
+}
 </style>
