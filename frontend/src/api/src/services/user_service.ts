@@ -143,7 +143,8 @@ export class UserService {
     try {
       const response = await this.api.put(
         `users/update-user/${uuid}`,
-        JSONattrs
+        JSONattrs,
+        { skipAuthRedirect: true }
       )
 
       const userData = response?.data?.user as UserData

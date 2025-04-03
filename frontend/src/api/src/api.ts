@@ -159,7 +159,7 @@ export class Api {
     axios.interceptors.response.use(
       (response) => response,
       async (error) => {
-        if (error.response?.status === 401) {
+        if (error.response?.status === 401 && !error.config?.skipAuthRedirect) {
           removeToken('accessToken')
           removeToken('refreshToken')
           removeToken('tokenExpiryTime')
@@ -214,9 +214,17 @@ export class Api {
    * @returns {Promise<Response>} The parsed response data
    * @throws {Error} When the request fails or returns an error status
    */
-  async put(endpoint: string, body: object): Promise<Response> {
+  async put(
+    endpoint: string,
+    body: object,
+    axiosConfig: object
+  ): Promise<Response> {
     try {
-      const response = await axios.put(`${this.baseUrl}/${endpoint}`, body)
+      const response = await axios.put(
+        `${this.baseUrl}/${endpoint}`,
+        body,
+        axiosConfig
+      )
       return this.handleResponse(response)
     } catch (error: unknown) {
       this.handleError(error)
