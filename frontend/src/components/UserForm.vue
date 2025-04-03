@@ -15,9 +15,21 @@ defineProps({
     type: Boolean,
     default: false,
   },
+  showUpdatePassword: {
+    type: Boolean,
+    default: false,
+  },
+  showUpdatePasswordConfirmation: {
+    type: Boolean,
+    default: false,
+  },
   showRole: {
     type: Boolean,
     default: false,
+  },
+  passwordLabel: {
+    type: String,
+    default: 'Mot de passe',
   },
   buttonText: {
     type: String,
@@ -28,6 +40,8 @@ defineProps({
 const username = defineModel('username')
 const email = defineModel('email')
 const password = defineModel('password')
+const updatePassword = defineModel('updatePassword')
+const updatePasswordConfirmation = defineModel('updatePasswordConfirmation')
 const role = defineModel('role')
 
 const validUserForm = ref(false)
@@ -52,6 +66,19 @@ const passwordRules = [
   (v: string) =>
     /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/.test(v) ||
     "Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un caractère spécial",
+]
+
+const updatePasswordRules = [
+  ...passwordRules,
+  (v: string) =>
+    v !== password.value || 'Le nouveau mot de passe est identique à l’ancien.',
+]
+
+const updatePasswordConfirmationRules = [
+  ...passwordRules,
+  (v: string) =>
+    v === updatePassword.value ||
+    'Les nouveaux mots de passe saisis ne sont pas identiques.',
 ]
 
 async function save() {
@@ -83,11 +110,37 @@ async function save() {
         <v-text-field
           v-if="showPassword"
           v-model="password"
-          label="Mot de passe"
+          :label="passwordLabel"
           password
           :append-icon="showPasswordCharacters ? 'mdi-eye' : 'mdi-eye-off'"
           :type="showPasswordCharacters ? 'text' : 'password'"
           :rules="passwordRules"
+          hint="8 caractères minimum, 1 majuscule, 1 chiffre, 1 caractère spécial"
+          persistent-hint
+          @click:append="showPasswordCharacters = !showPasswordCharacters"
+        ></v-text-field>
+
+        <v-text-field
+          v-if="showUpdatePassword"
+          v-model="updatePassword"
+          label="Nouveau mot de passe"
+          password
+          :append-icon="showPasswordCharacters ? 'mdi-eye' : 'mdi-eye-off'"
+          :type="showPasswordCharacters ? 'text' : 'password'"
+          :rules="updatePasswordRules"
+          hint="8 caractères minimum, 1 majuscule, 1 chiffre, 1 caractère spécial"
+          persistent-hint
+          @click:append="showPasswordCharacters = !showPasswordCharacters"
+        ></v-text-field>
+
+        <v-text-field
+          v-if="showUpdatePasswordConfirmation"
+          v-model="updatePasswordConfirmation"
+          label="Confirmation du nouveau mot de passe"
+          password
+          :append-icon="showPasswordCharacters ? 'mdi-eye' : 'mdi-eye-off'"
+          :type="showPasswordCharacters ? 'text' : 'password'"
+          :rules="updatePasswordConfirmationRules"
           hint="8 caractères minimum, 1 majuscule, 1 chiffre, 1 caractère spécial"
           persistent-hint
           @click:append="showPasswordCharacters = !showPasswordCharacters"
