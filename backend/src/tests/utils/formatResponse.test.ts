@@ -1,4 +1,4 @@
-import { dataResponse, errorResponse } from "../../utils/formatResponse.ts"
+import { dataResponse, errorResponse } from "../../handlerResponse/formatResponse.ts"
 import { type TokensInterface } from "../../interfaces/tokenInterfaces.ts"
 
 describe("dataResponse", () => {

@@ -6,7 +6,8 @@ import mongoose from "mongoose"
 import RefreshToken from "../../models/RefreshToken.ts"
 import { generateAccesToken, generateRefreshToken } from "../../utils/generateTokens.ts"
 import { checkAuthentification, checkUserRole } from "../../utils/checkAuth.ts"
-import { ROLE_HIERARCHY } from "../../config.ts"
+import { ROLE_HIERARCHY } from "../../configs.ts"
+import { msgInvalidCredentials } from "../../handlerResponse/errorHandler/configs.ts"
 
 jest.mock("bcrypt")
 jest.mock("../../models/User.ts")
@@ -136,7 +137,6 @@ describe("User Controller - Login", () => {
         ;(User.findOne as jest.Mock).mockResolvedValue(null)
         // Send a POST request to the login endpoint with invalid login data
         const response = await request(app).post("/api/v1/users/login").send(errorLoginData)
-        console.log(response)
         // Ensure that User.findOne was called with the correct email
         expect(User.findOne).toHaveBeenCalledWith({ email: errorLoginData.email })
         // Verify that the response contains the 'error' property
@@ -146,7 +146,7 @@ describe("User Controller - Login", () => {
         // Check that the response status is 401 (Unauthorized) as no user was found
         expect(response.status).toBe(401)
         // Ensure the error message is "Incorrect username/password pair!"
-        expect(response.body.error.msg).toBe("Incorrect username/password pair!")
+        expect(response.body.error.msg).toBe(msgInvalidCredentials)
     })
 
     it("should return error if the password does not match the stored password", async () => {
@@ -165,7 +165,7 @@ describe("User Controller - Login", () => {
         // Check that the response status is 401 (Unauthorized) as the password did not match
         expect(response.status).toBe(401)
         // Ensure the error message is "Incorrect username/password pair!"
-        expect(response.body.error.msg).toBe("Incorrect username/password pair!")
+        expect(response.body.error.msg).toBe(msgInvalidCredentials)
     })
 })
 

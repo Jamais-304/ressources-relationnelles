@@ -1,12 +1,12 @@
 import express from "express"
 import type { Request, Response, NextFunction } from "express"
 import mongoose from "mongoose"
-import { MONGO_URI } from "./config.ts"
+import { MONGO_URI } from "./configs.ts"
 import yaml from "yamljs"
 import swaggerUi from "swagger-ui-express"
 import userRouter from "./router/userRoutes.ts"
 import refreshTokenRouter from "./router/refreshTokenRoute.ts"
-import { morganMiddleware, errorLogger } from "../logs/logger.ts"
+import { morganMiddleware, errorLogger } from "./logs/logger.ts"
 
 const app = express()
 app.set("trust proxy", true)

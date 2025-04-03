@@ -1,14 +1,14 @@
-import { ROLE_HIERARCHY } from "../../config.ts"
-import { 
-    commonEmailValidation, 
-    commonPasswordValidation, 
-    commonPseudonymValidation, 
-    commonRoleValidation, 
-    commonOptionalEmailValidation, 
-    commonOptionalNewPasswordValidation, 
-    commonOptionalPasswordValidation, 
-    commonOptionalPseudonymeValidation, 
-    commonOptionalRoleValidation 
+import { ROLE_HIERARCHY } from "../../configs.ts"
+import {
+    commonEmailValidation,
+    commonPasswordValidation,
+    commonPseudonymValidation,
+    commonRoleValidation,
+    commonOptionalEmailValidation,
+    commonOptionalNewPasswordValidation,
+    commonOptionalPasswordValidation,
+    commonOptionalPseudonymeValidation,
+    commonOptionalRoleValidation
 } from "./configsUserValidator.ts"
 
 export const signUpUserValidationRules = [
