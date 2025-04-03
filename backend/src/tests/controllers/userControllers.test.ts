@@ -6,7 +6,7 @@ import mongoose from "mongoose"
 import RefreshToken from "../../models/RefreshToken.ts"
 import { generateAccesToken, generateRefreshToken } from "../../utils/generateTokens.ts"
 import { checkAuthentification, checkUserRole } from "../../utils/checkAuth.ts"
-import { ROLE_HIERARCHY } from "../../../config.ts"
+import { ROLE_HIERARCHY } from "../../config.ts"
 
 jest.mock("bcrypt")
 jest.mock("../../models/User.ts")
