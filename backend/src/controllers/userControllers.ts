@@ -6,7 +6,7 @@ import { dataResponse, errorResponse } from "../utils/formatResponse.ts"
 import { errorHandler } from "../utils/errorHandler.ts"
 import { generateAccesToken, generateRefreshToken } from "../utils/generateTokens.ts"
 import { checkAuthentification, checkUserParams, checkUserRole } from "../utils/checkAuth.ts"
-import { ROLE_HIERARCHY, ROLES } from "../../config.ts"
+import { ROLE_HIERARCHY, ROLES } from "../config.ts"
 import { type UserInterface, type UserReqBodyRequest } from "../interfaces/userInterfaces.ts"
 import { type AuthRequest } from "../interfaces/authInterface.ts"
 

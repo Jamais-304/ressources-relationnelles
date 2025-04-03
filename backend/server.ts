@@ -1,7 +1,8 @@
-import { PORT_BACKEND } from "./config.ts"
+import { PORT_BACKEND } from "./src/config.ts"
 import app from "./src/app.ts"
 import http from "http"
 import { normalize } from "./src/utils/normailze.ts"
+import chalk from "chalk"
 
 /**
  * Normalize the port value.
@@ -68,8 +69,8 @@ server.on("listening", () => {
         .join("  ")
     const address = server.address()
     const bind = typeof address === "string" ? `pipe ${address}` : `port ${portSplit}`
-    console.log("Server start 🛫")
-    console.log(`Listening 👂 on ${bind}`)
+    console.log(chalk.green("Server start ") + "🛫")
+    console.log(chalk.green("Listening ") + "👂 " + chalk.green(`on ${bind}`))
 })
 
 server.listen(port)
