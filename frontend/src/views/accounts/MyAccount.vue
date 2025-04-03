@@ -2,6 +2,7 @@
 import { Api, User } from '@/api/api'
 import ConfirmationModal from '@/components/ConfirmationModal.vue'
 import UserForm from '@/components/UserForm.vue'
+import { useErrorsManagement } from '@/composables/useErrorsManagement'
 import { useAuthUserStore } from '@/stores/authUserStore'
 import { storeToRefs } from 'pinia'
 import { onMounted, ref } from 'vue'
@@ -11,6 +12,7 @@ const api = new Api()
 
 const { authUser } = storeToRefs(useAuthUserStore())
 const { setAuthUser } = useAuthUserStore()
+const { handleError } = useErrorsManagement()
 
 const authUsername = ref('')
 const authEmail = ref('')
@@ -52,7 +54,7 @@ async function updateUser() {
     }
     setAuthUser(response)
   } catch (error) {
-    toast.error(`Error while listing users: ${error}.`)
+    handleError(error)
   }
 }
 

@@ -2,6 +2,7 @@
 import { Api, User } from '@/api/api'
 import ConfirmationModal from '@/components/ConfirmationModal.vue'
 import UserForm from '@/components/UserForm.vue'
+import { useErrorsManagement } from '@/composables/useErrorsManagement'
 import { useUsersManagement } from '@/composables/useUsersManagement'
 import { onMounted, ref } from 'vue'
 import { toast } from 'vue3-toastify'
@@ -11,6 +12,8 @@ const api = new Api()
 const {
   references: { currentUser },
 } = useUsersManagement()
+
+const { handleError } = useErrorsManagement()
 
 const user = ref<User>()
 
@@ -41,7 +44,7 @@ async function updateUser() {
     }
     user.value = response
   } catch (error) {
-    toast.error(`Error while listing users: ${error}.`)
+    handleError(error)
   }
 }
 
@@ -58,8 +61,8 @@ onMounted(() => initUser())
           v-model:email="user.email"
           v-model:role="user.role"
           show-username
-    show-email
-      show-role
+          show-email
+          show-role
           @save="askForUpdateConfirmation"
         />
         <ConfirmationModal
