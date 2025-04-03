@@ -2,6 +2,8 @@ import jwt from "jsonwebtoken"
 import type { Response, NextFunction } from "express"
 import { type AuthRequest } from "../interfaces/authInterface.ts"
 import { type DecodedToken } from "../interfaces/tokenInterfaces.ts"
+import { errorHandler } from "../handlerResponse/errorHandler/errorHandler.ts"
+import { serverError, unauthorized } from "../handlerResponse/errorHandler/configs.ts"
 /**
  * Middleware function to authenticate requests using JSON Web Tokens (JWT).
  *
@@ -15,8 +17,8 @@ export const auth = async (req: AuthRequest, res: Response, next: NextFunction):
     try {
         const authorization = req.header("authorization")
         if (!authorization) {
-            res.status(401).send("Unauthorized access")
-            return 
+            errorHandler(res, unauthorized)
+            return
         }
 
         const token = authorization.split(" ")[1]
@@ -37,8 +39,8 @@ export const auth = async (req: AuthRequest, res: Response, next: NextFunction):
 
         next()
     } catch (error: unknown) {
-        console.error(error)
-        res.status(401).send("Unauthorized access")
-        return 
+        const errorType = error instanceof Error ? error.message : serverError
+        errorHandler(res, errorType)
+        return
     }
 }

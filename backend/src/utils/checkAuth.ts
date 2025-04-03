@@ -1,7 +1,8 @@
 import User from "../models/User.ts"
-import { ROLE_HIERARCHY, type Role } from "../config.ts"
+import { ROLE_HIERARCHY, type Role } from "../configs.ts"
 import { type UserInterface, type UserReqBodyRequest } from "../interfaces/userInterfaces.ts"
 import { type AuthRequest } from "../interfaces/authInterface.ts"
+import { missingInfo, invRole, unauthorized } from "../handlerResponse/errorHandler/configs.ts"
 
 /**
  * Function to check the authentication of a request.
@@ -12,10 +13,9 @@ import { type AuthRequest } from "../interfaces/authInterface.ts"
  */
 
 export const checkAuthentification = async (req: AuthRequest) => {
-    if (!req.auth || !req.auth.userId) throw new Error("Unauthorized access")
+    if (!req.auth || !req.auth.userId) throw new Error(unauthorized)
 
     const user: UserInterface | null = await User.findById(req.auth.userId)
-
     return user
 }
 
@@ -30,7 +30,7 @@ export const checkAuthentification = async (req: AuthRequest) => {
 export const checkUserRole = (userRole: Role) => {
     const userRoleIndex: number = ROLE_HIERARCHY.indexOf(userRole)
 
-    if (userRoleIndex === -1) throw new Error("Invalid role")
+    if (userRoleIndex === -1) throw new Error(invRole)
 
     return userRoleIndex
 }
@@ -46,7 +46,7 @@ export const checkUserRole = (userRole: Role) => {
 export const checkUserParams = async (userParamsId: string) => {
     const userParams: UserReqBodyRequest | null = await User.findById(userParamsId)
 
-    if (!userParams || !userParams.role) throw new Error("No conditions met")
+    if (!userParams || !userParams.role) throw new Error(missingInfo)
 
     const userParamsRoleIndex: number = ROLE_HIERARCHY.indexOf(userParams.role)
 

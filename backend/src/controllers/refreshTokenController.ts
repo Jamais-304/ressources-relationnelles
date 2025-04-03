@@ -1,10 +1,11 @@
 import type { Request, Response } from "express"
 import jwt from "jsonwebtoken"
 import RefreshToken from "../models/RefreshToken.ts"
-import { errorResponse, dataResponse } from "../utils/formatResponse.ts"
+import { dataResponse } from "../handlerResponse/formatResponse.ts"
 import { generateAccesToken } from "../utils/generateTokens.ts"
-import { errorHandler } from "../utils/errorHandler.ts"
 import { type DecodedToken } from "../interfaces/tokenInterfaces.ts"
+import { errorHandler } from "../handlerResponse/errorHandler/errorHandler.ts"
+import { invToken, serverError, expirToken, unexpectedError } from "../handlerResponse/errorHandler/configs.ts"
 
 /**
  * Controller for refreshing the access token.
@@ -23,22 +24,21 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
 
         // Check if the refresh token is provided
         if (!refreshToken) {
-            res.status(401).json(errorResponse({ msg: "Invalid token" }))
+            errorHandler(res, invToken)
             return
         }
 
         // Retrieve the secret key from environment variables
         const secretKey: string | undefined = process.env.TOKEN_SECRET
         if (!secretKey) {
-            console.error("Secret key is not defined")
-            res.status(500).json(errorResponse({ msg: "Server error" }))
+            errorHandler(res, serverError)
             return
         }
 
         // Find the stored refresh token in the database
         const storedToken: string | null = await RefreshToken.findOne({ refreshToken: refreshToken })
         if (!storedToken) {
-            res.status(403).json(errorResponse({ msg: "Invalid token" }))
+            errorHandler(res, invToken)
             return
         }
 
@@ -56,15 +56,14 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
             res.status(201).json(dataResponse("Token renewed", { tokens: { accessToken: newAccesToken } }))
             return
         } catch (error: unknown) {
-            console.error(error)
-            res.status(401).json(errorHandler({msg :"Refresh Token expired"}))
+            const errorMessage = error instanceof Error ? error.message : expirToken
+            errorHandler(res, errorMessage)
             return
         }
     } catch (error: unknown) {
         // Handle unexpected errors
-        const statusCode: number = errorHandler(error) || 500
-        console.error(error)
-        res.status(statusCode).json(errorResponse({msg: "Server error"}))
+        const errorMessage = error instanceof Error ? error.message : unexpectedError
+        errorHandler(res, errorMessage)
         return
     }
 }
