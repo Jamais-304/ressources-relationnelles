@@ -4,6 +4,7 @@ import { UserService, TokenService } from './services/services'
 import { type Response } from './types/response'
 import { getToken, removeToken } from '@/utils/cookies'
 import router from '@/routes/router'
+
 /**
  * The Api class facilitates interactions with a RESTful API.
  * It handles authentication, sets up request headers, and manages HTTP
@@ -184,11 +185,7 @@ export class Api {
       const response = await axios.get(`${this.baseUrl}/${endpoint}`)
       return this.handleResponse(response)
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        throw new Error(`Failed to load data: ${error.response?.status}`)
-      } else {
-        throw new Error(`Failed to load data: ${error}`)
-      }
+      this.handleError(error)
     }
   }
 
@@ -205,11 +202,7 @@ export class Api {
       const response = await axios.post(`${this.baseUrl}/${endpoint}`, body)
       return this.handleResponse(response)
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        throw new Error(`Failed to send data: ${error.response?.status}`)
-      } else {
-        throw new Error(`Failed to send data: ${error}`)
-      }
+      this.handleError(error)
     }
   }
 
@@ -226,11 +219,7 @@ export class Api {
       const response = await axios.put(`${this.baseUrl}/${endpoint}`, body)
       return this.handleResponse(response)
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        throw new Error(`Failed to send data: ${error.response?.status}`)
-      } else {
-        throw new Error(`Failed to send data: ${error}`)
-      }
+      this.handleError(error)
     }
   }
 
@@ -246,11 +235,7 @@ export class Api {
       const response = await axios.delete(`${this.baseUrl}/${endpoint}`)
       return this.handleResponse(response)
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        throw new Error(`Failed to send data: ${error.response?.status}`)
-      } else {
-        throw new Error(`Failed to send data: ${error}`)
-      }
+      this.handleError(error)
     }
   }
 
@@ -267,7 +252,24 @@ export class Api {
     if (response.status >= 200 && response.status < 300) {
       return response.data
     } else {
-      throw new Error(`Failed to load data: ${response.status}`)
+      throw new Error(`Failed to load data: ${response}`)
+    }
+  }
+
+  /**
+   * Processes errors that occur during API requests and throws appropriate
+   * error types.
+   *
+   * @param {unknown} error - The error caught during the API request.
+   * @returns {never} This function never returns as it always throws an error.
+   * @throws {AxiosError} If the error is an Axios-specific error.
+   * @throws {Error} If the error is a generic error or unknown type.
+   */
+  private handleError(error: unknown): never {
+    if (axios.isAxiosError(error)) {
+      throw error
+    } else {
+      throw new Error(`Erreur durant l’appel API: ${error}`)
     }
   }
 }
