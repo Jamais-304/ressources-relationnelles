@@ -16,7 +16,6 @@ export const createComments = async (req: Request, res: Response): Promise<void>
             errorHandler(res, serverError)
             return
         }
-        // Ajouter un test pour vérifier si la ressource existe
         if (user._id === commentObject.authorId) {
             succesHandler(res, commentCreated)
         }
