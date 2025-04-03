@@ -8,6 +8,7 @@ import { generateAccesToken, generateRefreshToken } from "../../utils/generateTo
 import { checkAuthentification, checkUserRole } from "../../utils/checkAuth.ts"
 import { ROLE_HIERARCHY } from "../../configs.ts"
 import { msgInvalidCredentials } from "../../handlerResponse/errorHandler/configs.ts"
+import {msgUserCreated, msgLogoutSucces} from "../../handlerResponse/succesHandler/configs.ts"
 
 jest.mock("bcrypt")
 jest.mock("../../models/User.ts")
@@ -82,6 +83,7 @@ describe("User Controller", () => {
         // Send a POST request to the user creation endpoint with the new user data
         const response = await request(app).post("/api/v1/users/create-user").send(newUser)
         // Check that the response status is 201 (Created)
+        console.log(response)
         expect(response.status).toBe(201)
         // Check that the response contains a 'data' property
         expect(response.body).toHaveProperty("data")
@@ -103,7 +105,7 @@ describe("User Controller", () => {
         expect(response.body.data.user).toHaveProperty("pseudonyme", "usertest")
         expect(response.body.data.user).toHaveProperty("role", "utilisateur")
         // Assert that the response body contains the success message
-        expect(response.body).toHaveProperty("message", "User created successfully")
+        expect(response.body).toHaveProperty("message", msgUserCreated)
     })
 })
 
@@ -182,7 +184,7 @@ describe("User Controller - Logout", () => {
         // Assert that the response status is 200 (OK)
         expect(response.status).toBe(200)
         // Assert that the response body contains the success message
-        expect(response.body).toEqual({ message: "User logged out successfully" })
+        expect(response.body).toEqual({ message: msgLogoutSucces })
         // Attempt to find the deleted refresh token in the database
         const deletedToken = await RefreshToken.findOne({
             refreshToken: refreshToken
@@ -197,7 +199,7 @@ describe("User Controller - Logout", () => {
         expect(response.status).toBe(200)
         // Assert that the response body contains the success message
         expect(response.body).toEqual({
-            message: "User logged out successfully"
+            message: msgLogoutSucces
         })
     })
     it("should return error when no refresh token is provided", async () => {
@@ -233,7 +235,7 @@ describe("User Controller - Admin create user", () => {
         // Assert that the response status is 201 (Created)
         expect(response.status).toBe(201)
         // Assert that the response body contains the success message
-        expect(response.body).toHaveProperty("message", "User created successfully")
+        expect(response.body).toHaveProperty("message", msgUserCreated)
         // Assert that the checkAuthentification function was called
         expect(checkAuthentification).toHaveBeenCalled()
         // Assert that the checkUserRole function was called with the admin user's role

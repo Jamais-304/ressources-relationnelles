@@ -2,13 +2,14 @@ import type { Request, Response } from "express"
 import bcrypt from "bcrypt"
 import User from "../models/User.ts"
 import RefreshToken from "../models/RefreshToken.ts"
-import { dataResponse } from "../handlerResponse/formatResponse.ts"
 import { generateAccesToken, generateRefreshToken } from "../utils/generateTokens.ts"
 import { checkAuthentification, checkUserParams, checkUserRole } from "../utils/checkAuth.ts"
 import { ROLE_HIERARCHY, ROLES } from "../configs.ts"
 import { type UserInterface, type UserReqBodyRequest } from "../interfaces/userInterfaces.ts"
 import { type AuthRequest } from "../interfaces/authInterface.ts"
 import { errorHandler } from "../handlerResponse/errorHandler/errorHandler.ts"
+import { succesHandler } from "../handlerResponse/succesHandler/succesHandler.ts"
+import { userCreated, userDeleted, userUpdated, loginSucces, logoutSucces, userFound } from "../handlerResponse/succesHandler/configs.ts"
 import {
     unexpectedError,
     serverError,
@@ -92,12 +93,10 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
             return
         }
         // Return the user details and tokens in the response
-        res.status(201).json(
-            dataResponse("User created successfully", {
-                tokens: { accessToken, refreshToken },
-                user: { pseudonyme: savedUser.pseudonyme, role: savedUser.role, email: savedUser.email }
-            })
-        )
+        succesHandler(res, userCreated, {
+            tokens: { accessToken, refreshToken },
+            user: { pseudonyme: savedUser.pseudonyme, role: savedUser.role, email: savedUser.email }
+        })
         return
     } catch (error: unknown) {
         // Handle unexpected errors
@@ -160,7 +159,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
         // Remove user password before sending response
         delete userObject.password
         // Return the tokens in the response
-        res.status(200).json(dataResponse("Login successful", { tokens: { accessToken, refreshToken }, user: userObject }))
+        succesHandler(res, loginSucces, { tokens: { accessToken, refreshToken }, user: userObject })
         return
     } catch (error: unknown) {
         // Handle unexpected errors
@@ -192,7 +191,7 @@ export const logoutUser = async (req: Request, res: Response): Promise<void> => 
         // Delete the refresh token from the database
         await RefreshToken.deleteOne({ refreshToken: refreshToken })
         // Return a success message
-        res.status(200).json(dataResponse("User logged out successfully"))
+        succesHandler(res, logoutSucces)
         return
     } catch (error: unknown) {
         // Handle unexpected errors
@@ -275,11 +274,9 @@ export const adminCreateUser = async (req: AuthRequest, res: Response): Promise<
         const savedUser = await newUser.save()
 
         // Return a success message
-        res.status(201).json(
-            dataResponse("User created successfully", {
-                user: { pseudonyme: savedUser.pseudonyme, role: savedUser.role, email: savedUser.email }
-            })
-        )
+        succesHandler(res, userCreated, {
+            user: { pseudonyme: savedUser.pseudonyme, role: savedUser.role, email: savedUser.email }
+        })
         return
     } catch (error: unknown) {
         // Handle unexpected errors
@@ -325,14 +322,14 @@ export const getAllUsers = async (req: AuthRequest, res: Response): Promise<void
         // Super-administrator: Retrieve all users
         if (userRoleIndex === 0) {
             const users = await User.find().select("_id email pseudonyme role createdAt updatedAt")
-            res.status(200).json(dataResponse("Users found", { users: users }))
+            succesHandler(res, userFound, { users: users })
             return
         }
 
         // Administrator: Retrieve all users except super-administrators
         if (userRoleIndex === 1) {
             const users = await User.find({ role: { $ne: "super-administrateur" } }).select("_id email pseudonyme role createdAt updatedAt")
-            res.status(200).json(dataResponse("Users found", { users: users }))
+            succesHandler(res, userFound, { users: users })
             return
         }
         // Return an error if no conditions are met
@@ -390,7 +387,7 @@ export const deleteUserById = async (req: AuthRequest, res: Response): Promise<v
         await User.findByIdAndDelete(req.params.id)
 
         // Return a success message
-        res.status(200).json(dataResponse("User deleted successfully"))
+        succesHandler(res, userDeleted)
         return
     } catch (error: unknown) {
         // Handle unexpected errors
@@ -491,7 +488,7 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<void>
                 errorHandler(res, userNotFound)
                 return
             }
-            res.status(200).json(dataResponse("User updated successfully", { user: updateUser }))
+            succesHandler(res, userUpdated, { user: updateUser })
             return
         } else if (userRoleIndex <= userRoleIndexToModify) {
             // Ensure the role is valid and the authenticated user has sufficient permissions
@@ -508,7 +505,7 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<void>
                 errorHandler(res, userNotFound)
                 return
             }
-            res.status(200).json(dataResponse("User updated successfully", { user: updateUser }))
+            succesHandler(res, userUpdated, { user: updateUser })
             return
         } else {
             errorHandler(res, unauthorized)

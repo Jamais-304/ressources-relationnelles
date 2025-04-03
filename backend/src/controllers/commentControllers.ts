@@ -1,9 +1,10 @@
 import type { Request, Response } from "express"
-import { dataResponse, errorResponse } from "../handlerResponse/formatResponse.ts"
-import { errorHandler } from "../handlerResponse/errorHandler/errorHandler.ts"
-import { type CommentsInterface } from "../interfaces/commentsInterface.ts"
 import User from "../models/User.ts"
+import { type CommentsInterface } from "../interfaces/commentsInterface.ts"
+import { errorHandler } from "../handlerResponse/errorHandler/errorHandler.ts"
+import { succesHandler } from "../handlerResponse/succesHandler/succesHandler.ts"
 import { serverError } from "../handlerResponse/errorHandler/configs.ts"
+import { commentCreated } from "../handlerResponse/succesHandler/configs.ts"
 
 export const createComments = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -12,12 +13,12 @@ export const createComments = async (req: Request, res: Response): Promise<void>
         const user = await User.findOne({ _id: commentObject.authorId })
 
         if (!user) {
-            res.status(500).json(errorResponse({ msg: "Server error" }))
+            errorHandler(res, serverError)
             return
         }
         // Ajouter un test pour vérifier si la ressource existe
         if (user._id === commentObject.authorId) {
-            res.status(201).json(dataResponse("Comments created"))
+            succesHandler(res, commentCreated)
         }
     } catch (error: unknown) {
         // Handle unexpected errors

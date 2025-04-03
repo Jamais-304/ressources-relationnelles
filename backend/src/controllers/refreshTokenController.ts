@@ -1,11 +1,12 @@
 import type { Request, Response } from "express"
 import jwt from "jsonwebtoken"
 import RefreshToken from "../models/RefreshToken.ts"
-import { dataResponse } from "../handlerResponse/formatResponse.ts"
 import { generateAccesToken } from "../utils/generateTokens.ts"
 import { type DecodedToken } from "../interfaces/tokenInterfaces.ts"
 import { errorHandler } from "../handlerResponse/errorHandler/errorHandler.ts"
+import { succesHandler } from "../handlerResponse/succesHandler/succesHandler.ts"
 import { invToken, serverError, expirToken, unexpectedError } from "../handlerResponse/errorHandler/configs.ts"
+import { tokenRenewed } from "../handlerResponse/succesHandler/configs.ts"
 
 /**
  * Controller for refreshing the access token.
@@ -53,7 +54,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
             const newAccesToken = generateAccesToken(user)
 
             // Return the new access token in the response
-            res.status(201).json(dataResponse("Token renewed", { tokens: { accessToken: newAccesToken } }))
+            succesHandler(res, tokenRenewed, { tokens: { accessToken: newAccesToken } })
             return
         } catch (error: unknown) {
             const errorMessage = error instanceof Error ? error.message : expirToken
