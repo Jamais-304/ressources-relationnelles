@@ -1,107 +1,84 @@
 import { body } from "express-validator"
+import {
+    userMsgEmailInvalid,
+    userMsgPasswordRequirements,
+    userMsgLength,
+    userMsgCannotBeEmpty,
+    userMsgMustBeString,
+    userMsgRoleInvalid
+} from "../../handlerResponse/errorHandler/configs.ts"
+
+const password = "mot de passe"
+const pseudonyme = "pseudonyme"
+const email = "email"
+const role = "role"
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&,]{8,50}$/
 
 export const commonEmailValidation = () => [
-    body("email")
-    .exists()
-    .isEmail()
-    .withMessage("Email must be a valid email address")
-    .normalizeEmail()
-    .escape()
-    .trim()
+    body("email").exists().withMessage(userMsgCannotBeEmpty(email)).isEmail().withMessage(userMsgEmailInvalid).normalizeEmail().escape().trim()
 ]
 export const commonPasswordValidation = () => [
     body("password")
         .exists()
+        .withMessage(userMsgCannotBeEmpty(password))
         .isString()
-        .withMessage("Password must be a string")
-        .notEmpty()
-        .withMessage("Content cannot be empty")
+        .withMessage(userMsgMustBeString(password))
         .isLength({ min: 8, max: 50 })
-        .withMessage("Password must be at least 8 characters and less than 50 characters")
-        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&,]{8,50}$/)
-        .withMessage("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character")
+        .withMessage(userMsgLength(password, 8, 50))
+        .matches(passwordRegex)
+        .withMessage(userMsgPasswordRequirements)
         .escape()
         .trim()
 ]
 export const commonPseudonymValidation = () => [
-        body("pseudonyme")
+    body("pseudonyme")
         .exists()
+        .withMessage(userMsgCannotBeEmpty(pseudonyme))
         .isString()
-        .withMessage("Pseudonym must be a string")
-        .notEmpty()
-        .withMessage("Content cannot be empty")
+        .withMessage(userMsgMustBeString(pseudonyme))
         .isLength({ min: 5, max: 40 })
-        .withMessage("Pseudonym must be at least 5 characters and less than 40 characters")
+        .withMessage(userMsgLength(pseudonyme, 5, 40))
         .escape()
         .trim()
 ]
 export const commonRoleValidation = (roles: string[]) => [
     body("role")
-    .exists()
-    .isString()
-    .withMessage("Role must be a string")
-    .notEmpty()
-    .withMessage("Content cannot be empty")
-    .isIn(roles)
-    .withMessage(`Role must be one of the following: ${roles.join(", ")}`)
-    .escape()
-    .trim()
+        .exists()
+        .withMessage(userMsgCannotBeEmpty(role))
+        .isString()
+        .withMessage(userMsgMustBeString(role))
+        .isIn(roles)
+        .withMessage(userMsgRoleInvalid(roles))
+        .escape()
+        .trim()
 ]
 // Optional
 export const commonOptionalPasswordValidation = () => [
     body("password")
         .optional()
         .isString()
-        .withMessage("Password must be a string")
-        .notEmpty()
-        .withMessage("Content cannot be empty")
+        .withMessage(userMsgMustBeString(password))
         .isLength({ min: 8, max: 50 })
-        .withMessage("Password must be at least 8 characters and less than 50 characters")
-        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&,]{8,50}$/)
-        .withMessage("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character")
+        .withMessage(userMsgLength(password, 8, 50))
+        .matches(passwordRegex)
+        .withMessage(userMsgPasswordRequirements)
         .escape()
         .trim()
 ]
-export const commonOptionalNewPasswordValidation = () => [
-    body("password")
-        .optional()
-        .isString()
-        .withMessage("Password must be a string")
-        .notEmpty()
-        .withMessage("Content cannot be empty")
-        .isLength({ min: 8, max: 50 })
-        .withMessage("Password must be at least 8 characters and less than 50 characters")
-        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&,]{8,50}$/)
-        .withMessage("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character")
-        .escape()
-        .trim()
-]
+
+export const commonOptionalNewPasswordValidation = commonOptionalPasswordValidation
+
 export const commonOptionalPseudonymeValidation = () => [
     body("pseudonyme")
         .optional()
         .isString()
-        .withMessage("Pseudonym must be a string")
+        .withMessage(userMsgMustBeString(pseudonyme))
         .isLength({ min: 5, max: 40 })
-        .withMessage("Pseudonym must be at least 5 characters and less than 40 characters")
+        .withMessage(userMsgLength(pseudonyme, 5, 40))
         .escape()
         .trim()
 ]
 export const commonOptionalRoleValidation = (roles: string[]) => [
-    body("role")
-        .optional()
-        .isString()
-        .withMessage("Role must be a string")
-        .isIn(roles)
-        .withMessage(`Role must be one of the following: ${roles.join(", ")}`)
-        .escape()
-        .trim()
+    body("role").optional().isString().withMessage(userMsgMustBeString(role)).isIn(roles).withMessage(userMsgRoleInvalid(roles)).escape().trim()
 ]
-export const commonOptionalEmailValidation = () => [
-    body("email")
-        .optional()
-        .isEmail()
-        .withMessage("Email must be a valid email address")
-        .normalizeEmail()
-        .escape()
-        .trim(),
-]
+export const commonOptionalEmailValidation = () => [body("email").optional().isEmail().withMessage(userMsgEmailInvalid).normalizeEmail().escape().trim()]

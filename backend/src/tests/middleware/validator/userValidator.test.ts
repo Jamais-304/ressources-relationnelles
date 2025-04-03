@@ -1,5 +1,9 @@
 import request from "supertest"
 import app from "../../../app.ts"
+import { userMsgEmailInvalid, userMsgLength, userMsgMustBeString } from "../../../handlerResponse/errorHandler/configs.ts"
+
+const password = "mot de passe"
+const pseudonyme = "pseudonyme"
 
 describe("User Validator", () => {
     it("should return error when pseudonyme is too short", async () => {
@@ -17,7 +21,7 @@ describe("User Validator", () => {
         expect(response.body.error.errors).toContainEqual({
             type: "field",
             value: "test",
-            msg: "Pseudonym must be at least 5 characters and less than 40 characters",
+            msg: userMsgLength(pseudonyme, 5, 40),
             path: "pseudonyme",
             location: "body"
         })
@@ -37,14 +41,14 @@ describe("User Validator", () => {
         expect(response.body.error.errors).toContainEqual({
             type: "field",
             value: 123,
-            msg: "Pseudonym must be a string",
+            msg: userMsgMustBeString(pseudonyme),
             path: "pseudonyme",
             location: "body"
         })
         expect(response.body.error.errors).toContainEqual({
             type: "field",
             value: 123,
-            msg: "Pseudonym must be at least 5 characters and less than 40 characters",
+            msg: userMsgLength(pseudonyme, 5, 40),
             path: "pseudonyme",
             location: "body"
         })
@@ -65,7 +69,7 @@ describe("User Validator", () => {
         expect(response.body.error.errors).toContainEqual({
             type: "field",
             value: "test",
-            msg: "Password must be at least 8 characters and less than 50 characters",
+            msg: userMsgLength(password, 8, 50),
             path: "password",
             location: "body"
         })
@@ -85,14 +89,14 @@ describe("User Validator", () => {
         expect(response.body.error.errors).toContainEqual({
             type: "field",
             value: 123,
-            msg: "Password must be a string",
+            msg: userMsgMustBeString(password),
             path: "password",
             location: "body"
         })
         expect(response.body.error.errors).toContainEqual({
             type: "field",
             value: 123,
-            msg: "Password must be at least 8 characters and less than 50 characters",
+            msg: userMsgLength(password, 8, 50),
             path: "password",
             location: "body"
         })
@@ -112,7 +116,7 @@ describe("User Validator", () => {
         expect(response.body.error.errors).toContainEqual({
             type: "field",
             value: "testtest.com",
-            msg: "Email must be a valid email address",
+            msg: userMsgEmailInvalid,
             path: "email",
             location: "body"
         })
@@ -128,40 +132,44 @@ describe("User Validator", () => {
         expect(response.status).toBe(400)
         expect(response.body).toHaveProperty("error")
         expect(response.body.error).toHaveProperty("errors")
-        expect(response.body.error.errors).toContainEqual({
-            type: "field",
-            value: "testtest.com",
-            msg: "Email must be a valid email address",
-            path: "email",
-            location: "body"
-        })
-        expect(response.body.error.errors).toContainEqual({
-            type: "field",
-            value: 123,
-            msg: "Password must be at least 8 characters and less than 50 characters",
-            path: "password",
-            location: "body"
-        })
-        expect(response.body.error.errors).toContainEqual({
-            type: "field",
-            value: 123,
-            msg: "Password must be a string",
-            path: "password",
-            location: "body"
-        })
-        expect(response.body.error.errors).toContainEqual({
-            type: "field",
-            value: 122,
-            msg: "Pseudonym must be a string",
-            path: "pseudonyme",
-            location: "body"
-        })
-        expect(response.body.error.errors).toContainEqual({
-            type: "field",
-            value: 122,
-            msg: "Pseudonym must be at least 5 characters and less than 40 characters",
-            path: "pseudonyme",
-            location: "body"
-        })
+        expect(response.body.error.errors).toEqual(
+            expect.arrayContaining([
+                {
+                    type: "field",
+                    value: "testtest.com",
+                    msg: userMsgEmailInvalid,
+                    path: "email",
+                    location: "body"
+                },
+                {
+                    type: "field",
+                    value: 123,
+                    msg: userMsgLength(password, 8, 50),
+                    path: "password",
+                    location: "body"
+                },
+                {
+                    type: "field",
+                    value: 123,
+                    msg: userMsgMustBeString(password),
+                    path: "password",
+                    location: "body"
+                },
+                {
+                    type: "field",
+                    value: 122,
+                    msg: userMsgMustBeString(pseudonyme),
+                    path: "pseudonyme",
+                    location: "body"
+                },
+                {
+                    type: "field",
+                    value: 122,
+                    msg: userMsgLength(pseudonyme, 5, 40),
+                    path: "pseudonyme",
+                    location: "body"
+                }
+            ])
+        )
     })
 })
