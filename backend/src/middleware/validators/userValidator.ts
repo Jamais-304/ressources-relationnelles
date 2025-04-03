@@ -1,4 +1,4 @@
-import { ROLE_HIERARCHY } from "../../../config.ts"
+import { ROLE_HIERARCHY } from "../../config.ts"
 import { 
     commonEmailValidation, 
     commonPasswordValidation, 

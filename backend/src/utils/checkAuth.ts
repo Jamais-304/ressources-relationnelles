@@ -1,5 +1,5 @@
 import User from "../models/User.ts"
-import { ROLE_HIERARCHY, type Role } from "../../config.ts"
+import { ROLE_HIERARCHY, type Role } from "../config.ts"
 import { type UserInterface, type UserReqBodyRequest } from "../interfaces/userInterfaces.ts"
 import { type AuthRequest } from "../interfaces/authInterface.ts"
 
