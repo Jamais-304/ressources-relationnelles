@@ -43,14 +43,6 @@ export class UserService {
       const userData = response?.data?.user as UserData
       const user = User.fromJson(userData)
 
-      // NOTE: A non-admin user instance for dev purposes.
-      // const user = new User({
-      //   uuid: 'aiuenettn',
-      //   username: 'Guillaume',
-      //   email: 'test@test.com',
-      //   role: ['user'],
-      // })
-
       return user
     } catch (error) {
       CustomError.handleError(
