@@ -28,7 +28,24 @@ export const invToken: string = "invToken"
 export const expirToken: string = "expirToken"
 export const msgInvalidCredentials: string = "Identifiant/mot de passe incorrect !"
 export const msgServerError: string = "Erreur serveur"
-
+// Validator comments
+export const commentsMsgIdMustBeString: (type: string) => string = (type) =>
+    `L'ID de ${type === "auteur" ? "l'" : "la"} ${type} doit être une chaîne de caractères`
+export const commentsMsgIdCannotBeEmpty: (type: string) => string = (type) =>
+    `L'ID de ${type === "auteur" ? "l'" : "la"} ${type} ne peut pas être vide`
+export const commentsIdMaxLength: (type: string, max: number) => string = (type, max) =>
+    `L'ID de ${type === "auteur" ? "l'" : "la"} ${type} ne doit pas dépasser ${max} caractères`
+export const commentsMsgIdInvalid: (type: string) => string = (type) =>
+    `L'ID de ${type === "auteur" ? "l'" : "la"} ${type} doit être un ObjectId MongoDB valid`
+// Validator user
+export const userMsgEmailInvalid: string = "L'email doit être une adresse email valide"
+export const userMsgPasswordRequirements: string =
+    "Le mot de passe doit contenir au moins une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial"
+export const userMsgLength: (type: string, min: number, max: number) => string = (type, min, max) =>
+    `Le ${type} doit contenir entre ${min} et ${max} caractères`
+export const userMsgCannotBeEmpty: (type: string) => string = (type) => `${type === "email" ? "L'" : "Le"} ${type} ne peut pas être vide`
+export const userMsgMustBeString: (type: string) => string = (type) => `${type === "email" ? "L'" : "Le"} ${type} doit être une chaîne de caractères`
+export const userMsgRoleInvalid: (roles: string[]) => string = (roles) => `Le rôle doit être l'un des suivants : ${roles.join(", ")}`
 /**
  * Array of error mappings used to determine the HTTP status code based on the error type.
  */

@@ -1,6 +1,6 @@
 import type { Response } from "express"
 import { errorResponse } from "../formatResponse.ts"
-import { ErrorMappings } from "./configs.ts"
+import { ErrorMappings, msgServerError } from "./configs.ts"
 
 /**
  * Error handler function to map errors to appropriate HTTP status codes.
@@ -20,6 +20,6 @@ export const errorHandler = (res: Response, type: string): Response => {
         const responseData: { msg: string; location?: string } = { msg: mapping.msg, location: mapping?.location }
         return res.status(mapping.statusCode).json(errorResponse(responseData))
     } else {
-        return res.status(500).json(errorResponse({ msg: "Server error" }))
+        return res.status(500).json(errorResponse({ msg: msgServerError }))
     }
 }
