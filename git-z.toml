@@ -52,6 +52,7 @@ list = [
     "V:Comment",
     "V:Home",
     "V:Login",
+    "V:MyAccount",
     "V:Resources",
     "V:Signup",
     "V:Users",

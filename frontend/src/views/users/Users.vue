@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Api, User } from '@/api/api'
 import ConfirmationModal from '@/components/ConfirmationModal.vue'
+import { useErrorsManagement } from '@/composables/useErrorsManagement'
 import { useUsersManagement } from '@/composables/useUsersManagement'
 import router from '@/routes/router'
 import { onMounted, ref } from 'vue'
@@ -11,6 +12,8 @@ const api = new Api()
 const {
   references: { users, currentUser },
 } = useUsersManagement()
+
+const { handleError } = useErrorsManagement()
 
 const confirmationModalVisible = ref(false)
 const confirmationModalMessage = ref('')
@@ -53,7 +56,7 @@ async function listUsers() {
     const response = await api.users.list()
     users.value = response
   } catch (error) {
-    console.error(`Error while listing users: ${error}.`)
+    handleError(error)
   }
 }
 
@@ -77,7 +80,7 @@ async function deleteUser(user: User) {
     }
     await listUsers()
   } catch (error) {
-    console.error(`Error while listing users: ${error}.`)
+    handleError(error)
   }
 }
 

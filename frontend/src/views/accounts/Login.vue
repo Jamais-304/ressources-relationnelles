@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Api, User } from '@/api/api'
 import UserForm from '@/components/UserForm.vue'
+import { useErrorsManagement } from '@/composables/useErrorsManagement'
 import router from '@/routes/router'
 import { useAuthUserStore } from '@/stores/authUserStore'
 import { ref } from 'vue'
@@ -8,6 +9,7 @@ import { toast } from 'vue3-toastify'
 
 const api = new Api()
 const { setAuthUser } = useAuthUserStore()
+const { handleError } = useErrorsManagement()
 
 const email = ref('admintest@test.com')
 const password = ref('Admin123!')
@@ -25,7 +27,7 @@ async function login() {
       await router.push('/')
     }
   } catch (error) {
-    toast.error(error)
+    handleError(error)
   }
 }
 </script>

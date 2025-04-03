@@ -8,6 +8,7 @@ import Users from '@/views/users/Users.vue'
 import User from '@/views/users/User.vue'
 import NotAllowed from '@/views/NotAllowed.vue'
 import { useAuthUserStore } from '@/stores/authUserStore'
+import MyAccount from '@/views/accounts/MyAccount.vue'
 
 const routes = [
   { path: '/', name: 'home', component: Home },
@@ -31,6 +32,14 @@ const routes = [
     meta: {
       requiresAuth: true,
       requiresAdmin: true,
+    },
+  },
+  {
+    path: '/my-account',
+    name: 'my account',
+    component: MyAccount,
+    meta: {
+      requiresAuth: true,
     },
   },
 ]

@@ -4,13 +4,17 @@ import { useAuthUserStore } from '../stores/authUserStore'
 import { storeToRefs } from 'pinia'
 import logo from '../assets/logo.svg'
 import AppButton from './common/AppButton.vue'
+import { removeToken } from '@/utils/cookies'
 
 const router = useRouter()
 const authUserStore = useAuthUserStore()
 const { isAuthenticated, isAdmin } = storeToRefs(authUserStore)
 
 const logout = async () => {
-  await authUserStore.resetAuthUser()
+  authUserStore.resetAuthUser()
+  removeToken('accessToken')
+  removeToken('refreshToken')
+  removeToken('tokenExpiryTime')
   router.push('/')
 }
 </script>
@@ -22,7 +26,9 @@ const logout = async () => {
         <div class="flex justify-between items-center">
           <div class="flex items-center gap-4">
             <img :src="logo" alt="Logo Marianne" class="h-8 w-8" />
-            <span class="text-lg font-bold font-marianne">(RE)SOURCES RELATIONNELLES</span>
+            <span class="text-lg font-bold font-marianne"
+              >(RE)SOURCES RELATIONNELLES</span
+            >
           </div>
           <AppButton
             v-if="isAdmin"
@@ -34,6 +40,15 @@ const logout = async () => {
             Gestion des utilisateurs
           </AppButton>
           <div class="flex gap-2">
+            <AppButton
+              v-if="isAuthenticated"
+              variant="text"
+              color="white"
+              class="!text-sm hover:!bg-[#1212ff]"
+              to="/my-account"
+            >
+              Mon compte
+            </AppButton>
             <AppButton
               v-if="!isAuthenticated"
               variant="text"
@@ -53,7 +68,7 @@ const logout = async () => {
               S'inscrire
             </AppButton>
             <AppButton
-              v-else
+              v-if="isAuthenticated"
               variant="text"
               color="white"
               class="!text-sm hover:!bg-[#1212ff]"

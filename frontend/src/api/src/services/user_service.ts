@@ -1,4 +1,9 @@
-import { User, type UserData, type TokenData } from '../models/models'
+import {
+  User,
+  type UserData,
+  type TokenData,
+  CustomError,
+} from '../models/models'
 import { Api } from '../api'
 import { Token } from '../models/token'
 import { setToken } from '@/utils/cookies'
@@ -38,18 +43,11 @@ export class UserService {
       const userData = response?.data?.user as UserData
       const user = User.fromJson(userData)
 
-      // NOTE: A non-admin user instance for dev purposes.
-      // const user = new User({
-      //   uuid: 'aiuenettn',
-      //   username: 'Guillaume',
-      //   email: 'test@test.com',
-      //   role: ['user'],
-      // })
-
       return user
     } catch (error) {
-      throw new Error(
-        `Response is expected to have the form of UserData. Error: ${error}`
+      CustomError.handleError(
+        'Erreur durant la connexion d’un utilisateur.',
+        error
       )
     } finally {
       this.api.enableTokenHandling()
@@ -67,8 +65,9 @@ export class UserService {
       const users = usersData.map((user: UserData) => User.fromJson(user))
       return users
     } catch (error) {
-      throw new Error(
-        `Response is expected to have the form of UserData[]. Error: ${error}`
+      CustomError.handleError(
+        'Erreur durant la récupération d’une liste d’utilisateurs.',
+        error
       )
     }
   }
@@ -85,8 +84,11 @@ export class UserService {
       const userData = response?.data?.user as UserData
       const user = User.fromJson(userData)
       return user
-    } catch {
-      throw new Error('Response is expected to have the form of UserData.')
+    } catch (error) {
+      CustomError.handleError(
+        'Erreur durant la récupération d’un utilisateur.',
+        error
+      )
     }
   }
 
@@ -114,8 +116,9 @@ export class UserService {
 
       return user
     } catch (error) {
-      throw new Error(
-        `Response is expected to have the form of UserData. Error: ${error}`
+      CustomError.handleError(
+        'Erreur durant la création d’un utilisateur.',
+        error
       )
     }
   }
@@ -132,7 +135,8 @@ export class UserService {
     try {
       const response = await this.api.put(
         `users/update-user/${uuid}`,
-        JSONattrs
+        JSONattrs,
+        { skipAuthRedirect: true }
       )
 
       const userData = response?.data?.user as UserData
@@ -140,8 +144,9 @@ export class UserService {
 
       return user
     } catch (error) {
-      throw new Error(
-        `Response is expected to have the form of UserData. Error: ${error}`
+      CustomError.handleError(
+        'Erreur durant la mise à jour d’un utilisateur.',
+        error
       )
     }
   }
@@ -159,8 +164,9 @@ export class UserService {
       const response = await this.api.delete(`users/delete-user/${uuid}`)
       return response
     } catch (error) {
-      throw new Error(
-        `Response is expected to have the form of UserData. Error: ${error}`
+      CustomError.handleError(
+        'Erreur durant la suppression d’un utilisateur.',
+        error
       )
     }
   }
