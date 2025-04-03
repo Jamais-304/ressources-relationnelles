@@ -1,40 +1,50 @@
 import mongoose, { Document, Schema } from "mongoose"
 import uniqueValidator from "mongoose-unique-validator"
 import { type UserInterface } from "../interfaces/userInterfaces.ts"
-
+import {
+    userMsgEmailInvalid,
+    userMsgRequierd,
+    userMsgMinLength,
+    userMsgMaxLength,
+    password,
+    pseudonyme,
+    email,
+    role
+} from "../handlerResponse/errorHandler/configs.ts"
+import {ROLE_HIERARCHY} from "../configs.ts"
 interface IUserSchema extends UserInterface, Document {}
 
 const userSchema: Schema<IUserSchema> = new mongoose.Schema(
     {
         email: {
             type: String,
-            required: [true, "Email is required"],
+            required: [true, userMsgRequierd(email)],
             unique: true,
             trim: true,
-            match: [/^\S+@\S+\.\S+$/, "Invalid email address"]
+            match: [/^\S+@\S+\.\S+$/, userMsgEmailInvalid]
         },
         password: {
             type: String,
-            required: [true, "Password is required"],
+            required: [true, userMsgRequierd(password)],
             trim: true,
-            minlength: [8, "Password must be at least 8 characters long"],
-            maxlength: [90, "Password must not exceed 90 characters"]
+            minlength: [8, userMsgMinLength(password, 8)],
+            maxlength: [90, userMsgMaxLength(password, 90)]
         },
         pseudonyme: {
             type: String,
-            required: [true, "Pseudonym is required"],
+            required: [true, userMsgRequierd(pseudonyme)],
             trim: true,
-            minlength: [5, "Pseudonym must be at least 5 characters long"],
-            maxlength: [40, "Pseudonym must not exceed 40 characters"]
+            minlength: [5, userMsgMinLength(pseudonyme, 5)],
+            maxlength: [40, userMsgMaxLength(pseudonyme, 40)]
         },
         role: {
             type: String,
-            required: [true, "Role is required"],
+            required: [true, userMsgRequierd(role)],
             enum: {
-                values: ["super-administrateur", "administrateur", "moderateur", "utilisateur"],
-                message: 'The role "{VALUE}" is invalid.'
+                values: ROLE_HIERARCHY,
+                message: 'Le role "{VALUE}" est invalide'
             },
-            default: "utilisateur"
+            default: ROLE_HIERARCHY[3]
         }
     },
     {

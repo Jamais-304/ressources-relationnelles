@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose"
 import uniqueValidator from "mongoose-unique-validator"
-
+import {refreshTokenIsRequierd} from "../handlerResponse/errorHandler/configs.ts"
 interface IRefreshToken extends Document {
     refreshToken: string
     userId: mongoose.Schema.Types.ObjectId
@@ -10,7 +10,7 @@ interface IRefreshToken extends Document {
 const refreshTokenSchema: Schema<IRefreshToken> = new mongoose.Schema({
     refreshToken: {
         type: String,
-        required: [true, "The refresh token is necessary"],
+        required: [true, refreshTokenIsRequierd],
         unique: true
     },
     userId: {

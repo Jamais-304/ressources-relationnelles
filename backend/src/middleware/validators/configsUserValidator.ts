@@ -5,18 +5,26 @@ import {
     userMsgLength,
     userMsgCannotBeEmpty,
     userMsgMustBeString,
-    userMsgRoleInvalid
+    userMsgRoleInvalid,
+    password,
+    pseudonyme,
+    email,
+    role
 } from "../../handlerResponse/errorHandler/configs.ts"
-
-const password = "mot de passe"
-const pseudonyme = "pseudonyme"
-const email = "email"
-const role = "role"
+// Regular expression for validating password (at least one uppercase, one lowercase, one number, one special character, 8-50 characters)
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&,]{8,50}$/
 
+/**
+ * Validates the email field, checking if it exists, is a valid email, and normalizes/escapes it.
+ * @returns Array of express-validator chain methods for email validation
+ */
 export const commonEmailValidation = () => [
     body("email").exists().withMessage(userMsgCannotBeEmpty(email)).isEmail().withMessage(userMsgEmailInvalid).normalizeEmail().escape().trim()
 ]
+/**
+ * Validates the password field, checking if it exists, is a string, has the correct length, matches the required regex, and escapes/normalizes it.
+ * @returns Array of express-validator chain methods for password validation
+ */
 export const commonPasswordValidation = () => [
     body("password")
         .exists()
@@ -30,6 +38,10 @@ export const commonPasswordValidation = () => [
         .escape()
         .trim()
 ]
+/**
+ * Validates the pseudonym field, checking if it exists, is a string, has the correct length, and escapes/normalizes it.
+ * @returns Array of express-validator chain methods for pseudonym validation
+ */
 export const commonPseudonymValidation = () => [
     body("pseudonyme")
         .exists()
@@ -41,6 +53,11 @@ export const commonPseudonymValidation = () => [
         .escape()
         .trim()
 ]
+/**
+ * Validates the role field, checking if it exists, is a string, belongs to the allowed roles, and escapes/normalizes it.
+ * @param roles Array of allowed roles to check against
+ * @returns Array of express-validator chain methods for role validation
+ */
 export const commonRoleValidation = (roles: string[]) => [
     body("role")
         .exists()
@@ -52,7 +69,12 @@ export const commonRoleValidation = (roles: string[]) => [
         .escape()
         .trim()
 ]
-// Optional
+
+// Optional Validations
+/**
+ * Validates the password field (optional), allowing for updates where password validation is not required.
+ * @returns Array of express-validator chain methods for optional password validation
+ */
 export const commonOptionalPasswordValidation = () => [
     body("password")
         .optional()
@@ -65,9 +87,15 @@ export const commonOptionalPasswordValidation = () => [
         .escape()
         .trim()
 ]
-
+/**
+ * Validates the new password field (optional), reusing the common password validation rules.
+ * @returns Array of express-validator chain methods for optional new password validation
+ */
 export const commonOptionalNewPasswordValidation = commonOptionalPasswordValidation
-
+/**
+ * Validates the pseudonym field (optional), allowing for updates where pseudonym validation is not required.
+ * @returns Array of express-validator chain methods for optional pseudonym validation
+ */
 export const commonOptionalPseudonymeValidation = () => [
     body("pseudonyme")
         .optional()
@@ -78,7 +106,18 @@ export const commonOptionalPseudonymeValidation = () => [
         .escape()
         .trim()
 ]
+/**
+ * Validates the role field (optional), allowing for updates where role validation is not required.
+ * @param roles Array of allowed roles to check against
+ * @returns Array of express-validator chain methods for optional role validation
+ */
 export const commonOptionalRoleValidation = (roles: string[]) => [
     body("role").optional().isString().withMessage(userMsgMustBeString(role)).isIn(roles).withMessage(userMsgRoleInvalid(roles)).escape().trim()
 ]
-export const commonOptionalEmailValidation = () => [body("email").optional().isEmail().withMessage(userMsgEmailInvalid).normalizeEmail().escape().trim()]
+/**
+ * Validates the email field (optional), allowing for updates where email validation is not required.
+ * @returns Array of express-validator chain methods for optional email validation
+ */
+export const commonOptionalEmailValidation = () => [
+    body("email").optional().isEmail().withMessage(userMsgEmailInvalid).normalizeEmail().escape().trim()
+]

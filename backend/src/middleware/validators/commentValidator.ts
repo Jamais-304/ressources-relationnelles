@@ -5,12 +5,12 @@ import {
     commentsMsgIdMustBeString,
     commentsMsgIdCannotBeEmpty,
     commentsIdMaxLength,
-    commentsMsgIdInvalid
+    commentsMsgIdInvalid,
+    content,
+    author,
+    resource
 } from "../../handlerResponse/errorHandler/configs.ts"
 
-const content: string = "contenu"
-const author: string = "auteur"
-const resource: string = "ressource"
 // Validation rules for comments
 export const commentsValidationRules = [
     // Content: string, required, unique, trim

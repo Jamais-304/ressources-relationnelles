@@ -7,7 +7,7 @@ import RefreshToken from "../../models/RefreshToken.ts"
 import { generateAccesToken, generateRefreshToken } from "../../utils/generateTokens.ts"
 import { checkAuthentification, checkUserRole } from "../../utils/checkAuth.ts"
 import { ROLE_HIERARCHY } from "../../configs.ts"
-import { msgInvalidCredentials } from "../../handlerResponse/errorHandler/configs.ts"
+import { msgInvalidCredentials, tokenMsgMustBeString } from "../../handlerResponse/errorHandler/configs.ts"
 import {msgUserCreated, msgLogoutSucces} from "../../handlerResponse/succesHandler/configs.ts"
 
 jest.mock("bcrypt")
@@ -210,7 +210,7 @@ describe("User Controller - Logout", () => {
         // Assert that the response body contains an error property
         expect(response.body).toHaveProperty("error")
         // Assert that the error message indicates the refresh token must be a string
-        expect(response.body.error.errors[0]).toHaveProperty("msg", "Refresh token must be a string")
+        expect(response.body.error.errors[0]).toHaveProperty("msg", tokenMsgMustBeString("Refresh token"))
         // Assert that the error path is "refreshToken"
         expect(response.body.error.errors[0]).toHaveProperty("path", "refreshToken")
     })
