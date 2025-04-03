@@ -1,6 +1,6 @@
 import axios, { AxiosHeaders, type AxiosResponse } from 'axios'
 import { Authentication } from './authentication'
-import { UserService, TokenService } from './services/services'
+import { UserService, TokenService, ResourceService } from './services/services'
 import { type Response } from './types/response'
 import { getToken, removeToken } from '@/utils/cookies'
 import router from '@/routes/router'
@@ -15,6 +15,7 @@ export class Api {
   baseUrl: string
   private isRefreshing = false
   private skipTokenHandling = false
+  private resourceService?: ResourceService
   private tokenService?: TokenService
   private userService?: UserService
 
@@ -75,6 +76,19 @@ export class Api {
       this.userService = new UserService(this)
     }
     return this.userService
+  }
+
+  /**
+   * Gets the ResourceService instance associated with this Api instance.
+
+   * @returns {UserService} The UserService instance associated with this Api
+   * instance.
+   */
+  get resources(): ResourceService {
+    if (!this.resourceService) {
+      this.resourceService = new ResourceService(this)
+    }
+    return this.resourceService
   }
 
   /**
