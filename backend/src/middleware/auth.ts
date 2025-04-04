@@ -3,7 +3,7 @@ import type { Response, NextFunction } from "express"
 import { type AuthRequest } from "../interfaces/authInterface.ts"
 import { type DecodedToken } from "../interfaces/tokenInterfaces.ts"
 import { errorHandler } from "../handlerResponse/errorHandler/errorHandler.ts"
-import { serverError, unauthorized } from "../handlerResponse/errorHandler/configs.ts"
+import { serverError, unauthorized, expirToken, invToken, malformed, signToken } from "../handlerResponse/errorHandler/configs.ts"
 /**
  * Middleware function to authenticate requests using JSON Web Tokens (JWT).
  *
@@ -28,19 +28,30 @@ export const auth = async (req: AuthRequest, res: Response, next: NextFunction):
             console.error("Secret key is not defined")
             return
         }
-
         const decodedToken = jwt.verify(token, secretKey) as DecodedToken
-
         const userId = decodedToken.userId
 
         req.auth = {
             userId: userId
         }
-
         next()
     } catch (error: unknown) {
         const errorType = error instanceof Error ? error.message : serverError
-        errorHandler(res, errorType)
-        return
+        switch (errorType) {
+            case "invalid signature":
+                errorHandler(res, signToken)
+                break
+            case "invalid token":
+                errorHandler(res, invToken)
+                break
+            case "jwt malformed":
+                errorHandler(res, malformed)
+                break
+            case "jwt expired":
+                errorHandler(res, expirToken)
+                break
+            default:
+                errorHandler(res, errorType)
+        }
     }
 }

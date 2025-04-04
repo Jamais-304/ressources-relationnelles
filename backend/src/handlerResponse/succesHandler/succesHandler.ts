@@ -1,4 +1,5 @@
 import type { Response } from "express"
+import { type Data } from "../formatResponse.ts"
 import { dataResponse, errorResponse } from "../formatResponse.ts"
 import { SuccesMappings } from "./configs.ts"
 import { msgServerError } from "../errorHandler/configs.ts"
@@ -15,7 +16,7 @@ import { msgServerError } from "../errorHandler/configs.ts"
  * @param {object} [data] - Optional additional data to include in the response.
  * @returns {Response} - The Express response with the appropriate status code and success message.
  */
-export const succesHandler = (res: Response, type: string, data?: object): Response => {
+export const succesHandler = (res: Response, type: string, data?: Data): Response => {
     const mapping = SuccesMappings.find((mapping) => mapping.type === type)
 
     if (mapping) {

@@ -9,7 +9,7 @@ import { type UserInterface, type UserReqBodyRequest } from "../interfaces/userI
 import { type AuthRequest } from "../interfaces/authInterface.ts"
 import { errorHandler } from "../handlerResponse/errorHandler/errorHandler.ts"
 import { succesHandler } from "../handlerResponse/succesHandler/succesHandler.ts"
-import { userCreated, userDeleted, userUpdated, loginSucces, logoutSucces, userFound } from "../handlerResponse/succesHandler/configs.ts"
+import { userCreated, userDeleted, userUpdated, loginSucces, logoutSucces, userFound, usersFound, noUser } from "../handlerResponse/succesHandler/configs.ts"
 import {
     unexpectedError,
     serverError,
@@ -28,7 +28,9 @@ import {
     userNotFound,
     unableInfo
 } from "../handlerResponse/errorHandler/configs.ts"
-import {deleteUserObjectId} from "../utils/deleteUserObjectId.ts"
+import { deleteUserObjectId } from "../utils/deleteUserObjectId.ts"
+import { buildUserQuery } from "./mongoQueryBuilders/queryUserBuilder.ts"
+import { getPaginationOptions } from "./mongoQueryBuilders/utils/paginationOptions.ts"
 
 /**
  * Controller for creating a new user.
@@ -317,24 +319,31 @@ export const getAllUsers = async (req: AuthRequest, res: Response): Promise<void
             errorHandler(res, insufficientAccess)
             return
         }
+        // Build query based on role and request parameters
+        const query = buildUserQuery(req, userRoleIndex)
+        // Get pagination and sorting options
+        const { page, limit, skip, sortOptions } = getPaginationOptions(req)
+        // Execute the query with all filters and options
+        const users = await User.find(query).select("_id email pseudonyme role createdAt updatedAt").sort(sortOptions).skip(skip).limit(limit)
 
-        // Super-administrator: Retrieve all users
-        if (userRoleIndex === 0) {
-            const users = await User.find().select("_id email pseudonyme role createdAt updatedAt")
-            succesHandler(res, userFound, { users: users })
+        if (!users) {
+            // Return an error if no conditions are met
+            errorHandler(res, noConditions)
             return
         }
-
-        // Administrator: Retrieve all users except super-administrators
-        if (userRoleIndex === 1) {
-            const users = await User.find({ role: { $ne: "super-administrateur" } }).select("_id email pseudonyme role createdAt updatedAt")
-            succesHandler(res, userFound, { users: users })
+        // Get total count for pagination
+        const total: number = await User.countDocuments(query)
+        if (total === 0) {
+            succesHandler(res, noUser)
             return
         }
-        // Return an error if no conditions are met
-        errorHandler(res, noConditions)
+        const pagination = { total: total, page: page, limit: limit, totalPages: Math.ceil(total / limit) }
+
+        succesHandler(res, users.length > 1 ? usersFound : userFound, { users: users, pagination: pagination })
+
         return
     } catch (error: unknown) {
+        console.log(error)
         const errorType = error instanceof Error ? error.message : serverError
         errorHandler(res, errorType)
         return
