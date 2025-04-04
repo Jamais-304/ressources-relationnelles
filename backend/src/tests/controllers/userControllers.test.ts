@@ -83,7 +83,6 @@ describe("User Controller", () => {
         // Send a POST request to the user creation endpoint with the new user data
         const response = await request(app).post("/api/v1/users/create-user").send(newUser)
         // Check that the response status is 201 (Created)
-        console.log(response)
         expect(response.status).toBe(201)
         // Check that the response contains a 'data' property
         expect(response.body).toHaveProperty("data")
