@@ -11,8 +11,10 @@ import {
     email,
     role
 } from "../../handlerResponse/errorHandler/configs.ts"
+import { passwordMaxLength, passwordMinLength, pseudonymeMinLength, pseudonymeMaxLength } from "../../configs.ts"
 // Regular expression for validating password (at least one uppercase, one lowercase, one number, one special character, 8-50 characters)
-const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&,]{8,50}$/
+
+const passwordRegex = new RegExp(`^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{${passwordMinLength},${passwordMaxLength}}$`)
 
 /**
  * Validates the email field, checking if it exists, is a valid email, and normalizes/escapes it.
@@ -31,8 +33,8 @@ export const commonPasswordValidation = () => [
         .withMessage(userMsgCannotBeEmpty(password))
         .isString()
         .withMessage(userMsgMustBeString(password))
-        .isLength({ min: 8, max: 50 })
-        .withMessage(userMsgLength(password, 8, 50))
+        .isLength({ min: passwordMinLength, max: passwordMaxLength })
+        .withMessage(userMsgLength(password, passwordMinLength, passwordMaxLength))
         .matches(passwordRegex)
         .withMessage(userMsgPasswordRequirements)
         .escape()
@@ -48,8 +50,8 @@ export const commonPseudonymValidation = () => [
         .withMessage(userMsgCannotBeEmpty(pseudonyme))
         .isString()
         .withMessage(userMsgMustBeString(pseudonyme))
-        .isLength({ min: 5, max: 40 })
-        .withMessage(userMsgLength(pseudonyme, 5, 40))
+        .isLength({ min: pseudonymeMinLength, max: pseudonymeMaxLength })
+        .withMessage(userMsgLength(pseudonyme, pseudonymeMinLength, pseudonymeMaxLength))
         .escape()
         .trim()
 ]
@@ -80,8 +82,8 @@ export const commonOptionalPasswordValidation = () => [
         .optional()
         .isString()
         .withMessage(userMsgMustBeString(password))
-        .isLength({ min: 8, max: 50 })
-        .withMessage(userMsgLength(password, 8, 50))
+        .isLength({ min: passwordMinLength, max: passwordMaxLength })
+        .withMessage(userMsgLength(password, passwordMinLength, passwordMaxLength))
         .matches(passwordRegex)
         .withMessage(userMsgPasswordRequirements)
         .escape()
@@ -101,8 +103,8 @@ export const commonOptionalPseudonymeValidation = () => [
         .optional()
         .isString()
         .withMessage(userMsgMustBeString(pseudonyme))
-        .isLength({ min: 5, max: 40 })
-        .withMessage(userMsgLength(pseudonyme, 5, 40))
+        .isLength({ min: pseudonymeMinLength, max: pseudonymeMaxLength })
+        .withMessage(userMsgLength(pseudonyme, pseudonymeMinLength, pseudonymeMaxLength))
         .escape()
         .trim()
 ]

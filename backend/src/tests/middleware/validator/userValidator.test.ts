@@ -1,7 +1,7 @@
 import request from "supertest"
 import app from "../../../app.ts"
 import { userMsgEmailInvalid, userMsgLength, userMsgMustBeString } from "../../../handlerResponse/errorHandler/configs.ts"
-
+import {passwordMaxLength, passwordMinLength, pseudonymeMaxLength, pseudonymeMinLength} from "../../../configs.ts"
 const password = "mot de passe"
 const pseudonyme = "pseudonyme"
 
@@ -21,7 +21,7 @@ describe("User Validator", () => {
         expect(response.body.error.errors).toContainEqual({
             type: "field",
             value: "test",
-            msg: userMsgLength(pseudonyme, 5, 40),
+            msg: userMsgLength(pseudonyme, pseudonymeMinLength, pseudonymeMaxLength),
             path: "pseudonyme",
             location: "body"
         })
@@ -48,7 +48,7 @@ describe("User Validator", () => {
         expect(response.body.error.errors).toContainEqual({
             type: "field",
             value: 123,
-            msg: userMsgLength(pseudonyme, 5, 40),
+            msg: userMsgLength(pseudonyme, pseudonymeMinLength, pseudonymeMaxLength),
             path: "pseudonyme",
             location: "body"
         })
@@ -69,7 +69,7 @@ describe("User Validator", () => {
         expect(response.body.error.errors).toContainEqual({
             type: "field",
             value: "test",
-            msg: userMsgLength(password, 8, 50),
+            msg: userMsgLength(password, passwordMinLength, passwordMaxLength),
             path: "password",
             location: "body"
         })
@@ -96,7 +96,7 @@ describe("User Validator", () => {
         expect(response.body.error.errors).toContainEqual({
             type: "field",
             value: 123,
-            msg: userMsgLength(password, 8, 50),
+            msg: userMsgLength(password, passwordMinLength, passwordMaxLength),
             path: "password",
             location: "body"
         })
@@ -144,7 +144,7 @@ describe("User Validator", () => {
                 {
                     type: "field",
                     value: 123,
-                    msg: userMsgLength(password, 8, 50),
+                    msg: userMsgLength(password, passwordMinLength, passwordMaxLength),
                     path: "password",
                     location: "body"
                 },
@@ -165,7 +165,7 @@ describe("User Validator", () => {
                 {
                     type: "field",
                     value: 122,
-                    msg: userMsgLength(pseudonyme, 5, 40),
+                    msg: userMsgLength(pseudonyme, pseudonymeMinLength, pseudonymeMaxLength),
                     path: "pseudonyme",
                     location: "body"
                 }

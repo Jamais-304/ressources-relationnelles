@@ -10,6 +10,7 @@ import {
     author,
     resource
 } from "../../handlerResponse/errorHandler/configs.ts"
+import {uuidMaxLength} from "../../configs.ts"
 
 // Validation rules for comments
 export const commentsValidationRules = [
@@ -27,8 +28,8 @@ export const commentsValidationRules = [
         .withMessage(commentsMsgIdMustBeString(author))
         .notEmpty()
         .withMessage(commentsMsgIdCannotBeEmpty(author))
-        .isLength({ max: 35 })
-        .withMessage(commentsIdMaxLength(author, 35))
+        .isLength({ max: uuidMaxLength })
+        .withMessage(commentsIdMaxLength(author, uuidMaxLength))
         .trim()
         .escape()
         .custom((value) => {
@@ -43,8 +44,8 @@ export const commentsValidationRules = [
         .withMessage(commentsMsgIdMustBeString(resource))
         .notEmpty()
         .withMessage(commentsMsgIdCannotBeEmpty(resource))
-        .isLength({ max: 35 })
-        .withMessage(commentsIdMaxLength(resource, 35))
+        .isLength({ max: uuidMaxLength })
+        .withMessage(commentsIdMaxLength(resource, uuidMaxLength))
         .trim()
         .escape()
         .custom((value) => {

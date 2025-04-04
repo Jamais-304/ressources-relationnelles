@@ -11,7 +11,7 @@ import {
     email,
     role
 } from "../handlerResponse/errorHandler/configs.ts"
-import {ROLE_HIERARCHY} from "../configs.ts"
+import {ROLE_HIERARCHY, passwordMaxLength, passwordMinLength, pseudonymeMaxLength, pseudonymeMinLength} from "../configs.ts"
 interface IUserSchema extends UserInterface, Document {}
 
 const userSchema: Schema<IUserSchema> = new mongoose.Schema(
@@ -27,15 +27,15 @@ const userSchema: Schema<IUserSchema> = new mongoose.Schema(
             type: String,
             required: [true, userMsgRequierd(password)],
             trim: true,
-            minlength: [8, userMsgMinLength(password, 8)],
-            maxlength: [90, userMsgMaxLength(password, 90)]
+            minlength: [passwordMinLength, userMsgMinLength(password, passwordMinLength)],
+            maxlength: [passwordMaxLength, userMsgMaxLength(password, passwordMaxLength)]
         },
         pseudonyme: {
             type: String,
             required: [true, userMsgRequierd(pseudonyme)],
             trim: true,
-            minlength: [5, userMsgMinLength(pseudonyme, 5)],
-            maxlength: [40, userMsgMaxLength(pseudonyme, 40)]
+            minlength: [pseudonymeMinLength, userMsgMinLength(pseudonyme, pseudonymeMinLength)],
+            maxlength: [pseudonymeMaxLength, userMsgMaxLength(pseudonyme, pseudonymeMaxLength)]
         },
         role: {
             type: String,
