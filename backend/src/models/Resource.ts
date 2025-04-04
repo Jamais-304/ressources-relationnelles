@@ -1,4 +1,7 @@
 import mongoose from 'mongoose';
+import type ResourceInterface from '../interfaces/resourceInterface.ts';
+
+interface IResourceSchema extends ResourceInterface, Document {}
 
 const resourceSchema = new mongoose.Schema({
 	authorId: {
@@ -56,4 +59,5 @@ resourceSchema.pre('save', function (next) {
 resourceSchema.index({ authorId: 1 });
 resourceSchema.index({ title: 'text' });
 
-export default mongoose.model('Resource', resourceSchema);
+const Resource = mongoose.model<IResourceSchema>('Resource', resourceSchema);
+export default Resource

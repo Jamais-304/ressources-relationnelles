@@ -5,6 +5,7 @@ import { MONGO_URI } from "./configs.ts"
 import yaml from "yamljs"
 import swaggerUi from "swagger-ui-express"
 import userRouter from "./router/userRoutes.ts"
+import resourceRoutes from "./router/resourceRoutes.ts"
 import refreshTokenRouter from "./router/refreshTokenRoute.ts"
 import { morganMiddleware, errorLogger } from "./logs/logger.ts"
 
@@ -36,7 +37,7 @@ if (process.env.NODE_ENV !== "test") {
     app.use(morganMiddleware) // For request logging
 }
 // Routes Users
-app.use("/api", userRouter, refreshTokenRouter)
+app.use("/api", userRouter, refreshTokenRouter, resourceRoutes)
 // Swagger API documentation route
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs))
 // Error handling middleware should be after routes to catch errors
