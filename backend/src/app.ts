@@ -31,7 +31,10 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 // JSON parsing middleware
 app.use(express.json())
-app.use(morganMiddleware) // For request logging
+
+if (process.env.NODE_ENV !== "test") {
+    app.use(morganMiddleware) // For request logging
+}
 // Routes Users
 app.use("/api", userRouter, refreshTokenRouter)
 // Swagger API documentation route
