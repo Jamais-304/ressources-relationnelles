@@ -9,6 +9,7 @@ import User from '@/views/users/User.vue'
 import NotAllowed from '@/views/NotAllowed.vue'
 import { useAuthUserStore } from '@/stores/authUserStore'
 import MyAccount from '@/views/accounts/MyAccount.vue'
+import CreateResource from '@/views/resources/CreateResource.vue'
 
 const routes = [
   { path: '/', name: 'home', component: Home },
@@ -38,6 +39,14 @@ const routes = [
     path: '/my-account',
     name: 'my account',
     component: MyAccount,
+    meta: {
+      requiresAuth: true,
+    },
+  },
+  {
+    path: '/create-resource',
+    name: 'create resource',
+    component: CreateResource,
     meta: {
       requiresAuth: true,
     },

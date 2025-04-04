@@ -39,6 +39,15 @@ const logout = async () => {
           >
             Gestion des utilisateurs
           </AppButton>
+          <AppButton
+            v-if="isAdmin"
+            variant="text"
+            color="white"
+            class="!text-sm hover:!bg-[#1212ff]"
+            to="/create-resource"
+          >
+            Gestion des ressources (wip)
+          </AppButton>
           <div class="flex gap-2">
             <AppButton
               v-if="isAuthenticated"
