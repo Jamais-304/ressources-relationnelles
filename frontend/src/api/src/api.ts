@@ -1,9 +1,13 @@
 import axios, { AxiosHeaders, type AxiosResponse } from 'axios'
 import { Authentication } from './authentication'
 import { UserService, TokenService, ResourceService } from './services/services'
-import { type Response } from './types/response'
 import { getToken, removeToken } from '@/utils/cookies'
 import router from '@/routes/router'
+import {
+  ContentType,
+  type CustomRequestConfig,
+  type Response,
+} from './types/types'
 
 /**
  * The Api class facilitates interactions with a RESTful API.
@@ -98,9 +102,11 @@ export class Api {
    * including Content-Type and Authorization if bearer token authentication
    * is used.
    */
-  get headers(): AxiosHeaders {
+  getHeaders(config: CustomRequestConfig): AxiosHeaders {
     const headers: AxiosHeaders = new AxiosHeaders()
-    headers.set('Content-Type', 'application/json')
+    const contentType = config?.contentType || ContentType.Json
+
+    headers.set('Content-Type', contentType)
 
     if (this.auth.isBearer) {
       headers.set('Authorization', `Bearer ${this.auth.bearerToken}`)
@@ -164,9 +170,9 @@ export class Api {
    * and header setup before each request.
    */
   private setupAxiosInterceptors() {
-    axios.interceptors.request.use(async (config) => {
+    axios.interceptors.request.use(async (config: CustomRequestConfig) => {
       await this.handleTokens()
-      config.headers = this.headers
+      config.headers = this.getHeaders(config)
       return config
     })
 
@@ -194,9 +200,12 @@ export class Api {
    * @throws {Error} If the request fails or if the response status code
    * indicates an error.
    */
-  async get(endpoint: string): Promise<Response> {
+  async get(endpoint: string, axiosConfig?: object): Promise<Response> {
     try {
-      const response = await axios.get(`${this.baseUrl}/${endpoint}`)
+      const response = await axios.get(
+        `${this.baseUrl}/${endpoint}`,
+        axiosConfig
+      )
       return this.handleResponse(response)
     } catch (error: unknown) {
       this.handleError(error)
@@ -211,9 +220,17 @@ export class Api {
    * @returns {Promise<Response>} The parsed response data
    * @throws {Error} When the request fails or returns an error status
    */
-  async post(endpoint: string, body: object): Promise<Response> {
+  async post(
+    endpoint: string,
+    body: object,
+    axiosConfig?: object
+  ): Promise<Response> {
     try {
-      const response = await axios.post(`${this.baseUrl}/${endpoint}`, body)
+      const response = await axios.post(
+        `${this.baseUrl}/${endpoint}`,
+        body,
+        axiosConfig
+      )
       return this.handleResponse(response)
     } catch (error: unknown) {
       this.handleError(error)
@@ -231,7 +248,7 @@ export class Api {
   async put(
     endpoint: string,
     body: object,
-    axiosConfig: object
+    axiosConfig?: object
   ): Promise<Response> {
     try {
       const response = await axios.put(
