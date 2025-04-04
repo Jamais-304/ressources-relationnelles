@@ -24,8 +24,8 @@ export class UserService {
    * Authenticates a user and stores their tokens in cookies.
    *
    * @param {object} attrs - User credentials for authentication
-   * @returns {Promise<Token>} A Token object with access and refresh attrs.
-   * @throws {Error} When the API response doesn't match the TokenData format.
+   * @returns {Promise<User>} A User object.
+   * @throws {Error} When login action failed.
    */
   async login(attrs: object): Promise<User> {
     this.api.disableTokenHandling()
@@ -57,6 +57,7 @@ export class UserService {
   /**
    * List all users.
    * @returns A list of instantiated Users.
+   * @throws {Error} When fetching users failed.
    */
   async list(): Promise<User[]> {
     try {
@@ -76,6 +77,7 @@ export class UserService {
    * Get a user from its uuid.
    * @param uuid - A User uuid.
    * @returns A User instance.
+   * @throws {Error} When the user creation failed.
    */
   async get(uuid: string): Promise<User> {
     const response = await this.api.get(`users/${uuid}`)
@@ -97,7 +99,7 @@ export class UserService {
    *
    * @param {object} attrs - User attributes for registration
    * @returns {Promise<User>} A User object containing the created user.
-   * @throws {Error} When the API response doesn't match UserData format.
+   * @throws {Error} When the user creation failed.
    */
   async create(attrs: IUser): Promise<User> {
     const JSONattrs = User.toJson(attrs)
@@ -124,11 +126,11 @@ export class UserService {
   }
 
   /**
-   * Creates a user account.
+   * Updates a user account.
    *
-   * @param {object} attrs - User attributes for registration
-   * @returns {Promise<User>} A User object containing the created user.
-   * @throws {Error} When the API response doesn't match UserData format.
+   * @param {object} attrs - User attributes to update.
+   * @returns {Promise<User>} A User object containing the updated user.
+   * @throws {Error} When the user update failed.
    */
   async update(uuid: string, attrs: IUser): Promise<User> {
     const JSONattrs = User.toJson(attrs)
@@ -156,7 +158,7 @@ export class UserService {
    *
    * @param {object} user - User attributes for registration
    * @returns {Promise<User>} A User object containing the created user.
-   * @throws {Error} When the API response doesn't match UserData format.
+   * @throws {Error} When the user deletion failed.
    */
   async delete(user: User): Promise<Response> {
     const uuid = user.uuid
