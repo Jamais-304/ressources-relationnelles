@@ -28,6 +28,7 @@ import {
     userNotFound,
     unableInfo
 } from "../handlerResponse/errorHandler/configs.ts"
+import {deleteUserObjectId} from "../utils/deleteUserObjectId.ts"
 
 /**
  * Controller for creating a new user.
@@ -51,20 +52,19 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
             return
         }
         // Remove any user IDs from the request body for security reasons
-        delete userObject.id
-        delete userObject.userId
+        const cleanUserObject = deleteUserObjectId(userObject)
         // Validate the presence of required fields in the request body
-        if (!userObject.role || !userObject.password || !userObject.email || !userObject.pseudonyme) {
+        if (!cleanUserObject.role || !cleanUserObject.password || !cleanUserObject.email || !cleanUserObject.pseudonyme) {
             errorHandler(res, missingInfo)
             return
         }
         // Hash the user's password
-        const hashedPassword: string = await bcrypt.hash(userObject.password, 10)
+        const hashedPassword: string = await bcrypt.hash(cleanUserObject.password, 10)
         // Create a new user instance with the hashed password
         const newUser = new User({
-            email: userObject.email,
+            email: cleanUserObject.email,
             password: hashedPassword,
-            pseudonyme: userObject.pseudonyme,
+            pseudonyme: cleanUserObject.pseudonyme,
             role: "utilisateur"
         })
         // Save the new user to the database
@@ -154,12 +154,12 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
             return
         }
 
-        const userObject = user.toObject ? user.toObject() : user
+        const cleanUserObject = user.toObject ? user.toObject() : user
 
         // Remove user password before sending response
-        delete userObject.password
+        delete cleanUserObject.password
         // Return the tokens in the response
-        succesHandler(res, loginSucces, { tokens: { accessToken, refreshToken }, user: userObject })
+        succesHandler(res, loginSucces, { tokens: { accessToken, refreshToken }, user: cleanUserObject })
         return
     } catch (error: unknown) {
         // Handle unexpected errors
@@ -222,11 +222,10 @@ export const adminCreateUser = async (req: AuthRequest, res: Response): Promise<
             errorHandler(res, unableInfo)
         }
         // Remove any user IDs from the request body for security reasons
-        delete userObject.id
-        delete userObject.userId
+        const cleanUserObject = deleteUserObjectId(userObject)
 
         // Validate the presence of required fields in the request body
-        if (!userObject.role || !userObject.password || !userObject.email || !userObject.pseudonyme) {
+        if (!cleanUserObject.role || !cleanUserObject.password || !cleanUserObject.email || !cleanUserObject.pseudonyme) {
             errorHandler(res, missingInfo)
             return
         }
@@ -239,7 +238,7 @@ export const adminCreateUser = async (req: AuthRequest, res: Response): Promise<
         try {
             // Determine the role indices for the authenticated user and the requested user
             userRoleIndex = user?.role ? checkUserRole(user.role) : userRoleIndex
-            reqUserRoleIndex = checkUserRole(userObject.role)
+            reqUserRoleIndex = checkUserRole(cleanUserObject.role)
         } catch (error: unknown) {
             // Handle unexpected errors
             const errorType = error instanceof Error ? error.message : serverError
@@ -260,14 +259,14 @@ export const adminCreateUser = async (req: AuthRequest, res: Response): Promise<
         }
 
         // Hash the new user's password
-        const hashedPassword: string = await bcrypt.hash(userObject.password, 10)
+        const hashedPassword: string = await bcrypt.hash(cleanUserObject.password, 10)
 
         // Create a new user instance with the hashed password
         const newUser = new User({
-            email: userObject.email,
+            email: cleanUserObject.email,
             password: hashedPassword,
-            pseudonyme: userObject.pseudonyme,
-            role: userObject.role
+            pseudonyme: cleanUserObject.pseudonyme,
+            role: cleanUserObject.role
         })
 
         // Save the new user to the database
@@ -429,13 +428,17 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<void>
 
         // Extract user details from the request body
         const userObject: UserReqBodyRequest = req.body
-        if (userObject.role && !Object.values(ROLES).includes(userObject.role)) {
+
+        // Remove any user IDs from the request body for security reasons
+        const cleanUserObject = deleteUserObjectId(userObject)
+
+        if (cleanUserObject.role && !Object.values(ROLES).includes(cleanUserObject.role)) {
             errorHandler(res, invRole)
             return
         }
 
-        if ((userObject.password && !userObject.newPassword) || (!userObject.password && userObject.newPassword)) {
-            errorHandler(res, userObject.password ? newPasswordRequired : passwordRequired)
+        if ((cleanUserObject.password && !cleanUserObject.newPassword) || (!cleanUserObject.password && cleanUserObject.newPassword)) {
+            errorHandler(res, cleanUserObject.password ? newPasswordRequired : passwordRequired)
             return
         }
 
@@ -453,27 +456,22 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<void>
             return
         }
 
-        if (userObject.password) {
+        if (cleanUserObject.password) {
             // Verify the provided password with the stored hashed password
-            const isValid: boolean = await bcrypt.compare(userObject.password, userReq.password)
+            const isValid: boolean = await bcrypt.compare(cleanUserObject.password, userReq.password)
             if (!isValid) {
                 errorHandler(res, incorrectPassword)
                 return
             }
         }
 
-        if (userObject.newPassword) {
-            const hashedPassword: string = await bcrypt.hash(userObject.newPassword, 10)
-            userObject.password = hashedPassword
-            delete userObject.newPassword // Supprimer newPassword pour éviter de l'enregistrer par erreur
+        if (cleanUserObject.newPassword) {
+            const hashedPassword: string = await bcrypt.hash(cleanUserObject.newPassword, 10)
+            cleanUserObject.password = hashedPassword
+            delete cleanUserObject.newPassword // Supprimer newPassword pour éviter de l'enregistrer par erreur
         }
-        // Remove any user IDs from the request body for security reasons
-        delete userObject.id
-        delete userObject.userId
-        delete userObject._id
-        delete userObject.uuid
 
-        if (Object.keys(userObject).length === 0) {
+        if (Object.keys(cleanUserObject).length === 0) {
             errorHandler(res, noFields)
             return
         }
@@ -481,9 +479,9 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<void>
         // Allow users and moderators to update their own information
         if (userRoleIndex >= 1 && req.auth && req.params.id == req.auth.userId) {
             // Remove role from the request body for security reasons
-            delete userObject.role
+            delete cleanUserObject.role
             // Update user information
-            const updateUser = await User.findByIdAndUpdate(req.params.id, { $set: { ...userObject } }, { new: true })
+            const updateUser = await User.findByIdAndUpdate(req.params.id, { $set: { ...cleanUserObject } }, { new: true })
             if (!updateUser) {
                 errorHandler(res, userNotFound)
                 return
@@ -492,14 +490,14 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<void>
             return
         } else if (userRoleIndex <= userRoleIndexToModify) {
             // Ensure the role is valid and the authenticated user has sufficient permissions
-            if (userObject.role) {
-                if (userRoleIndex > ROLE_HIERARCHY.indexOf(userObject.role)) {
+            if (cleanUserObject.role) {
+                if (userRoleIndex > ROLE_HIERARCHY.indexOf(cleanUserObject.role)) {
                     errorHandler(res, insufficientAccess)
                     return
                 }
             }
             // Update user information
-            const updateUser: UserInterface | null = await User.findByIdAndUpdate(req.params.id, { $set: { ...userObject } }, { new: true })
+            const updateUser: UserInterface | null = await User.findByIdAndUpdate(req.params.id, { $set: { ...cleanUserObject } }, { new: true })
 
             if (!updateUser) {
                 errorHandler(res, userNotFound)
