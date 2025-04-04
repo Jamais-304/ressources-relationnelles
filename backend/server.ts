@@ -1,4 +1,4 @@
-import { PORT_BACKEND } from "./src/config.ts"
+import { PORT_BACKEND } from "./src/configs.ts"
 import app from "./src/app.ts"
 import http from "http"
 import { normalize } from "./src/utils/normailze.ts"

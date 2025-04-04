@@ -1,12 +1,12 @@
 import express from "express"
 import type { Request, Response, NextFunction } from "express"
 import mongoose from "mongoose"
-import { MONGO_URI } from "./config.ts"
+import { MONGO_URI } from "./configs.ts"
 import yaml from "yamljs"
 import swaggerUi from "swagger-ui-express"
 import userRouter from "./router/userRoutes.ts"
 import refreshTokenRouter from "./router/refreshTokenRoute.ts"
-import { morganMiddleware, errorLogger } from "../logs/logger.ts"
+import { morganMiddleware, errorLogger } from "./logs/logger.ts"
 
 const app = express()
 app.set("trust proxy", true)
@@ -31,7 +31,10 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 // JSON parsing middleware
 app.use(express.json())
-app.use(morganMiddleware) // For request logging
+
+if (process.env.NODE_ENV !== "test") {
+    app.use(morganMiddleware) // For request logging
+}
 // Routes Users
 app.use("/api", userRouter, refreshTokenRouter)
 // Swagger API documentation route

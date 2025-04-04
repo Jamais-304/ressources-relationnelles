@@ -22,3 +22,11 @@ export type Role = (typeof ROLES)[keyof typeof ROLES]
 
 export const ROLE_HIERARCHY = [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.MODERATOR, ROLES.USER]
 
+// Configs validator or response values
+
+export const uuidMaxLength: number = 35
+export const passwordMinLength: number = 8
+export const passwordMaxLength: number = 90
+export const pseudonymeMinLength: number = 5
+export const pseudonymeMaxLength: number = 50
+export const expireRefreshToken: string = "7d"

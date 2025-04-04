@@ -1,6 +1,7 @@
 import { type RessourceInterface } from "../interfaces/ressourceInterfaces.ts"
 import { type UserInterface } from "../interfaces/userInterfaces.ts"
 import { type TokensInterface } from "../interfaces/tokenInterfaces.ts"
+
 /**
  * Interface representing the structure of the data that can be included in the response.
  */

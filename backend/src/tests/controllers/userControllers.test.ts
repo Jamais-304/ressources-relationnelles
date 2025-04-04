@@ -6,7 +6,9 @@ import mongoose from "mongoose"
 import RefreshToken from "../../models/RefreshToken.ts"
 import { generateAccesToken, generateRefreshToken } from "../../utils/generateTokens.ts"
 import { checkAuthentification, checkUserRole } from "../../utils/checkAuth.ts"
-import { ROLE_HIERARCHY } from "../../config.ts"
+import { ROLE_HIERARCHY } from "../../configs.ts"
+import { msgInvalidCredentials, tokenMsgMustBeString } from "../../handlerResponse/errorHandler/configs.ts"
+import {msgUserCreated, msgLogoutSucces} from "../../handlerResponse/succesHandler/configs.ts"
 
 jest.mock("bcrypt")
 jest.mock("../../models/User.ts")
@@ -102,7 +104,7 @@ describe("User Controller", () => {
         expect(response.body.data.user).toHaveProperty("pseudonyme", "usertest")
         expect(response.body.data.user).toHaveProperty("role", "utilisateur")
         // Assert that the response body contains the success message
-        expect(response.body).toHaveProperty("message", "User created successfully")
+        expect(response.body).toHaveProperty("message", msgUserCreated)
     })
 })
 
@@ -136,7 +138,6 @@ describe("User Controller - Login", () => {
         ;(User.findOne as jest.Mock).mockResolvedValue(null)
         // Send a POST request to the login endpoint with invalid login data
         const response = await request(app).post("/api/v1/users/login").send(errorLoginData)
-        console.log(response)
         // Ensure that User.findOne was called with the correct email
         expect(User.findOne).toHaveBeenCalledWith({ email: errorLoginData.email })
         // Verify that the response contains the 'error' property
@@ -146,7 +147,7 @@ describe("User Controller - Login", () => {
         // Check that the response status is 401 (Unauthorized) as no user was found
         expect(response.status).toBe(401)
         // Ensure the error message is "Incorrect username/password pair!"
-        expect(response.body.error.msg).toBe("Incorrect username/password pair!")
+        expect(response.body.error.msg).toBe(msgInvalidCredentials)
     })
 
     it("should return error if the password does not match the stored password", async () => {
@@ -165,7 +166,7 @@ describe("User Controller - Login", () => {
         // Check that the response status is 401 (Unauthorized) as the password did not match
         expect(response.status).toBe(401)
         // Ensure the error message is "Incorrect username/password pair!"
-        expect(response.body.error.msg).toBe("Incorrect username/password pair!")
+        expect(response.body.error.msg).toBe(msgInvalidCredentials)
     })
 })
 
@@ -182,7 +183,7 @@ describe("User Controller - Logout", () => {
         // Assert that the response status is 200 (OK)
         expect(response.status).toBe(200)
         // Assert that the response body contains the success message
-        expect(response.body).toEqual({ message: "User logged out successfully" })
+        expect(response.body).toEqual({ message: msgLogoutSucces })
         // Attempt to find the deleted refresh token in the database
         const deletedToken = await RefreshToken.findOne({
             refreshToken: refreshToken
@@ -197,7 +198,7 @@ describe("User Controller - Logout", () => {
         expect(response.status).toBe(200)
         // Assert that the response body contains the success message
         expect(response.body).toEqual({
-            message: "User logged out successfully"
+            message: msgLogoutSucces
         })
     })
     it("should return error when no refresh token is provided", async () => {
@@ -208,7 +209,7 @@ describe("User Controller - Logout", () => {
         // Assert that the response body contains an error property
         expect(response.body).toHaveProperty("error")
         // Assert that the error message indicates the refresh token must be a string
-        expect(response.body.error.errors[0]).toHaveProperty("msg", "Refresh token must be a string")
+        expect(response.body.error.errors[0]).toHaveProperty("msg", tokenMsgMustBeString("Refresh token"))
         // Assert that the error path is "refreshToken"
         expect(response.body.error.errors[0]).toHaveProperty("path", "refreshToken")
     })
@@ -233,7 +234,7 @@ describe("User Controller - Admin create user", () => {
         // Assert that the response status is 201 (Created)
         expect(response.status).toBe(201)
         // Assert that the response body contains the success message
-        expect(response.body).toHaveProperty("message", "User created successfully")
+        expect(response.body).toHaveProperty("message", msgUserCreated)
         // Assert that the checkAuthentification function was called
         expect(checkAuthentification).toHaveBeenCalled()
         // Assert that the checkUserRole function was called with the admin user's role

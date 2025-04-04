@@ -1,7 +1,6 @@
 import type { Request, Response, NextFunction } from "express"
 import winston, { Logger } from "winston"
 import morgan, { type StreamOptions } from "morgan"
-import { fileURLToPath } from "url"
 import chalk from "chalk"
 import moment from "moment"
 import fs from "fs"
@@ -19,11 +18,8 @@ import path from "path"
  * - `errorLogger`: A middleware for logging errors.
  */
 
-// Resolve current file name and directory for use in logging
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 // Directory for saving log files
-const logDirectory = path.join(__dirname, "..", "logs")
+const logDirectory = path.join(process.cwd(), "src","logs", "fileLogs")
 // Ensure the log directory exists
 if (!fs.existsSync(logDirectory)) {
     fs.mkdirSync(logDirectory)
