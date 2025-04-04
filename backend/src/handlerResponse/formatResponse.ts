@@ -1,4 +1,4 @@
-import { type RessourceInterface } from "../interfaces/ressourceInterfaces.ts"
+import type ResourceInterface from "../interfaces/resourceInterface.ts"
 import { type UserInterface } from "../interfaces/userInterfaces.ts"
 import { type TokensInterface } from "../interfaces/tokenInterfaces.ts"
 
@@ -8,7 +8,7 @@ import { type TokensInterface } from "../interfaces/tokenInterfaces.ts"
 interface Data {
     user?: UserInterface
     users?: UserInterface[]
-    ressource?: RessourceInterface
+    ressource?: ResourceInterface
     tokens?: TokensInterface
 }
 

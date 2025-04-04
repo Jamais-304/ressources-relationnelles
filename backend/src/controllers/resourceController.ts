@@ -1,9 +1,11 @@
 // CRUD
 // vérifier les rôles etc
 
-import { Request, Response } from 'express';
-import Resource from '../models/Resource'; // Ensure this is the Mongoose model, not the schema
-import User from '../models/User';
+import type { Request, Response } from 'express';
+import Resource from '../models/Resource.ts';
+import User from '../models/User.ts';
+import { unexpectedError } from '../handlerResponse/errorHandler/configs.ts';
+import { errorHandler } from '../handlerResponse/errorHandler/errorHandler.ts';
 
 
 //TODO: remove this interface and use the one from the interfaces folder
@@ -33,17 +35,21 @@ export const getAllResources = async (req: AuthRequest, res: Response) => {
 		const resources = await Resource.find();
 		res.status(200).json(resources);
 	} catch (error) {
-		res.status(404).json({ message: error.message });
+		const errorMessage = error instanceof Error ? error.message : unexpectedError
+		errorHandler(res, errorMessage)
+		return
 	}
 }
 
 export const getAllPublishedResources = async (req: Request, res: Response) => {
 
 	try {
-		const resources = await Resource.find({ status: 'published' });
+		const resources = await Resource.find({ status: 'PUBLISHED' });
 		res.status(200).json(resources);
 	} catch (error) {
-		res.status(404).json({ message: error.message });
+		const errorMessage = error instanceof Error ? error.message : unexpectedError
+		errorHandler(res, errorMessage)
+		return
 	}
 }
 
@@ -67,7 +73,9 @@ export const getResourceById = async (req: AuthRequest, res: Response) => {
 		const resource = await Resource.findById(req.params.id);
 		res.status(200).json(resource);
 	} catch (error) {
-		res.status(404).json({ message: error.message });
+		const errorMessage = error instanceof Error ? error.message : unexpectedError
+		errorHandler(res, errorMessage)
+		return
 	}
 }
 
@@ -81,10 +89,12 @@ export const createResource = async (req: AuthRequest, res: Response) => {
 
 	try {
 		const resource = new Resource(req.body);
-		await resource.save(); //TODO: fix this
+		await resource.save();
 		res.status(201).json(resource);
 	} catch (error) {
-		res.status(409).json({ message: error.message });
+		const errorMessage = error instanceof Error ? error.message : unexpectedError
+		errorHandler(res, errorMessage)
+		return
 	}
 }
 
@@ -111,7 +121,9 @@ export const updateResource = async (req: AuthRequest, res: Response) => {
 		const resource = await Resource.findByIdAndUpdate(req.params.id, req.body, { new: true });
 		res.status(200).json(resource);
 	} catch (error) {
-		res.status(409).json({ message: error.message });
+		const errorMessage = error instanceof Error ? error.message : unexpectedError
+		errorHandler(res, errorMessage)
+		return
 	}
 }
 
@@ -135,7 +147,9 @@ export const updateResourceStatus = async (req: AuthRequest, res: Response) => {
 		const resource = await Resource.findByIdAndUpdate(req.params.id, { status: req.body.status }, { new: true });
 		res.status(200).json(resource);
 	} catch (error) {
-		res.status(409).json({ message: error.message });
+		const errorMessage = error instanceof Error ? error.message : unexpectedError
+		errorHandler(res, errorMessage)
+		return
 	}
 }
 
@@ -159,7 +173,9 @@ export const deleteResource = async (req: AuthRequest, res: Response) => {
 		await Resource.findByIdAndDelete(req.params.id);
 		res.status(200).json({ message: `Resource with id ${req.params.id} deleted successfully` });
 	} catch (error) {
-		res.status(409).json({ message: error.message });
+		const errorMessage = error instanceof Error ? error.message : unexpectedError
+		errorHandler(res, errorMessage)
+		return
 	}
 }
 
