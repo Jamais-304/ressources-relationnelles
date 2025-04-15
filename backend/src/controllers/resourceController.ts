@@ -10,6 +10,7 @@ import { errorHandler } from '../handlerResponse/errorHandler/errorHandler.ts';
 
 import { getResources, createResource as createResourceSuccess, updateResource as updateResourceSuccess, deleteResource as deleteResourceSuccess } from '../handlerResponse/succesHandler/configs.ts';
 import { succesHandler } from '../handlerResponse/succesHandler/succesHandler.ts';
+import { uploadToGridFS } from '../utils/gridfsHandler.ts';
 
 
 
@@ -182,6 +183,23 @@ export const createResource = async (req: AuthRequest, res: Response) => {
 			return
 		}
 
+//----------------------------------------------------
+		if (!req.file) {
+			errorHandler(res, resourceParameterNotFound) // pas de fichier envoyé
+			return
+		}
+		
+		const { buffer, originalname, mimetype } = req.file
+		
+		let contentGridfsIdResult: string
+		try {
+			contentGridfsIdResult = await uploadToGridFS(buffer, originalname, mimetype)
+		} catch (err) {
+			errorHandler(res, 'Erreur lors de l’envoi du contenu à GridFS')
+			return
+		}
+
+
 		// TODO: try to insert content into gridFS here
 		// check if that worked before creating the resource
 
@@ -189,7 +207,7 @@ export const createResource = async (req: AuthRequest, res: Response) => {
 			...req.body,
 			authorId: req.auth.userId,
 			status: 'DRAFT',
-			contentGridfsId: null, //TODO: handle gridFS content upload
+			contentGridfsId: contentGridfsIdResult, //TODO: handle gridFS content upload
 			validatedAndPublishedAt: null,
 			validatedBy: null,
 			createdAt: new Date(),
