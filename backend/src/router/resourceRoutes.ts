@@ -3,6 +3,8 @@ import { getAllResources, getResourceById, createResource, updateResource, updat
 import { validationErrorHandler } from "../middleware/validationErrorHandler.ts"
 import { auth } from "../middleware/auth.ts"
 
+import { upload } from "../middleware/fileUpload.ts"
+
 const router = Router()
 
 router.get('/v1/resource/', auth, getAllResources)
@@ -11,7 +13,8 @@ router.get('/v1/resource/published', getAllPublishedResources)
 
 router.get('/v1/resource/:id', auth, getResourceById)
 
-router.post('/v1/resource/create', auth, createResource)
+// GRIDFS
+router.post('/v1/resource/create', auth, upload.single('file'), createResource)
 
 router.put('/v1/resource/:id', auth, updateResource)
 
