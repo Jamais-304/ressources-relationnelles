@@ -1,8 +1,10 @@
 .history/*
 .env
 
+
 ## Backend
 backend/node_modules/*
+backend/resourcesExamples/*
 
 ## Frontend
 frontend/node_modules/*

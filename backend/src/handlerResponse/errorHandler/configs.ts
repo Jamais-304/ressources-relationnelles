@@ -12,6 +12,7 @@ export const role: string = "role"
 export const content: string = "contenu"
 export const author: string = "auteur"
 export const resource: string = "ressource"
+
 // Error constants used to identify various types of errors
 export const unexpectedError: string = "unexpectedErr"
 export const serverError: string = "serverErr"
@@ -34,9 +35,13 @@ export const userNotFound: string = "userNotFound"
 export const unableInfo: string = "unableInfo"
 export const invToken: string = "invToken"
 export const expirToken: string = "expirToken"
+export const resourceNotFound: string = "resourceNotFound"
+export const resourceParameterNotFound: string = "resourceParameterNotFound"
+
 // Predefined error messages for validation
 export const msgInvalidCredentials: string = "Identifiant/mot de passe incorrect !"
 export const msgServerError: string = "Erreur serveur"
+
 // Validation error messages for comments
 export const commentsMsgIdMustBeString: (type: string) => string = (type) =>
     `L'ID de ${type === "auteur" ? "l'" : "la"} ${type} doit être une chaîne de caractères`
@@ -87,5 +92,8 @@ export const ErrorMappings: ErrorMapping[] = [
     { type: userNotFound, msg: "Utilisateur non trouvé. Veuillez vérifier l'email fourni", statusCode: 404 },
     { type: unableInfo, msg: "Impossible de créer un compte avec les informations fournies", statusCode: 409 },
     { type: serverError, msg: msgServerError, statusCode: 500 },
-    { type: unexpectedError, msg: "Une erreur inattendue s'est produite", statusCode: 500 }
+    { type: unexpectedError, msg: "Une erreur inattendue s'est produite", statusCode: 500 },
+    { type: resourceNotFound, msg: "Ressource non trouvée", statusCode: 404 },
+    { type: resourceParameterNotFound, msg: "Mauvaise requête : paramètre de ressource non trouvé", statusCode: 400, location: "params" },
+    
 ]
