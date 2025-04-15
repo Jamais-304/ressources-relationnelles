@@ -18,7 +18,7 @@ const swaggerDocs = yaml.load("swagger.yaml")
 // Connection to MongoDB Atlas Database
 if (process.env.NODE_ENV !== "test") {
     mongoose
-        .connect(MONGO_URI)
+        .connect(MONGO_URI, { dbName: process.env.DB_NAME })
         .then(() => console.log("Connexion à MongoDB réussie ✅"))
         .catch(() => console.log("Connexion à MongoDB échouée ❌"))
 }
