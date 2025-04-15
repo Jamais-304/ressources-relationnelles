@@ -1,9 +1,7 @@
 import { MongoClient, GridFSBucket, ObjectId } from 'mongodb'
 import { Readable } from 'stream'
 
-import { MONGO_URI } from '../configs'
-
-const mongoUri = MONGO_URI
+const mongoUri = process.env.MONGO_URI || '' //FIXME: add default value or handle error if not set
 const dbName = process.env.DB_NAME
 
 const connectGridFS = async () => {
