@@ -41,7 +41,7 @@ const resourceSchema = new mongoose.Schema({
 	},
 	status: { 
 		type: String, 
-		enum: ['DRAFT', 'PENDING', 'PUBLISHED'], 
+		enum: ['DRAFT', 'PENDING', 'PUBLISHED', 'STATICRESOURCE'], 
 		default: 'DRAFT' 
 	},
 	validatedAndPublishedAt: { 

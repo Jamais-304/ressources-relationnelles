@@ -8,7 +8,7 @@ export interface ResourceInterface {
 		'text/plain' | 'text/html';
 	category: string;
 	relationType: string;
-	status?: 'DRAFT' | 'PENDING' | 'PUBLISHED';
+	status: 'DRAFT' | 'PENDING' | 'PUBLISHED' | 'STATICRESOURCE';
 	validatedAndPublishedAt?: Date;
 	validatedBy?: string;
 	createdAt?: Date;
