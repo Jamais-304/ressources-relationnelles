@@ -35,13 +35,14 @@ export const userNotFound: string = "userNotFound"
 export const unableInfo: string = "unableInfo"
 export const invToken: string = "invToken"
 export const expirToken: string = "expirToken"
+export const signToken: string = "signToken"
+export const malformed: string = "malformed"
 export const resourceNotFound: string = "resourceNotFound"
 export const resourceParameterNotFound: string = "resourceParameterNotFound"
-
 // Predefined error messages for validation
 export const msgInvalidCredentials: string = "Identifiant/mot de passe incorrect !"
 export const msgServerError: string = "Erreur serveur"
-
+export const msgExpirToken: string = "Token expiré"
 // Validation error messages for comments
 export const commentsMsgIdMustBeString: (type: string) => string = (type) =>
     `L'ID de ${type === "auteur" ? "l'" : "la"} ${type} doit être une chaîne de caractères`
@@ -83,7 +84,9 @@ export const ErrorMappings: ErrorMapping[] = [
     { type: passwordRequired, msg: "'password' est requis pour confirmer votre identité avant modification", statusCode: 400 },
     { type: unauthorized, msg: "Accès non autorisé", statusCode: 401 },
     { type: invToken, msg: "Token invalid", statusCode: 401 },
-    { type: expirToken, msg: "Token invalid", statusCode: 401 },
+    { type: malformed, msg: "Format token invalide", statusCode: 401 },
+    { type: signToken, msg: "Signature token invalide", statusCode: 401 },
+    { type: expirToken, msg: msgExpirToken, statusCode: 401 },
     { type: incorrectPassword, msg: "Mot de passe incorrect. Veuillez réessayer", statusCode: 401 },
     { type: invalidCredentials, msg: msgInvalidCredentials, statusCode: 401, location: "body" },
     { type: insufficientAccess, msg: "Accès insuffisant", statusCode: 403 },
@@ -92,8 +95,5 @@ export const ErrorMappings: ErrorMapping[] = [
     { type: userNotFound, msg: "Utilisateur non trouvé. Veuillez vérifier l'email fourni", statusCode: 404 },
     { type: unableInfo, msg: "Impossible de créer un compte avec les informations fournies", statusCode: 409 },
     { type: serverError, msg: msgServerError, statusCode: 500 },
-    { type: unexpectedError, msg: "Une erreur inattendue s'est produite", statusCode: 500 },
-    { type: resourceNotFound, msg: "Ressource non trouvée", statusCode: 404 },
-    { type: resourceParameterNotFound, msg: "Mauvaise requête : paramètre de ressource non trouvé", statusCode: 400, location: "params" },
-    
+    { type: unexpectedError, msg: "Une erreur inattendue s'est produite", statusCode: 500 }
 ]

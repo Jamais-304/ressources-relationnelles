@@ -1,15 +1,18 @@
 import type ResourceInterface from "../interfaces/resourceInterface.ts"
 import { type UserInterface } from "../interfaces/userInterfaces.ts"
 import { type TokensInterface } from "../interfaces/tokenInterfaces.ts"
-
+import { type PaginationInterface } from "../interfaces/paginationInterface.ts"
+import {type CommentsInterface} from "../interfaces/commentsInterface.ts"
 /**
  * Interface representing the structure of the data that can be included in the response.
  */
-interface Data {
+export interface Data {
     user?: UserInterface
     users?: UserInterface[]
     ressource?: ResourceInterface
     tokens?: TokensInterface
+    pagination?: PaginationInterface
+    comments?: CommentsInterface
 }
 
 interface ErrorDataItem {

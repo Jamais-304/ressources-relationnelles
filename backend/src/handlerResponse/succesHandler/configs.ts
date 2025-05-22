@@ -11,7 +11,9 @@ export const commentCreated: string = "commentCreated"
 export const loginSucces: string = "loginSucces"
 export const logoutSucces: string = "logoutSucces"
 export const userFound: string = "userFound"
+export const usersFound: string = "usersFound"
 export const tokenRenewed: string = "tokenRenewed"
+export const noUser: string = "noUser"
 export const getResources: string = "getResources"
 export const createResource: string = "createResource"
 export const updateResource: string = "updateResource"
@@ -25,7 +27,9 @@ export const msgCommentCreated: string = "Commentaire créé avec succès"
 export const msgLoginSucces: string = "Connexion réussie"
 export const msgLogoutSucces: string = "Utilisateur déconnecté avec succès"
 export const msgUserFound: string = "Utilisateur trouvé"
+export const msgUsersFound: string = "Utilisateurs trouvés"
 export const msgTokenRenewed: string = "Nouveau token généré"
+export const msgNoUser: string = "Aucun utilisateur trouvé"
 export const msgGetResources: string = "Ressources récupérées avec succès"
 export const msgCreateResource: string = "Ressource créée avec succès"
 export const msgUpdateResource: string = "Ressource mise à jour avec succès"
@@ -37,7 +41,9 @@ export const msgDeleteResource: string = "Ressource supprimée avec succès"
  */
 export const SuccesMappings: SuccesMapping[] = [
     { type: loginSucces, msg: msgLoginSucces, statusCode: 200 },
+    { type: noUser, msg: msgNoUser, statusCode: 200 },
     { type: userFound, msg: msgUserFound, statusCode: 200 },
+    { type: usersFound, msg: msgUsersFound, statusCode: 200 },
     { type: logoutSucces, msg: msgLogoutSucces, statusCode: 200 },
     { type: userDeleted, msg: msgUserDeleted, statusCode: 200 },
     { type: userUpdated, msg: msgUserUpdated, statusCode: 200 },
@@ -47,5 +53,5 @@ export const SuccesMappings: SuccesMapping[] = [
     { type: getResources, msg: msgGetResources, statusCode: 200 },
     { type: createResource, msg: msgCreateResource, statusCode: 201 },
     { type: updateResource, msg: msgUpdateResource, statusCode: 200 },
-    { type: deleteResource, msg: msgDeleteResource, statusCode: 200 },
+    { type: deleteResource, msg: msgDeleteResource, statusCode: 200 }
 ]
