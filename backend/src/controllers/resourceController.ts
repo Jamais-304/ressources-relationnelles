@@ -10,7 +10,7 @@ import { errorHandler } from '../handlerResponse/errorHandler/errorHandler.ts';
 
 import { getResources, createResource as createResourceSuccess, updateResource as updateResourceSuccess, deleteResource as deleteResourceSuccess } from '../handlerResponse/succesHandler/configs.ts';
 import { succesHandler } from '../handlerResponse/succesHandler/succesHandler.ts';
-import { uploadToGridFS } from '../utils/gridfsHandler.ts';
+import { uploadToGridFS, categorySizeLimit, allowedMimeTypes } from '../utils/gridfsHandler.ts';
 
 
 
@@ -161,53 +161,61 @@ export const createResource = async (req: AuthRequest, res: Response) => {
 
 		// check if resource information is provided
 		/**
-	authorId: string;
-	title: string;
-	contentGridfsId: string;
-	category: 'TEXT' | 'HTML' | 'VIDEO' | 'AUDIO' | 'IMAGE';
-	relationType: string;
-	status?: 'DRAFT' | 'PENDING' | 'PUBLISHED';
-	validatedAndPublishedAt?: Date;
-	validatedBy?: string;
-	createdAt?: Date;
-	updatedAt?: Date;
+			authorId: string;
+			title: string;
+			contentGridfsId: string;
+			category: 'TEXT' | 'HTML' | 'VIDEO' | 'AUDIO' | 'IMAGE';
+			relationType: string;
+			status?: 'DRAFT' | 'PENDING' | 'PUBLISHED';
+			validatedAndPublishedAt?: Date;
+			validatedBy?: string;
+			createdAt?: Date;
+			updatedAt?: Date;
 		 */
 		if (!req.body.title || !req.body.category || !req.body.relationType) {
 			errorHandler(res, resourceParameterNotFound) //missing resource information
 			return
 		}
 
-		// TODO : double check the content input so that invalid content is not uploaded to gridFS
+		// check that a category is provided and is valid
 		if (req.body.category !== 'TEXT' && req.body.category !== 'HTML' && req.body.category !== 'VIDEO' && req.body.category !== 'AUDIO' && req.body.category !== 'IMAGE') {
 			errorHandler(res, resourceParameterNotFound) //unvalid resource category
 			return
 		}
-
-//----------------------------------------------------
+		
+		
+		//----------------------------------------------------
 		if (!req.file) {
 			errorHandler(res, resourceParameterNotFound) // pas de fichier envoyé
 			return
 		}
 		
+		// double check the content category so that invalid content is not uploaded to gridFS
+		if (!allowedMimeTypes[req.body.category].includes(req.file.mimetype)) {
+			errorHandler(res, resourceParameterNotFound) //mimetype and category do not match
+			return
+		}
+		
 		const { buffer, originalname, mimetype } = req.file
+		
+		if (req.file.size > categorySizeLimit[req.body.category]) {
+			errorHandler(res, `Fichier trop volumineux : max autorisé pour ${req.body.category} = ${categorySizeLimit[req.body.category] / 1024 / 1024} Mo`)
+			return
+		}
 		
 		let contentGridfsIdResult: string
 		try {
 			contentGridfsIdResult = await uploadToGridFS(buffer, originalname, mimetype)
 		} catch (err) {
-			errorHandler(res, 'Erreur lors de l’envoi du contenu à GridFS')
+			errorHandler(res, `Erreur lors du téléversement du contenu à GridFS`)
 			return
 		}
 
-
-		// TODO: try to insert content into gridFS here
-		// check if that worked before creating the resource
-
 		const resource = new Resource({
-			...req.body,
+			...req.body, //TODO: décomposer pour éviter l'upload de données incorrectes ou inutiles
 			authorId: req.auth.userId,
 			status: 'DRAFT',
-			contentGridfsId: contentGridfsIdResult, //TODO: handle gridFS content upload
+			contentGridfsId: contentGridfsIdResult,
 			validatedAndPublishedAt: null,
 			validatedBy: null,
 			createdAt: new Date(),
@@ -248,7 +256,6 @@ export const updateResource = async (req: AuthRequest, res: Response) => {
 	if (!req.auth || !req.auth.userId) {
 		errorHandler(res, unauthorized)
 		return
-
 	}
 
 	try {
