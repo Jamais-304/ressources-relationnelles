@@ -1,9 +1,12 @@
-export default interface ResourceInterface {
-
+export interface ResourceInterface {
 	authorId: string;
 	title: string;
 	contentGridfsId: string;
-	category: 'TEXT' | 'HTML' | 'VIDEO' | 'AUDIO' | 'IMAGE';
+	resourceMIMEType: 'image/jpeg' | 'image/png' | 'image/gif' |
+		'audio/mpeg' | 'audio/wav' |
+		'video/mp4' | 'video/webm' |
+		'text/plain' | 'text/html';
+	category: string;
 	relationType: string;
 	status?: 'DRAFT' | 'PENDING' | 'PUBLISHED';
 	validatedAndPublishedAt?: Date;
