@@ -12,6 +12,7 @@ import {
     role
 } from "../handlerResponse/errorHandler/configs.ts"
 import {ROLE_HIERARCHY, passwordMaxLength, passwordMinLength, pseudonymeMaxLength, pseudonymeMinLength} from "../configs.ts"
+
 interface IUserSchema extends UserInterface, Document {}
 
 const userSchema: Schema<IUserSchema> = new mongoose.Schema(

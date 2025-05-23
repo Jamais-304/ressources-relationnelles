@@ -39,6 +39,10 @@ export const signToken: string = "signToken"
 export const malformed: string = "malformed"
 export const resourceNotFound: string = "resourceNotFound"
 export const resourceParameterNotFound: string = "resourceParameterNotFound"
+
+export const categoryNotFound: string = "categoryNotFound"
+export const categoryParameterNotFound: string = "categoryParameterNotFound"
+
 // Predefined error messages for validation
 export const msgInvalidCredentials: string = "Identifiant/mot de passe incorrect !"
 export const msgServerError: string = "Erreur serveur"
@@ -95,5 +99,10 @@ export const ErrorMappings: ErrorMapping[] = [
     { type: userNotFound, msg: "Utilisateur non trouvé. Veuillez vérifier l'email fourni", statusCode: 404 },
     { type: unableInfo, msg: "Impossible de créer un compte avec les informations fournies", statusCode: 409 },
     { type: serverError, msg: msgServerError, statusCode: 500 },
-    { type: unexpectedError, msg: "Une erreur inattendue s'est produite", statusCode: 500 }
+    { type: unexpectedError, msg: "Une erreur inattendue s'est produite", statusCode: 500 },
+
+    { type: resourceNotFound, msg: "Ressource non trouvée", statusCode: 404 },
+    { type: resourceParameterNotFound, msg: "Mauvaise requête : paramètre de ressource non trouvé", statusCode: 400, location: "params" },
+    { type: categoryNotFound, msg: "Catégorie non trouvée", statusCode: 404 },
+    { type: categoryParameterNotFound, msg: "Mauvaise requête : paramètre de catégorie non trouvé", statusCode: 400, location: "params" }
 ]

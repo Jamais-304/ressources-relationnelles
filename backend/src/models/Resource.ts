@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
-import type ResourceInterface from '../interfaces/resourceInterface.ts';
+import mongoose, { Document, Schema } from 'mongoose';
+import { type ResourceInterface } from '../interfaces/resourceInterface.ts';
 
 interface IResourceSchema extends ResourceInterface, Document {}
 
@@ -18,11 +18,21 @@ const resourceSchema = new mongoose.Schema({
 		type: String, 
 		required: [true, "Content's GridFS ID is required"], 
 	},
+	resourceMIMEType: {
+		type: String,
+		enum: [
+			'image/jpeg', 'image/png', 'image/gif',
+			'audio/mpeg', 'audio/wav',
+			'video/mp4', 'video/webm',
+			'text/plain', 'text/html'
+		],
+		required: [true, "MIME type is required"],
+		trim: true
+	},
 	category: { 
-		type: String, 
-		enum: ['TEXT', 'HTML', 'VIDEO', 'AUDIO', 'IMAGE'], 
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'Category',
 		required: [true, "Category is required"], 
-		trim: true 
 	},
 	relationType: { 
 		type: String, 
@@ -31,7 +41,7 @@ const resourceSchema = new mongoose.Schema({
 	},
 	status: { 
 		type: String, 
-		enum: ['DRAFT', 'PENDING', 'PUBLISHED'], 
+		enum: ['DRAFT', 'PENDING', 'PUBLISHED', 'STATICRESOURCE'], 
 		default: 'DRAFT' 
 	},
 	validatedAndPublishedAt: { 
