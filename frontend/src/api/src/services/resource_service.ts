@@ -21,16 +21,40 @@ export class ResourceService {
    */
   async list(): Promise<Resource[]> {
     try {
-      const response = await this.api.get(`resources/get-all-resources`)
-      const resourcesData = response?.data?.resources as ResourceData[]
+      const response = await this.api.get(`resource`)
+      console.log(response)
+      const resourcesData = response?.data as ResourceData[]
       const resources = resourcesData.map((resource: ResourceData) =>
         Resource.fromJson(resource)
       )
+
+      console.log(resources)
 
       return resources
     } catch (error) {
       CustomError.handleError(
         'Erreur durant la récupération d’une liste de ressources.',
+        error
+      )
+    }
+  }
+
+  /**
+   * Get a single resource based on its id.
+   * @param {object} uuid - The Resource uuid.
+   * @returns A Resource.
+   * @throws {CustomError} When fetching a resource failed.
+   */
+  async get(uuid: string): Promise<Resource[]> {
+    try {
+      const response = await this.api.get(`resource/${uuid}`)
+      const resourceData = response?.data?.resource as ResourceData
+      const resource = Resource.fromJson(resourceData)
+
+      return resource
+    } catch (error) {
+      CustomError.handleError(
+        'Erreur durant la récupération d’une ressource.',
         error
       )
     }
@@ -57,13 +81,9 @@ export class ResourceService {
     }
 
     try {
-      const response = await this.api.post(
-        `resources/create-resource`,
-        formData,
-        {
-          contentType: ContentType.FormData,
-        }
-      )
+      const response = await this.api.post(`resource/create`, formData, {
+        contentType: ContentType.FormData,
+      })
       const resourceData = response?.data?.resource as ResourceData
       const resource = Resource.fromJson(resourceData)
 
@@ -96,13 +116,9 @@ export class ResourceService {
       formData.append('file', JSONattrs.file)
     }
     try {
-      const response = await this.api.put(
-        `resources/update-resource/${uuid}`,
-        formData,
-        {
-          contentType: ContentType.FormData,
-        }
-      )
+      const response = await this.api.put(`resource/${uuid}`, formData, {
+        contentType: ContentType.FormData,
+      })
 
       const resourceData = response?.data?.resource as ResourceData
       const resource = Resource.fromJson(resourceData)
@@ -127,9 +143,7 @@ export class ResourceService {
   async delete(resource: Resource): Promise<Response> {
     const uuid = resource.uuid
     try {
-      const response = await this.api.delete(
-        `resources/delete-resource/${uuid}`
-      )
+      const response = await this.api.delete(`resource/delete/${uuid}`)
       return response
     } catch (error) {
       CustomError.handleError(

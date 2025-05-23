@@ -11,7 +11,7 @@ export interface ResourceData {
   file?: File
   contentGridfsId?: string
   category: string
-  relationType?: string
+  // relationType?: string
   status: string
   validatedAndPublishedAt?: string
   validatedBy?: number
@@ -25,7 +25,7 @@ export interface IResource {
   authorUuid: string
   file?: File
   contentGridfsUuid?: string
-  relationType?: RelationType
+  // relationType?: RelationType
   category: string
   status: string
   validatedAndPublishedAt?: string
@@ -57,7 +57,7 @@ export class Resource implements IResource {
     this.title = data.title
     this.authorUuid = data.authorId
     this.contentGridfsUuid = data.contentGridfsId
-    this.relationType = relationTypeFromString(data.relationType)
+    // this.relationType = relationTypeFromString(data.relationType)
     this.category = data.category
     this.status = data.status
     this.validatedAndPublishedAt = data.validatedAndPublishedAt
@@ -84,10 +84,11 @@ export class Resource implements IResource {
       _id: attrs.uuid,
       title: attrs.title,
       authorId: attrs.authorUuid,
+      // resourceMIMEtype:
       file: attrs.file,
       contentGridfsId: attrs.contentGridfsUuid,
       category: attrs.category,
-      relationType: relationTypeToString(attrs.relationType),
+      // relationType: relationTypeToString(attrs.relationType),
       status: attrs.status,
       validatedAndPublishedAt: attrs.validatedAndPublishedAt,
       validatedBy: attrs.validatedBy,
