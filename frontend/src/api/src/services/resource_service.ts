@@ -21,11 +21,14 @@ export class ResourceService {
    */
   async list(): Promise<Resource[]> {
     try {
-      const response = await this.api.get(`resource/get-all-resources`)
-      const resourcesData = response?.data?.resources as ResourceData[]
+      const response = await this.api.get(`resource`)
+      console.log(response)
+      const resourcesData = response?.data as ResourceData[]
       const resources = resourcesData.map((resource: ResourceData) =>
         Resource.fromJson(resource)
       )
+
+      console.log(resources)
 
       return resources
     } catch (error) {
