@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import NavBar from './components/NavBar.vue'
+import Footer from './components/Footer.vue'
 import { RouterView } from 'vue-router'
 import { useAuthUserStore } from './stores/authUserStore'
 import { onMounted } from 'vue'
+
 
 const { initializeFromSessionStorage } = useAuthUserStore()
 
@@ -19,5 +21,6 @@ onMounted(() => initializeFromSessionStorage())
         <RouterView />
       </div>
     </v-main>
+    <Footer />
   </v-app>
 </template>
