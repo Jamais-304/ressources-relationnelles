@@ -245,26 +245,16 @@ const loadResourceContent = async (resource: Resource) => {
       if (resourceData.resourceMIMEType.startsWith('text/')) {
         console.log('🔍 DEBUG - Resource is text type, fetching content...')
         try {
-          // Essayer de récupérer le contenu pour tous les utilisateurs (connectés ou non)
-          console.log('🔍 DEBUG - About to fetch content with ID:', resourceData.contentGridfsId)
-          const contentResponse = await api.get(`resource/content/${resourceData.contentGridfsId}`, {
+          // Utiliser l'endpoint public pour le contenu des ressources publiées
+          const contentResponse = await api.get(`resource/published/${resource.uuid}/content`, {
             responseType: 'text'
           })
-          console.log('🔍 DEBUG - Content response:', contentResponse)
-          
           const content = contentResponse.data || contentResponse
           resourceContent.value = content as string || 'Contenu non disponible'
           console.log('🔍 DEBUG - Set resourceContent:', resourceContent.value)
         } catch (error: any) {
           console.error('❌ DEBUG - Erreur chargement contenu:', error)
-          
-          if (error.response?.status === 401 || error.response?.status === 403) {
-            resourceContent.value = '🔒 Contenu protégé - Impossible d\'accéder au contenu de cette ressource'
-          } else if (error.code === 'ERR_NETWORK') {
-            resourceContent.value = '🌐 Erreur de connexion au serveur - Vérifiez que le backend est démarré'
-          } else {
-            resourceContent.value = 'Erreur lors du chargement du contenu'
-          }
+          resourceContent.value = 'Contenu non disponible'
         }
       } else {
         // Pour les autres types de fichiers, afficher les informations disponibles
@@ -278,13 +268,7 @@ const loadResourceContent = async (resource: Resource) => {
     console.error('❌ DEBUG - Erreur lors du chargement du contenu:', error)
     console.error('❌ DEBUG - Error response:', error.response)
     
-    if (error.response?.status === 401 || error.response?.status === 403) {
-      resourceContent.value = '🔒 Accès refusé - Impossible d\'accéder aux informations de cette ressource'
-    } else if (error.code === 'ERR_NETWORK') {
-      resourceContent.value = '🌐 Erreur de connexion - Le backend n\'est pas démarré'
-    } else {
-      resourceContent.value = 'Erreur lors du chargement des métadonnées'
-    }
+    resourceContent.value = 'Informations non disponibles'
   } finally {
     console.log('🔍 DEBUG - loadResourceContent finished. Final resourceContent:', resourceContent.value)
     isLoadingContent.value = false
