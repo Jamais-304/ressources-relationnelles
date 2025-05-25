@@ -151,65 +151,103 @@ export const createResource = async (req: AuthRequest, res: Response) => {
 	}
 
 	try {
+		console.log('🔍 DEBUG - createResource called with body:', req.body)
+		console.log('🔍 DEBUG - createResource called with file:', req.file ? {
+			originalname: req.file.originalname,
+			mimetype: req.file.mimetype,
+			size: req.file.size
+		} : 'No file')
+
 		const user = await User.findById(req.auth.userId)
 
 		// check if user exists
 		if (!user) {
+			console.log('❌ DEBUG - User not found')
 			errorHandler(res, unauthorized) //connection error ?
 			return
 		}
 
 		// check if resource information is provided
-		/**
-			authorId: string;
-			title: string;
-			contentGridfsId: string;
-			category: 'TEXT' | 'HTML' | 'VIDEO' | 'AUDIO' | 'IMAGE';
-			relationType: string;
-			status?: 'DRAFT' | 'PENDING' | 'PUBLISHED';
-			validatedAndPublishedAt?: Date;
-			validatedBy?: string;
-			createdAt?: Date;
-			updatedAt?: Date;
-		 */
 		if (!req.body.title || !req.body.category || !req.body.relationType) {
+			console.log('❌ DEBUG - Missing required fields:', {
+				title: !!req.body.title,
+				category: !!req.body.category,
+				relationType: !!req.body.relationType
+			})
 			errorHandler(res, resourceParameterNotFound) //missing resource information
 			return
 		}
 
-		// check that a category is provided and is valid
-		if (req.body.category !== 'TEXT' && req.body.category !== 'HTML' && req.body.category !== 'VIDEO' && req.body.category !== 'AUDIO' && req.body.category !== 'IMAGE') {
-			errorHandler(res, resourceParameterNotFound) //unvalid resource category
+		// Valider que la catégorie est fournie (on accepte maintenant toutes les catégories métier)
+		if (!req.body.category.trim()) {
+			console.log('❌ DEBUG - Empty category')
+			errorHandler(res, 'Catégorie requise')
 			return
 		}
 		
-		
 		//----------------------------------------------------
 		if (!req.file) {
+			console.log('❌ DEBUG - No file provided')
 			errorHandler(res, resourceParameterNotFound) // pas de fichier envoyé
 			return
 		}
 		
-		// double check the content category so that invalid content is not uploaded to gridFS
-		if (!allowedMimeTypes[req.body.category].includes(req.file.mimetype)) {
-			errorHandler(res, resourceParameterNotFound) //mimetype and category do not match
-			return
-		}
-		
+		// Déterminer automatiquement le type de fichier basé sur le MIME type
 		const { buffer, originalname, mimetype } = req.file
+		let fileType: string
 		
-		if (req.file.size > categorySizeLimit[req.body.category]) {
-			errorHandler(res, `Fichier trop volumineux : max autorisé pour ${req.body.category} = ${categorySizeLimit[req.body.category] / 1024 / 1024} Mo`)
+		console.log('🔍 DEBUG - Processing file:', { originalname, mimetype, size: req.file.size })
+		
+		if (mimetype.startsWith('image/')) {
+			fileType = 'IMAGE'
+		} else if (mimetype.startsWith('video/')) {
+			fileType = 'VIDEO'
+		} else if (mimetype.startsWith('audio/')) {
+			fileType = 'AUDIO'
+		} else if (mimetype.startsWith('text/')) {
+			fileType = 'TEXT'
+		} else {
+			console.log('❌ DEBUG - Unsupported file type:', mimetype)
+			errorHandler(res, `Type de fichier non supporté: ${mimetype}`)
 			return
 		}
+		
+		console.log('🔍 DEBUG - Detected file type:', fileType)
+		
+		// Vérifier que le MIME type est autorisé pour ce type de fichier
+		if (!allowedMimeTypes[fileType].includes(mimetype)) {
+			console.log('❌ DEBUG - MIME type not allowed:', { fileType, mimetype, allowed: allowedMimeTypes[fileType] })
+			errorHandler(res, `Type de fichier non autorisé: ${mimetype}. Types autorisés pour ${fileType}: ${allowedMimeTypes[fileType].join(', ')}`)
+			return
+		}
+		
+		// Vérifier la taille du fichier
+		if (req.file.size > categorySizeLimit[fileType]) {
+			console.log('❌ DEBUG - File too large:', { size: req.file.size, limit: categorySizeLimit[fileType] })
+			errorHandler(res, `Fichier trop volumineux : max autorisé pour ${fileType} = ${categorySizeLimit[fileType] / 1024 / 1024} Mo`)
+			return
+		}
+		
+		console.log('🔍 DEBUG - All validations passed, uploading to GridFS...')
 		
 		let contentGridfsUuidResult: string
 		try {
 			contentGridfsUuidResult = await uploadToGridFS(buffer, originalname, mimetype)
+			console.log('✅ DEBUG - GridFS upload successful:', contentGridfsUuidResult)
 		} catch (err) {
+			console.log('❌ DEBUG - GridFS upload failed:', err)
 			errorHandler(res, `Erreur lors du téléversement du contenu à GridFS`)
 			return
 		}
+
+		console.log('🔍 DEBUG - Creating resource with data:', {
+			authorId: req.auth.userId,
+			title: req.body.title,
+			contentGridfsId: contentGridfsUuidResult,
+			resourceMIMEType: mimetype,
+			category: req.body.category,
+			relationType: req.body.relationType
+		})
 
 		const resource = new Resource({
 			authorId: req.auth.userId,
@@ -218,16 +256,18 @@ export const createResource = async (req: AuthRequest, res: Response) => {
 			resourceMIMEType: mimetype,
 			category: req.body.category,
 			relationType: req.body.relationType,
-			status: 'DRAFT',
+			status: 'PENDING',
 			validatedAndPublishedAt: null,
 			validatedBy: null,
 		})
 
 		await resource.save()
+		console.log('✅ DEBUG - Resource saved successfully')
 		succesHandler(res, createResourceSuccess, resource)
 		return
 
 	} catch (error) {
+		console.log('❌ DEBUG - Unexpected error:', error)
 		const errorMessage = error instanceof Error ? error.message : unexpectedError
 		errorHandler(res, errorMessage)
 		return
