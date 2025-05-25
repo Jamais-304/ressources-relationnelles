@@ -178,7 +178,7 @@ onMounted(() => {
               </div>
               <div>
                 <div class="text-3xl font-bold text-gray-900">{{ isAuthenticated ? 'Connecté' : 'Visiteur' }}</div>
-                <div class="text-gray-600">{{ isAuthenticated ? 'Accès complet' : 'Accès limité' }}</div>
+                <div class="text-gray-600">{{ isAuthenticated ? 'Peut créer des ressources' : 'Peut consulter les ressources' }}</div>
               </div>
             </div>
           </div>
