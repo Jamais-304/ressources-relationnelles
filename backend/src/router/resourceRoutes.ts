@@ -11,6 +11,9 @@ router.get('/v1/resource/', auth, getAllResources)
 
 router.get('/v1/resource/published', getAllPublishedResources)
 
+// Route publique pour accéder à une ressource publiée spécifique
+router.get('/v1/resource/published/:id', getResourceById)
+
 router.get('/v1/resource/:id', auth, getResourceById)
 
 // Upload d'image pour l'éditeur WYSIWYG
