@@ -118,7 +118,7 @@
         <v-divider class="my-4" />
 
         <!-- Actions de modération -->
-        <div class="moderation-actions mb-4">
+        <div v-if="isAdmin" class="moderation-actions mb-4">
           <div class="text-subtitle-2 mb-3 d-flex align-center">
             <v-icon class="mr-2" color="primary">mdi-shield-check</v-icon>
             Actions de modération
@@ -174,6 +174,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import { useResourceHelpers, type Resource } from '@/composables/useResourceHelpers'
+import { useAuthUserStore } from '@/stores/authUserStore'
 import { Api } from '@/api/api'
 
 // Composables
@@ -186,6 +187,9 @@ const {
   getResourceColor, 
   formatDate 
 } = useResourceHelpers()
+
+// Store
+const { isAdmin } = useAuthUserStore()
 
 // Props & Emits
 const props = defineProps<{
@@ -224,14 +228,13 @@ const loadResourceContent = async (resource: Resource) => {
   resourceContentType.value = null
   
   try {
-    console.log('🔍 DEBUG - Making API call to resource/' + resource.uuid)
-    // Récupérer les métadonnées de la ressource pour avoir le type MIME
-    const resourceResponse = await api.get(`resource/${resource.uuid}`)
+    console.log('🔍 DEBUG - Making API call to resource/published/' + resource.uuid)
+    // Utiliser l'endpoint public pour les ressources publiées
+    const resourceResponse = await api.get(`resource/published/${resource.uuid}`)
     const resourceData = resourceResponse.data as any
     
     console.log('🔍 DEBUG - Resource data from backend:', resourceData)
     console.log('🔍 DEBUG - Resource contentGridfsId:', resourceData?.contentGridfsId)
-    console.log('🔍 DEBUG - Resource contentGridfsUuid:', resourceData?.contentGridfsUuid)
     console.log('🔍 DEBUG - Resource resourceMIMEType:', resourceData?.resourceMIMEType)
     
     if (resourceData && resourceData.resourceMIMEType) {
@@ -242,32 +245,21 @@ const loadResourceContent = async (resource: Resource) => {
       if (resourceData.resourceMIMEType.startsWith('text/')) {
         console.log('🔍 DEBUG - Resource is text type, fetching content...')
         try {
+          // Essayer de récupérer le contenu pour tous les utilisateurs (connectés ou non)
           console.log('🔍 DEBUG - About to fetch content with ID:', resourceData.contentGridfsId)
-          console.log('🔍 DEBUG - Making API call to resource/content/' + resourceData.contentGridfsId)
-          // Utiliser l'API axios pour récupérer le contenu  
           const contentResponse = await api.get(`resource/content/${resourceData.contentGridfsId}`, {
             responseType: 'text'
           })
           console.log('🔍 DEBUG - Content response:', contentResponse)
-          console.log('🔍 DEBUG - Content data:', contentResponse.data)
-          console.log('🔍 DEBUG - Content response type:', typeof contentResponse)
-          console.log('🔍 DEBUG - Content response keys:', Object.keys(contentResponse))
           
-          // La réponse semble être directement le contenu, pas dans .data
           const content = contentResponse.data || contentResponse
-          console.log('🔍 DEBUG - Final content to use:', content)
-          
           resourceContent.value = content as string || 'Contenu non disponible'
-          console.log('🔍 DEBUG - Set resourceContent to:', resourceContent.value)
+          console.log('🔍 DEBUG - Set resourceContent:', resourceContent.value)
         } catch (error: any) {
           console.error('❌ DEBUG - Erreur chargement contenu:', error)
-          console.error('❌ DEBUG - Error response:', error.response)
-          console.error('❌ DEBUG - Error status:', error.response?.status)
-          console.error('❌ DEBUG - Error data:', error.response?.data)
           
-          // Gérer spécifiquement les erreurs d'autorisation
           if (error.response?.status === 401 || error.response?.status === 403) {
-            resourceContent.value = '🔒 Accès au contenu restreint - Droits de modération requis'
+            resourceContent.value = '🔒 Contenu protégé - Impossible d\'accéder au contenu de cette ressource'
           } else if (error.code === 'ERR_NETWORK') {
             resourceContent.value = '🌐 Erreur de connexion au serveur - Vérifiez que le backend est démarré'
           } else {
@@ -287,7 +279,7 @@ const loadResourceContent = async (resource: Resource) => {
     console.error('❌ DEBUG - Error response:', error.response)
     
     if (error.response?.status === 401 || error.response?.status === 403) {
-      resourceContent.value = '🔒 Accès refusé - Connectez-vous en tant que modérateur'
+      resourceContent.value = '🔒 Accès refusé - Impossible d\'accéder aux informations de cette ressource'
     } else if (error.code === 'ERR_NETWORK') {
       resourceContent.value = '🌐 Erreur de connexion - Le backend n\'est pas démarré'
     } else {
