@@ -32,7 +32,19 @@ router.get('/v1/resource/content/:id', auth, getResourceContent)
 router.post('/v1/resource/create-text', auth, createTextResource)
 
 // Création de ressource fichier (GRIDFS)
-router.post('/v1/resource/create', auth, upload.single('file'), createResource)
+router.post('/v1/resource/create', auth, (req, res, next) => {
+	console.log('🔍 DEBUG - Route /v1/resource/create hit')
+	console.log('🔍 DEBUG - Request headers:', req.headers)
+	console.log('🔍 DEBUG - Request content-type:', req.get('content-type'))
+	console.log('🔍 DEBUG - Request body before multer:', req.body)
+	console.log('🔍 DEBUG - Request file before multer:', req.file)
+	next()
+}, upload.single('file'), (req, res, next) => {
+	console.log('🔍 DEBUG - After multer middleware')
+	console.log('🔍 DEBUG - Request body after multer:', req.body)
+	console.log('🔍 DEBUG - Request file after multer:', req.file)
+	next()
+}, createResource)
 
 router.put('/v1/resource/:id', auth, updateResource)
 
