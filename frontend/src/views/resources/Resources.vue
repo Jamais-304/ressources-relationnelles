@@ -201,18 +201,15 @@ const loadResourceContent = async (resource: Resource) => {
       // Si c'est du texte, essayer de récupérer le contenu
       if (resourceData.resourceMIMEType.startsWith('text/')) {
         try {
-          // Essayer de récupérer le contenu pour tous les utilisateurs (connectés ou non)
-          const contentResponse = await api.get(`resource/content/${resourceData.contentGridfsId}`, {
+          // Utiliser l'endpoint public pour le contenu des ressources publiées
+          const contentResponse = await api.get(`resource/published/${resource.uuid}/content`, {
             responseType: 'text'
           })
           const content = contentResponse.data || contentResponse
           resourceContents.value.set(resource.uuid, content as string)
         } catch (error: any) {
-          if (error.response?.status === 401 || error.response?.status === 403) {
-            resourceContents.value.set(resource.uuid, '🔒 Contenu protégé - Impossible d\'accéder au contenu de cette ressource')
-          } else {
-            resourceContents.value.set(resource.uuid, 'Erreur lors du chargement du contenu')
-          }
+          console.error('Erreur lors du chargement du contenu:', error)
+          resourceContents.value.set(resource.uuid, 'Contenu non disponible')
         }
       } else if (resourceData.resourceMIMEType.startsWith('image/')) {
         // Les images sont accessibles publiquement
@@ -222,11 +219,8 @@ const loadResourceContent = async (resource: Resource) => {
       }
     }
   } catch (error: any) {
-    if (error.response?.status === 401 || error.response?.status === 403) {
-      resourceContents.value.set(resource.uuid, '🔒 Informations protégées - Impossible d\'accéder aux informations de cette ressource')
-    } else {
-      resourceContents.value.set(resource.uuid, 'Erreur lors du chargement')
-    }
+    console.error('Erreur lors du chargement des métadonnées:', error)
+    resourceContents.value.set(resource.uuid, 'Informations non disponibles')
   } finally {
     loadingContents.value.delete(resource.uuid)
   }
