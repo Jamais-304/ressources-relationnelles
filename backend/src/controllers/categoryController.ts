@@ -10,6 +10,20 @@ import { createCategorySuccess, deleteCategorySuccess, getCategories, updateCate
 
 /**
  * Retrieves all categories from the database.
+ * Public endpoint - no authentication required.
+ */
+export const getPublicCategories = async (req: Request, res: Response): Promise<void> => {
+	try {
+		const categories = await Category.find();
+		succesHandler(res, getCategories, categories as any);
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : unexpectedError;
+		errorHandler(res, errorMessage);
+	}
+};
+
+/**
+ * Retrieves all categories from the database.
  * Only accessible by admin or super-admin users.
  */
 export const getAllCategories = async (req: AuthRequest, res: Response): Promise<void> => {
