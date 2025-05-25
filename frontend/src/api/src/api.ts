@@ -36,7 +36,7 @@ export class Api {
    */
   constructor({
     auth = Authentication.anonymous(),
-    baseUrl = import.meta.env.VITE_API_BASE_URL,
+    baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1',
   }: {
     auth?: Authentication
     baseUrl?: string
@@ -308,7 +308,7 @@ export class Api {
     if (axios.isAxiosError(error)) {
       throw error
     } else {
-      throw new Error(`Erreur durant l’appel API: ${error}`)
+      throw new Error(`Erreur durant l'appel API: ${error}`)
     }
   }
 }
