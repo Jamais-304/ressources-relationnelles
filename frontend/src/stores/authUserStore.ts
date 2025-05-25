@@ -13,10 +13,10 @@ export const useAuthUserStore = defineStore('user', () => {
   const isAuthenticated = ref<boolean>(false)
 
   const isAdmin = computed(() => {
-    console.log(authUser.value?.role)
+    console.log('🔍 DEBUG - Checking isAdmin for user:', authUser.value?.role)
     return (
       authUser.value &&
-      authUser.value.role.includes(Role.Admin || Role.SuperAdmin)
+      (authUser.value.role === Role.Admin || authUser.value.role === Role.SuperAdmin)
     )
   })
 
@@ -57,7 +57,7 @@ export const useAuthUserStore = defineStore('user', () => {
       })
     )
   }
-
+                                                                                    
   function resetAuthUser() {
     authUser.value = undefined
     isAuthenticated.value = false

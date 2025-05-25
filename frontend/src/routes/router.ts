@@ -11,6 +11,7 @@ import { useAuthUserStore } from '@/stores/authUserStore'
 import MyAccount from '@/views/accounts/MyAccount.vue'
 import Resources from '@/views/resources/Resources.vue'
 import CreateResource from '@/views/resources/CreateResource.vue'
+import ResourceModeration from '@/views/resources/ResourceModerationV2.vue'
 
 const routes = [
   { path: '/', name: 'home', component: Home },
@@ -48,9 +49,6 @@ const routes = [
     path: '/resources',
     name: 'list resources',
     component: Resources,
-    meta: {
-      requiresAuth: true,
-    },
   },
   {
     path: '/create-resource',
@@ -58,6 +56,15 @@ const routes = [
     component: CreateResource,
     meta: {
       requiresAuth: true,
+    },
+  },
+  {
+    path: '/resources/moderation',
+    name: 'resource moderation',
+    component: ResourceModeration,
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
     },
   },
 ]

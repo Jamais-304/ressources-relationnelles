@@ -64,7 +64,6 @@ export const deleteFromGridFS = async (fileId: string): Promise<void> => {
 	}
 }
 
-
 export const getStreamFileFromGridFS = async (
 	fileId: string
 ): Promise<{
@@ -72,21 +71,28 @@ export const getStreamFileFromGridFS = async (
 	metadata: any
 }> => {
 	const { client, bucket } = await connectGridFS()
-	try {
-		const files = await bucket.find({ _id: new ObjectId(fileId) }).toArray()
+	
+	const files = await bucket.find({ _id: new ObjectId(fileId) }).toArray()
 
-		if (files.length === 0) {
-			throw new Error(`File not found in GridFS: ${fileId}`)
-		}
+	if (files.length === 0) {
+		await client.close() // Fermer la connexion seulement en cas d'erreur
+		throw new Error(`File not found in GridFS: ${fileId}`)
+	}
 
-		const fileInfo = files[0]
-		const downloadStream = bucket.openDownloadStream(new ObjectId(fileId))
+	const fileInfo = files[0]
+	const downloadStream = bucket.openDownloadStream(new ObjectId(fileId))
 
-		return {
-			stream: downloadStream,
-			metadata: fileInfo,
-		}
-	} finally {
-		await client.close()
+	// Fermer la connexion quand le stream est fini ou en erreur
+	downloadStream.on('end', () => {
+		client.close()
+	})
+	
+	downloadStream.on('error', () => {
+		client.close()
+	})
+
+	return {
+		stream: downloadStream,
+		metadata: fileInfo,
 	}
 }

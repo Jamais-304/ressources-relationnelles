@@ -1,21 +1,19 @@
 import type { Request, Response } from 'express';
 import type { AuthRequest } from '../interfaces/authInterface.ts';
-import Category from '../models/Category.ts';
+import RelationType from '../models/RelationType.ts';
 import User from '../models/User.ts';
-import { /*categoryNotFound, categoryParameterNotFound,*/ categoryNotFound, categoryParameterNotFound, unauthorized, unexpectedError } from '../handlerResponse/errorHandler/configs.ts';
+import { unauthorized, unexpectedError } from '../handlerResponse/errorHandler/configs.ts';
 import { errorHandler } from '../handlerResponse/errorHandler/errorHandler.ts';
-
 import { succesHandler } from '../handlerResponse/succesHandler/succesHandler.ts';
-import { createCategorySuccess, deleteCategorySuccess, getCategories, updateCategorySuccess } from '../handlerResponse/succesHandler/configs.ts';
 
 /**
- * Retrieves all categories from the database.
+ * Retrieves all active relation types from the database.
  * Public endpoint - no authentication required.
  */
-export const getPublicCategories = async (req: Request, res: Response): Promise<void> => {
+export const getActiveRelationTypes = async (req: Request, res: Response): Promise<void> => {
 	try {
-		const categories = await Category.find();
-		succesHandler(res, getCategories, categories as any);
+		const relationTypes = await RelationType.find({ isActive: true }).sort({ displayName: 1 });
+		succesHandler(res, 'Types de relations récupérés avec succès', relationTypes as any);
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : unexpectedError;
 		errorHandler(res, errorMessage);
@@ -23,10 +21,10 @@ export const getPublicCategories = async (req: Request, res: Response): Promise<
 };
 
 /**
- * Retrieves all categories from the database.
+ * Retrieves all relation types from the database.
  * Only accessible by admin or super-admin users.
  */
-export const getAllCategories = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getAllRelationTypes = async (req: AuthRequest, res: Response): Promise<void> => {
 	if (!req.auth || !req.auth.userId) {
 		errorHandler(res, unauthorized);
 		return;
@@ -39,8 +37,8 @@ export const getAllCategories = async (req: AuthRequest, res: Response): Promise
 	}
 
 	try {
-		const categories = await Category.find();
-		succesHandler(res, getCategories, categories);
+		const relationTypes = await RelationType.find().sort({ displayName: 1 });
+		succesHandler(res, 'Types de relations récupérés avec succès', relationTypes as any);
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : unexpectedError;
 		errorHandler(res, errorMessage);
@@ -48,33 +46,10 @@ export const getAllCategories = async (req: AuthRequest, res: Response): Promise
 };
 
 /**
- * Retrieves a category by its ID.
- */
-export const getCategoryById = async (req: Request, res: Response): Promise<void> => {
-	if (!req.params.id) {
-		errorHandler(res, categoryParameterNotFound);
-		return;
-	}
-
-	try {
-		const category = await Category.findById(req.params.id);
-		if (!category) {
-			errorHandler(res, categoryNotFound);
-			return;
-		}
-
-		succesHandler(res, getCategories, category);
-	} catch (error) {
-		const errorMessage = error instanceof Error ? error.message : unexpectedError;
-		errorHandler(res, errorMessage);
-	}
-};
-
-/**
- * Creates a new category.
+ * Creates a new relation type.
  * Only accessible by admin or super-admin users.
  */
-export const createCategory = async (req: AuthRequest, res: Response): Promise<void> => {
+export const createRelationType = async (req: AuthRequest, res: Response): Promise<void> => {
 	if (!req.auth || !req.auth.userId) {
 		errorHandler(res, unauthorized);
 		return;
@@ -86,21 +61,21 @@ export const createCategory = async (req: AuthRequest, res: Response): Promise<v
 		return;
 	}
 
-	if (!req.body.name) {
-		errorHandler(res, categoryParameterNotFound);
+	if (!req.body.name || !req.body.displayName) {
+		errorHandler(res, 'Le nom et le nom d\'affichage sont requis');
 		return;
 	}
 
 	try {
-		const category = new Category({
+		const relationType = new RelationType({
 			name: req.body.name,
+			displayName: req.body.displayName,
 			description: req.body.description || null,
-			createdAt: new Date(),
-			updatedAt: new Date(),
+			isActive: req.body.isActive !== undefined ? req.body.isActive : true,
 		});
 
-		await category.save();
-		succesHandler(res, createCategorySuccess, category);
+		await relationType.save();
+		succesHandler(res, 'Type de relation créé avec succès', relationType as any);
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : unexpectedError;
 		errorHandler(res, errorMessage);
@@ -108,10 +83,10 @@ export const createCategory = async (req: AuthRequest, res: Response): Promise<v
 };
 
 /**
- * Updates an existing category by its ID.
+ * Updates an existing relation type by its ID.
  * Only accessible by admin or super-admin users.
  */
-export const updateCategory = async (req: AuthRequest, res: Response): Promise<void> => {
+export const updateRelationType = async (req: AuthRequest, res: Response): Promise<void> => {
 	if (!req.auth || !req.auth.userId) {
 		errorHandler(res, unauthorized);
 		return;
@@ -123,28 +98,31 @@ export const updateCategory = async (req: AuthRequest, res: Response): Promise<v
 		return;
 	}
 
-	if (!req.params.id || !req.body.name) {
-		errorHandler(res, categoryParameterNotFound);
+	if (!req.params.id) {
+		errorHandler(res, 'ID du type de relation manquant');
 		return;
 	}
 
 	try {
-		const updatedCategory = await Category.findByIdAndUpdate(
+		const updateData: any = { updatedAt: new Date() };
+		
+		if (req.body.name) updateData.name = req.body.name;
+		if (req.body.displayName) updateData.displayName = req.body.displayName;
+		if (req.body.description !== undefined) updateData.description = req.body.description;
+		if (req.body.isActive !== undefined) updateData.isActive = req.body.isActive;
+
+		const updatedRelationType = await RelationType.findByIdAndUpdate(
 			req.params.id,
-			{
-				name: req.body.name,
-				description: req.body.description || null,
-				updatedAt: new Date(),
-			},
+			updateData,
 			{ new: true }
 		);
 
-		if (!updatedCategory) {
-			errorHandler(res, categoryNotFound);
+		if (!updatedRelationType) {
+			errorHandler(res, 'Type de relation non trouvé');
 			return;
 		}
 
-		succesHandler(res, updateCategorySuccess, updatedCategory);
+		succesHandler(res, 'Type de relation mis à jour avec succès', updatedRelationType as any);
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : unexpectedError;
 		errorHandler(res, errorMessage);
@@ -152,10 +130,10 @@ export const updateCategory = async (req: AuthRequest, res: Response): Promise<v
 };
 
 /**
- * Deletes a category by its ID.
+ * Deletes a relation type by its ID.
  * Only accessible by admin or super-admin users.
  */
-export const deleteCategory = async (req: AuthRequest, res: Response): Promise<void> => {
+export const deleteRelationType = async (req: AuthRequest, res: Response): Promise<void> => {
 	if (!req.auth || !req.auth.userId) {
 		errorHandler(res, unauthorized);
 		return;
@@ -168,20 +146,20 @@ export const deleteCategory = async (req: AuthRequest, res: Response): Promise<v
 	}
 
 	if (!req.params.id) {
-		errorHandler(res, categoryParameterNotFound);
+		errorHandler(res, 'ID du type de relation manquant');
 		return;
 	}
 
 	try {
-		const deletedCategory = await Category.findByIdAndDelete(req.params.id);
-		if (!deletedCategory) {
-			errorHandler(res, categoryNotFound);
+		const deletedRelationType = await RelationType.findByIdAndDelete(req.params.id);
+		if (!deletedRelationType) {
+			errorHandler(res, 'Type de relation non trouvé');
 			return;
 		}
 
-		succesHandler(res, deleteCategorySuccess);
+		succesHandler(res, 'Type de relation supprimé avec succès', undefined);
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : unexpectedError;
 		errorHandler(res, errorMessage);
 	}
-};
+}; 

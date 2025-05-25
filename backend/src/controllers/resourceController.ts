@@ -1,4 +1,3 @@
-
 import type { Request, Response } from 'express';
 import type { AuthRequest } from '../interfaces/authInterface.ts';
 
@@ -11,6 +10,7 @@ import { errorHandler } from '../handlerResponse/errorHandler/errorHandler.ts';
 import { getResources, createResource as createResourceSuccess, updateResource as updateResourceSuccess, deleteResource as deleteResourceSuccess } from '../handlerResponse/succesHandler/configs.ts';
 import { succesHandler } from '../handlerResponse/succesHandler/succesHandler.ts';
 import { uploadToGridFS, categorySizeLimit, allowedMimeTypes } from '../utils/gridfsHandler.ts';
+import { getStreamFileFromGridFS } from '../utils/gridfsHandler.ts';
 
 
 
@@ -151,82 +151,123 @@ export const createResource = async (req: AuthRequest, res: Response) => {
 	}
 
 	try {
+		console.log('🔍 DEBUG - createResource called with body:', req.body)
+		console.log('🔍 DEBUG - createResource called with file:', req.file ? {
+			originalname: req.file.originalname,
+			mimetype: req.file.mimetype,
+			size: req.file.size
+		} : 'No file')
+
 		const user = await User.findById(req.auth.userId)
 
 		// check if user exists
 		if (!user) {
+			console.log('❌ DEBUG - User not found')
 			errorHandler(res, unauthorized) //connection error ?
 			return
 		}
 
 		// check if resource information is provided
-		/**
-			authorId: string;
-			title: string;
-			contentGridfsId: string;
-			category: 'TEXT' | 'HTML' | 'VIDEO' | 'AUDIO' | 'IMAGE';
-			relationType: string;
-			status?: 'DRAFT' | 'PENDING' | 'PUBLISHED';
-			validatedAndPublishedAt?: Date;
-			validatedBy?: string;
-			createdAt?: Date;
-			updatedAt?: Date;
-		 */
 		if (!req.body.title || !req.body.category || !req.body.relationType) {
+			console.log('❌ DEBUG - Missing required fields:', {
+				title: !!req.body.title,
+				category: !!req.body.category,
+				relationType: !!req.body.relationType
+			})
 			errorHandler(res, resourceParameterNotFound) //missing resource information
 			return
 		}
 
-		// check that a category is provided and is valid
-		if (req.body.category !== 'TEXT' && req.body.category !== 'HTML' && req.body.category !== 'VIDEO' && req.body.category !== 'AUDIO' && req.body.category !== 'IMAGE') {
-			errorHandler(res, resourceParameterNotFound) //unvalid resource category
+		// Valider que la catégorie est fournie (on accepte maintenant toutes les catégories métier)
+		if (!req.body.category.trim()) {
+			console.log('❌ DEBUG - Empty category')
+			errorHandler(res, 'Catégorie requise')
 			return
 		}
 		
-		
 		//----------------------------------------------------
 		if (!req.file) {
+			console.log('❌ DEBUG - No file provided')
 			errorHandler(res, resourceParameterNotFound) // pas de fichier envoyé
 			return
 		}
 		
-		// double check the content category so that invalid content is not uploaded to gridFS
-		if (!allowedMimeTypes[req.body.category].includes(req.file.mimetype)) {
-			errorHandler(res, resourceParameterNotFound) //mimetype and category do not match
-			return
-		}
-		
+		// Déterminer automatiquement le type de fichier basé sur le MIME type
 		const { buffer, originalname, mimetype } = req.file
+		let fileType: string
 		
-		if (req.file.size > categorySizeLimit[req.body.category]) {
-			errorHandler(res, `Fichier trop volumineux : max autorisé pour ${req.body.category} = ${categorySizeLimit[req.body.category] / 1024 / 1024} Mo`)
+		console.log('🔍 DEBUG - Processing file:', { originalname, mimetype, size: req.file.size })
+		
+		if (mimetype.startsWith('image/')) {
+			fileType = 'IMAGE'
+		} else if (mimetype.startsWith('video/')) {
+			fileType = 'VIDEO'
+		} else if (mimetype.startsWith('audio/')) {
+			fileType = 'AUDIO'
+		} else if (mimetype.startsWith('text/')) {
+			fileType = 'TEXT'
+		} else {
+			console.log('❌ DEBUG - Unsupported file type:', mimetype)
+			errorHandler(res, `Type de fichier non supporté: ${mimetype}`)
 			return
 		}
 		
-		let contentGridfsIdResult: string
+		console.log('🔍 DEBUG - Detected file type:', fileType)
+		
+		// Vérifier que le MIME type est autorisé pour ce type de fichier
+		if (!allowedMimeTypes[fileType].includes(mimetype)) {
+			console.log('❌ DEBUG - MIME type not allowed:', { fileType, mimetype, allowed: allowedMimeTypes[fileType] })
+			errorHandler(res, `Type de fichier non autorisé: ${mimetype}. Types autorisés pour ${fileType}: ${allowedMimeTypes[fileType].join(', ')}`)
+			return
+		}
+		
+		// Vérifier la taille du fichier
+		if (req.file.size > categorySizeLimit[fileType]) {
+			console.log('❌ DEBUG - File too large:', { size: req.file.size, limit: categorySizeLimit[fileType] })
+			errorHandler(res, `Fichier trop volumineux : max autorisé pour ${fileType} = ${categorySizeLimit[fileType] / 1024 / 1024} Mo`)
+			return
+		}
+		
+		console.log('🔍 DEBUG - All validations passed, uploading to GridFS...')
+		
+		let contentGridfsUuidResult: string
 		try {
-			contentGridfsIdResult = await uploadToGridFS(buffer, originalname, mimetype)
+			contentGridfsUuidResult = await uploadToGridFS(buffer, originalname, mimetype)
+			console.log('✅ DEBUG - GridFS upload successful:', contentGridfsUuidResult)
 		} catch (err) {
+			console.log('❌ DEBUG - GridFS upload failed:', err)
 			errorHandler(res, `Erreur lors du téléversement du contenu à GridFS`)
 			return
 		}
 
-		const resource = new Resource({
-			...req.body, //TODO: décomposer pour éviter l'upload de données incorrectes ou inutiles
+		console.log('🔍 DEBUG - Creating resource with data:', {
 			authorId: req.auth.userId,
-			status: 'DRAFT',
-			contentGridfsId: contentGridfsIdResult,
+			title: req.body.title,
+			contentGridfsId: contentGridfsUuidResult,
+			resourceMIMEType: mimetype,
+			category: req.body.category,
+			relationType: req.body.relationType
+		})
+
+		const resource = new Resource({
+			authorId: req.auth.userId,
+			title: req.body.title,
+			contentGridfsId: contentGridfsUuidResult,
+			resourceMIMEType: mimetype,
+			category: req.body.category,
+			relationType: req.body.relationType,
+			status: 'PENDING',
 			validatedAndPublishedAt: null,
 			validatedBy: null,
-			createdAt: new Date(),
-			updatedAt: new Date()
 		})
 
 		await resource.save()
+		console.log('✅ DEBUG - Resource saved successfully')
 		succesHandler(res, createResourceSuccess, resource)
 		return
 
 	} catch (error) {
+		console.log('❌ DEBUG - Unexpected error:', error)
 		const errorMessage = error instanceof Error ? error.message : unexpectedError
 		errorHandler(res, errorMessage)
 		return
@@ -313,8 +354,6 @@ export const updateResource = async (req: AuthRequest, res: Response) => {
  */
 export const updateResourceStatus = async (req: AuthRequest, res: Response) => {
 
-	//TODO: call a middleware to inform the user that the resource has been validated and published ?
-
 	// user auth handling
 	if (!req.auth || !req.auth.userId) {
 		errorHandler(res, unauthorized)
@@ -330,16 +369,39 @@ export const updateResourceStatus = async (req: AuthRequest, res: Response) => {
 			errorHandler(res, unauthorized)
 			return
 		}
-		
-		//TODO: add validatedBy and validatedAndPublishedAt fields to the resource
-		const resource = await Resource.findByIdAndUpdate(req.params.id, { status: req.body.status }, { new: true })
 
-		if (!resource) {
-			errorHandler(res, unexpectedError) //failed to update the resource status
+		// Validate the status value
+		const { status } = req.body
+		if (!status || !['DRAFT', 'PENDING', 'PUBLISHED'].includes(status)) {
+			errorHandler(res, 'Statut invalide. Valeurs acceptées: DRAFT, PENDING, PUBLISHED')
 			return
 		}
 
-		succesHandler(res, updateResourceSuccess, resource)
+		// Prepare update data
+		const updateData: any = { status }
+
+		// If status is PUBLISHED, set validation fields
+		if (status === 'PUBLISHED') {
+			updateData.validatedBy = req.auth.userId
+			updateData.validatedAndPublishedAt = new Date()
+		} else if (status === 'DRAFT' || status === 'PENDING') {
+			// Reset validation fields if changing back to draft or pending
+			updateData.validatedBy = null
+			updateData.validatedAndPublishedAt = null
+		}
+
+		const resource = await Resource.findByIdAndUpdate(
+			req.params.id, 
+			updateData, 
+			{ new: true }
+		)
+
+		if (!resource) {
+			errorHandler(res, resourceNotFound)
+			return
+		}
+
+		succesHandler(res, updateResourceSuccess, resource as any)
 		return
 
 	} catch (error) {
@@ -388,6 +450,275 @@ export const deleteResource = async (req: AuthRequest, res: Response) => {
 
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : unexpectedError
+		errorHandler(res, errorMessage)
+		return
+	}
+}
+
+/**
+ * Upload an image for the WYSIWYG editor
+ * The user must be authenticated.
+ * 
+ * @param {AuthRequest} req the request object containing the image file and user information
+ * @param {Response} res the response object to send to the client
+ * @returns {Promise<void>} a promise that resolves when the image is uploaded
+ */
+export const uploadImage = async (req: AuthRequest, res: Response): Promise<void> => {
+	// user auth handling
+	if (!req.auth || !req.auth.userId) {
+		errorHandler(res, unauthorized)
+		return
+	}
+
+	try {
+		const user = await User.findById(req.auth.userId)
+
+		// check if user exists
+		if (!user) {
+			errorHandler(res, unauthorized)
+			return
+		}
+
+		// check if image file is provided
+		if (!req.file) {
+			errorHandler(res, 'Aucun fichier image fourni')
+			return
+		}
+
+		// validate file type (only images)
+		if (!req.file.mimetype.startsWith('image/')) {
+			errorHandler(res, 'Le fichier doit être une image')
+			return
+		}
+
+		// check file size (max 5MB for images in editor)
+		const maxSize = 5 * 1024 * 1024 // 5MB
+		if (req.file.size > maxSize) {
+			errorHandler(res, 'L\'image ne peut pas dépasser 5 MB')
+			return
+		}
+
+		const { buffer, originalname, mimetype } = req.file
+
+		let imageGridfsUuid: string
+		try {
+			imageGridfsUuid = await uploadToGridFS(buffer, originalname, mimetype)
+		} catch (err) {
+			errorHandler(res, 'Erreur lors du téléversement de l\'image')
+			return
+		}
+
+		// Return the image URL/ID for the editor
+		const imageUrl = `/api/v1/resource/image/${imageGridfsUuid}`
+		
+		succesHandler(res, 'Image téléversée avec succès', { imageUrl, imageUuid: imageGridfsUuid } as any)
+		return
+
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : unexpectedError
+		errorHandler(res, errorMessage)
+		return
+	}
+}
+
+/**
+ * Serve an image from GridFS
+ * Public endpoint - no authentication required
+ * 
+ * @param {Request} req the request object containing the image ID
+ * @param {Response} res the response object to send to the client
+ * @returns {Promise<void>} a promise that resolves when the image is served
+ */
+export const getImage = async (req: Request, res: Response): Promise<void> => {
+	try {
+		if (!req.params.id) {
+			errorHandler(res, 'ID de l\'image manquant')
+			return
+		}
+
+		const { stream, metadata } = await getStreamFileFromGridFS(req.params.id)
+		
+		// Set appropriate headers
+		res.set({
+			'Content-Type': metadata.contentType || 'image/jpeg',
+			'Content-Length': metadata.length,
+			'Cache-Control': 'public, max-age=31536000' // Cache for 1 year
+		})
+
+		// Pipe the stream to response
+		stream.pipe(res)
+
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : 'Image non trouvée'
+		errorHandler(res, errorMessage)
+		return
+	}
+}
+
+/**
+ * Creates a new text/HTML resource in the database.
+ * The user must be authenticated.
+ * This function handles text content (including HTML from WYSIWYG editor).
+ * 
+ * @param {AuthRequest} req the request object containing resource and user information
+ * @param {Response} res the response object to send to the client
+ * @returns {Promise<void>} a promise that resolves when the resource is created
+ */
+export const createTextResource = async (req: AuthRequest, res: Response): Promise<void> => {
+	// user auth handling
+	if (!req.auth || !req.auth.userId) {
+		errorHandler(res, unauthorized)
+		return
+	}
+
+	try {
+		const user = await User.findById(req.auth.userId)
+
+		// check if user exists
+		if (!user) {
+			errorHandler(res, unauthorized)
+			return
+		}
+
+		// check if resource information is provided
+		if (!req.body.title || !req.body.category || !req.body.relationType || !req.body.content) {
+			errorHandler(res, resourceParameterNotFound)
+			return
+		}
+
+		const { title, category, relationType, content } = req.body
+		
+		// Determine MIME type based on content
+		const resourceMIMEType = content.includes('<') ? 'text/html' : 'text/plain'
+		
+		// Upload content to GridFS
+		const contentBuffer = Buffer.from(content, 'utf8')
+		const filename = `${title.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.${resourceMIMEType === 'text/html' ? 'html' : 'txt'}`
+		
+		let contentGridfsUuid: string
+		try {
+			contentGridfsUuid = await uploadToGridFS(contentBuffer, filename, resourceMIMEType)
+		} catch (err) {
+			errorHandler(res, 'Erreur lors du téléversement du contenu')
+			return
+		}
+
+		const resource = new Resource({
+			authorId: req.auth.userId,
+			title,
+			contentGridfsId: contentGridfsUuid,
+			resourceMIMEType,
+			category,
+			relationType,
+			status: 'DRAFT',
+			validatedAndPublishedAt: null,
+			validatedBy: null,
+		})
+
+		await resource.save()
+		succesHandler(res, createResourceSuccess, resource as any)
+		return
+
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : unexpectedError
+		errorHandler(res, errorMessage)
+		return
+	}
+}
+
+/**
+ * Serve resource content from GridFS
+ * Requires authentication for access control
+ * 
+ * @param {AuthRequest} req the request object containing the resource content ID
+ * @param {Response} res the response object to send to the client
+ * @returns {Promise<void>} a promise that resolves when the content is served
+ */
+export const getResourceContent = async (req: AuthRequest, res: Response): Promise<void> => {
+	// user auth handling
+	if (!req.auth || !req.auth.userId) {
+		errorHandler(res, unauthorized)
+		return
+	}
+
+	try {
+		if (!req.params.id) {
+			errorHandler(res, 'ID du contenu manquant')
+			return
+		}
+
+		const user = await User.findById(req.auth.userId)
+
+		// check if user is authorized: moderator, admin, super-admin
+		if (!user || !user.role || (user.role !== 'moderateur' && user.role !== 'administrateur' && user.role !== 'super-administrateur')) {
+			errorHandler(res, unauthorized)
+			return
+		}
+
+		const { stream, metadata } = await getStreamFileFromGridFS(req.params.id)
+		
+		// Set appropriate headers
+		res.set({
+			'Content-Type': metadata.contentType || 'application/octet-stream',
+			'Content-Length': metadata.length,
+			'Cache-Control': 'private, max-age=3600' // Cache for 1 hour
+		})
+
+		// Pipe the stream to response
+		stream.pipe(res)
+
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : 'Contenu non trouvé'
+		errorHandler(res, errorMessage)
+		return
+	}
+}
+
+/**
+ * Serve content of a published resource from GridFS
+ * Public endpoint - no authentication required
+ * Only works for published resources
+ * 
+ * @param {Request} req the request object containing the resource ID
+ * @param {Response} res the response object to send to the client
+ * @returns {Promise<void>} a promise that resolves when the content is served
+ */
+export const getPublishedResourceContent = async (req: Request, res: Response): Promise<void> => {
+	try {
+		if (!req.params.id) {
+			errorHandler(res, 'ID de la ressource manquant')
+			return
+		}
+
+		// Find the resource and check if it's published
+		const resource = await Resource.findById(req.params.id)
+
+		if (!resource) {
+			errorHandler(res, resourceNotFound)
+			return
+		}
+
+		// Only allow access to published resources
+		if (resource.status !== 'PUBLISHED') {
+			errorHandler(res, 'Cette ressource n\'est pas publiée')
+			return
+		}
+
+		// Get the content from GridFS using the contentGridfsId
+		const { stream, metadata } = await getStreamFileFromGridFS(resource.contentGridfsId)
+		
+		// Set appropriate headers
+		res.set({
+			'Content-Type': metadata.contentType || 'application/octet-stream',
+			'Content-Length': metadata.length,
+			'Cache-Control': 'public, max-age=3600' // Cache for 1 hour
+		})
+
+		// Pipe the stream to response
+		stream.pipe(res)
+
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : 'Contenu non trouvé'
 		errorHandler(res, errorMessage)
 		return
 	}
