@@ -10,25 +10,42 @@ import { commentCreated, commentUpdated, commentDeleted, commentsFound } from ".
 
 export const createComments = async (req: Request, res: Response): Promise<void> => {
     try {
+        console.log('🔍 DEBUG - createComments called')
+        console.log('🔍 DEBUG - req.params.Id:', req.params.Id)
+        console.log('🔍 DEBUG - req.body:', req.body)
+        
         const commentObject: CommentsInterface = req.body
-        // Create a new user instance with the hashed password
-        const newComment = new Comment({
-            content: commentObject.content,
-            authorId: commentObject.authorId,
-            resourceId: commentObject.resourceId
-        })
         const user = await User.findOne({ _id: req.params.Id })
 
+        console.log('🔍 DEBUG - user found:', user)
+
         if (!user) {
-            errorHandler(res, serverError)
+            console.log('❌ DEBUG - User not found')
+            errorHandler(res, "Utilisateur non trouvé")
             return
         }
 
-        if (user._id === req.params.Id) {
+        // Convertir les IDs en string pour la comparaison
+        if (user._id.toString() === req.params.Id) {
+            console.log('✅ DEBUG - User ID matches, creating comment')
+            
+            // Create a new comment instance
+            const newComment = new Comment({
+                content: commentObject.content,
+                authorId: commentObject.authorId,
+                resourceId: commentObject.resourceId
+            })
+            
             const savedComment = await newComment.save()
+            console.log('✅ DEBUG - Comment saved:', savedComment)
+            
             succesHandler(res, commentCreated, {comments : savedComment})
+        } else {
+            console.log('❌ DEBUG - User ID does not match')
+            errorHandler(res, "Non autorisé à créer ce commentaire")
         }
     } catch (error: unknown) {
+        console.error('❌ DEBUG - Error in createComments:', error)
         // Handle unexpected errors
         const errorType = error instanceof Error ? error.message : serverError
         errorHandler(res, errorType)
