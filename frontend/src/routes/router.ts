@@ -49,9 +49,6 @@ const routes = [
     path: '/resources',
     name: 'list resources',
     component: Resources,
-    meta: {
-      requiresAuth: true,
-    },
   },
   {
     path: '/create-resource',
