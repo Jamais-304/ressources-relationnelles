@@ -106,6 +106,14 @@ const logout = async () => {
             variant="text"
             color="default"
             class="!text-sm hover:!bg-[#F5F5FE] hover:!text-[#000091]"
+            to="/resources"
+          >
+            Ressources
+          </AppButton>
+          <AppButton
+            variant="text"
+            color="default"
+            class="!text-sm hover:!bg-[#F5F5FE] hover:!text-[#000091]"
             to="/about"
           >
             À propos
