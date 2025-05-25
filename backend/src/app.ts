@@ -9,6 +9,7 @@ import resourceRoutes from "./router/resourceRoutes.ts"
 import categoryRoutes from "./router/categoryRoutes.ts"
 import relationTypeRoutes from "./router/relationTypeRoutes.ts"
 import refreshTokenRouter from "./router/refreshTokenRoute.ts"
+import commentRoutes from "./router/commentRoutes.ts"
 import { morganMiddleware, errorLogger } from "./logs/logger.ts"
 import statsRoutes from "./router/statsRoutes.ts"
 
@@ -41,7 +42,7 @@ if (process.env.NODE_ENV !== "test") {
     app.use(morganMiddleware) // For request logging
 }
 // Routes
-app.use("/api", userRouter, refreshTokenRouter, resourceRoutes, categoryRoutes, relationTypeRoutes, statsRoutes)
+app.use("/api", userRouter, refreshTokenRouter, resourceRoutes, categoryRoutes, relationTypeRoutes, commentRoutes, statsRoutes)
 // Swagger API documentation route
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs))
 // Error handling middleware should be after routes to catch errors
