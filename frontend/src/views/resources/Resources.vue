@@ -8,7 +8,6 @@ import { useAuthUserStore } from '@/stores/authUserStore'
 import ResourceDetailsModal from '@/components/resources/ResourceDetailsModal.vue'
 import router from '@/routes/router'
 import { onMounted, ref, computed } from 'vue'
-import { toast } from 'vue3-toastify'
 
 const api = new Api()
 const apiBaseUrl = api.baseUrl
@@ -229,11 +228,6 @@ const loadResourceContent = async (resource: Resource) => {
 const clearFilters = () => {
   searchQuery.value = ''
   selectedCategory.value = ''
-}
-
-const downloadResource = (resource: Resource) => {
-  console.log('Télécharger:', resource)
-  toast.info('Fonctionnalité de téléchargement à implémenter')
 }
 
 const openResourceModal = (resource: Resource) => {
@@ -547,16 +541,6 @@ onMounted(() => listResources())
                 <v-icon start>mdi-open-in-new</v-icon>
                 Ouvrir en grand
               </v-btn>
-              
-              <v-btn
-                variant="text"
-                color="secondary"
-                @click="downloadResource(resource)"
-                class="rounded-xl font-medium"
-              >
-                <v-icon start>mdi-download</v-icon>
-                Télécharger
-              </v-btn>
             </div>
           </div>
         </div>
@@ -600,16 +584,6 @@ onMounted(() => listResources())
               </div>
 
               <div class="flex items-center gap-1">
-                <v-btn
-                  variant="text"
-                  color="primary"
-                  density="compact"
-                  @click.stop="downloadResource(resource)"
-                  class="rounded-xl"
-                >
-                  <v-icon>mdi-download</v-icon>
-                </v-btn>
-                
                 <v-btn
                   variant="text"
                   color="info"
