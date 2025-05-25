@@ -222,15 +222,25 @@ const loadResourceContent = async (resource: Resource) => {
   console.log('🔍 DEBUG - Starting loadResourceContent with resource:', resource)
   console.log('🔍 DEBUG - Resource UUID:', resource.uuid)
   console.log('🔍 DEBUG - Resource contentGridfsUuid from frontend:', resource.contentGridfsUuid)
+  console.log('🔍 DEBUG - User isAdmin:', isAdmin)
   
   isLoadingContent.value = true
   resourceContent.value = null
   resourceContentType.value = null
   
   try {
-    console.log('🔍 DEBUG - Making API call to resource/published/' + resource.uuid)
-    // Utiliser l'endpoint public pour les ressources publiées
-    const resourceResponse = await api.get(`resource/published/${resource.uuid}`)
+    let resourceResponse
+    
+    // Si l'utilisateur est admin, utiliser l'endpoint avec authentification
+    // Sinon, utiliser l'endpoint public (seulement pour les ressources publiées)
+    if (isAdmin) {
+      console.log('🔍 DEBUG - Admin user, using authenticated endpoint')
+      resourceResponse = await api.get(`resource/${resource.uuid}`)
+    } else {
+      console.log('🔍 DEBUG - Regular user, using public endpoint')
+      resourceResponse = await api.get(`resource/published/${resource.uuid}`)
+    }
+    
     const resourceData = resourceResponse.data as any
     
     console.log('🔍 DEBUG - Resource data from backend:', resourceData)
@@ -245,10 +255,21 @@ const loadResourceContent = async (resource: Resource) => {
       if (resourceData.resourceMIMEType.startsWith('text/')) {
         console.log('🔍 DEBUG - Resource is text type, fetching content...')
         try {
-          // Utiliser l'endpoint public pour le contenu des ressources publiées
-          const contentResponse = await api.get(`resource/published/${resource.uuid}/content`, {
-            responseType: 'text'
-          })
+          let contentResponse
+          
+          // Si l'utilisateur est admin, utiliser l'endpoint avec authentification
+          if (isAdmin) {
+            console.log('🔍 DEBUG - Admin user, fetching content with auth')
+            contentResponse = await api.get(`resource/content/${resourceData.contentGridfsId}`, {
+              responseType: 'text'
+            })
+          } else {
+            console.log('🔍 DEBUG - Regular user, fetching public content')
+            contentResponse = await api.get(`resource/published/${resource.uuid}/content`, {
+              responseType: 'text'
+            })
+          }
+          
           const content = contentResponse.data || contentResponse
           resourceContent.value = content as string || 'Contenu non disponible'
           console.log('🔍 DEBUG - Set resourceContent:', resourceContent.value)
