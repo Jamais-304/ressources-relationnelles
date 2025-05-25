@@ -145,13 +145,13 @@ onMounted(() => {
         <div class="text-center lg:text-left">
           <h1 class="flex items-center justify-center lg:justify-start gap-4 text-5xl lg:text-6xl font-bold mb-4">
             <v-icon class="text-6xl lg:text-7xl">mdi-shield-check</v-icon>
-            Modération des Ressources
-          </h1>
+        Modération des Ressources
+      </h1>
           <p class="text-xl opacity-90 max-w-2xl leading-relaxed">
-            Gérez et validez les ressources en attente de publication
-          </p>
-        </div>
-        
+        Gérez et validez les ressources en attente de publication
+      </p>
+    </div>
+
         <v-btn
           class="rounded-full px-8 h-14 font-semibold tracking-wide"
           color="primary"
@@ -299,14 +299,14 @@ onMounted(() => {
                 >
                   <v-icon start size="16">{{ getStatusIcon(resource.status) }}</v-icon>
                   {{ getStatusText(resource.status) }}
-                </v-chip>
+          </v-chip>
               </div>
 
               <!-- Contenu principal -->
               <h3 class="text-xl font-semibold text-gray-900 mb-3 line-clamp-2">{{ resource.title }}</h3>
-              
+
               <div class="mb-4">
-                <v-chip
+          <v-chip
                   :color="getResourceColor(resource.category)"
                   size="small"
                   variant="tonal"
@@ -371,7 +371,7 @@ onMounted(() => {
                   v-if="resource.status !== 'DRAFT'"
                   variant="text"
                   color="info"
-                  size="small"
+            size="small"
                   @click="openStatusDialog(resource, 'DRAFT')"
                   class="rounded-xl font-medium"
                 >
@@ -411,7 +411,7 @@ onMounted(() => {
                   >
                     <v-icon start size="16">{{ getStatusIcon(resource.status) }}</v-icon>
                     {{ getStatusText(resource.status) }}
-                  </v-chip>
+          </v-chip>
                 </div>
                 
                 <div class="flex items-center gap-4 text-sm text-gray-600">
@@ -430,53 +430,53 @@ onMounted(() => {
               </div>
 
               <div class="flex items-center gap-1">
-                <v-btn
-                  variant="text"
-                  color="primary"
+            <v-btn
+              variant="text"
+              color="primary"
                   density="compact"
                   @click="openResourceDetails(resource)"
                   class="rounded-xl"
-                >
-                  <v-icon>mdi-eye</v-icon>
-                  <v-tooltip activator="parent">Voir détails</v-tooltip>
-                </v-btn>
+            >
+              <v-icon>mdi-eye</v-icon>
+              <v-tooltip activator="parent">Voir détails</v-tooltip>
+            </v-btn>
 
-                <v-btn
+            <v-btn
                   v-if="resource.status !== 'PUBLISHED'"
-                  variant="text"
-                  color="success"
+              variant="text"
+              color="success"
                   density="compact"
                   @click="openStatusDialog(resource, 'PUBLISHED')"
                   class="rounded-xl"
-                >
-                  <v-icon>mdi-check</v-icon>
-                  <v-tooltip activator="parent">Publier</v-tooltip>
-                </v-btn>
+            >
+              <v-icon>mdi-check</v-icon>
+              <v-tooltip activator="parent">Publier</v-tooltip>
+            </v-btn>
 
-                <v-btn
+            <v-btn
                   v-if="resource.status === 'DRAFT'"
-                  variant="text"
-                  color="warning"
+              variant="text"
+              color="warning"
                   density="compact"
                   @click="openStatusDialog(resource, 'PENDING')"
                   class="rounded-xl"
-                >
-                  <v-icon>mdi-clock</v-icon>
-                  <v-tooltip activator="parent">Mettre en attente</v-tooltip>
-                </v-btn>
+            >
+              <v-icon>mdi-clock</v-icon>
+              <v-tooltip activator="parent">Mettre en attente</v-tooltip>
+            </v-btn>
 
-                <v-btn
+            <v-btn
                   v-if="resource.status !== 'DRAFT'"
-                  variant="text"
-                  color="info"
+              variant="text"
+              color="info"
                   density="compact"
                   @click="openStatusDialog(resource, 'DRAFT')"
                   class="rounded-xl"
-                >
-                  <v-icon>mdi-file-edit</v-icon>
-                  <v-tooltip activator="parent">Remettre en brouillon</v-tooltip>
-                </v-btn>
-              </div>
+            >
+              <v-icon>mdi-file-edit</v-icon>
+              <v-tooltip activator="parent">Remettre en brouillon</v-tooltip>
+            </v-btn>
+          </div>
             </div>
           </div>
         </div>
@@ -562,4 +562,4 @@ onMounted(() => {
       @update-status="updateResourceStatusFromModal"
     />
   </div>
-</template> 
+</template>
