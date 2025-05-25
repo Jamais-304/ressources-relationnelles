@@ -44,9 +44,9 @@ const logout = async () => {
             variant="text"
             color="white"
             class="!text-sm hover:!bg-[#1212ff]"
-            to="/create-resource"
+            to="/resources/moderation"
           >
-            Gestion des ressources (wip)
+            Modération des ressources
           </AppButton>
           <div class="flex gap-2">
             <AppButton
@@ -109,6 +109,15 @@ const logout = async () => {
             to="/resources"
           >
             Ressources
+          </AppButton>
+          <AppButton
+            v-if="isAuthenticated"
+            variant="text"
+            color="default"
+            class="!text-sm hover:!bg-[#F5F5FE] hover:!text-[#000091]"
+            to="/create-resource"
+          >
+            Créer une ressource
           </AppButton>
           <AppButton
             variant="text"
