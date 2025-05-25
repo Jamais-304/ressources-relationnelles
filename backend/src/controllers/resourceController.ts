@@ -634,5 +634,55 @@ export const getResourceContent = async (req: AuthRequest, res: Response): Promi
 	}
 }
 
+/**
+ * Serve content of a published resource from GridFS
+ * Public endpoint - no authentication required
+ * Only works for published resources
+ * 
+ * @param {Request} req the request object containing the resource ID
+ * @param {Response} res the response object to send to the client
+ * @returns {Promise<void>} a promise that resolves when the content is served
+ */
+export const getPublishedResourceContent = async (req: Request, res: Response): Promise<void> => {
+	try {
+		if (!req.params.id) {
+			errorHandler(res, 'ID de la ressource manquant')
+			return
+		}
+
+		// Find the resource and check if it's published
+		const resource = await Resource.findById(req.params.id)
+
+		if (!resource) {
+			errorHandler(res, resourceNotFound)
+			return
+		}
+
+		// Only allow access to published resources
+		if (resource.status !== 'PUBLISHED') {
+			errorHandler(res, 'Cette ressource n\'est pas publiée')
+			return
+		}
+
+		// Get the content from GridFS using the contentGridfsId
+		const { stream, metadata } = await getStreamFileFromGridFS(resource.contentGridfsId)
+		
+		// Set appropriate headers
+		res.set({
+			'Content-Type': metadata.contentType || 'application/octet-stream',
+			'Content-Length': metadata.length,
+			'Cache-Control': 'public, max-age=3600' // Cache for 1 hour
+		})
+
+		// Pipe the stream to response
+		stream.pipe(res)
+
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : 'Contenu non trouvé'
+		errorHandler(res, errorMessage)
+		return
+	}
+}
+
 
 
