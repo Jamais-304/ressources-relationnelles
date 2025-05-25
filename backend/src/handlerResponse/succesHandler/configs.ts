@@ -8,6 +8,9 @@ export const userCreated: string = "userCreated"
 export const userDeleted: string = "userDeleted"
 export const userUpdated: string = "userUpdated"
 export const commentCreated: string = "commentCreated"
+export const commentUpdated: string = "commentUpdated"
+export const commentDeleted: string = "commentDeleted"
+export const commentsFound: string = "commentsFound"
 export const loginSucces: string = "loginSucces"
 export const logoutSucces: string = "logoutSucces"
 export const userFound: string = "userFound"
@@ -28,6 +31,10 @@ export const msgUserCreated: string = "Utilisateur créé avec succès"
 export const msgUserDeleted: string = "Utilisateur supprimé avec succès"
 export const msgUserUpdated: string = "Utilisateur mis à jour avec succès"
 export const msgCommentCreated: string = "Commentaire créé avec succès"
+export const msgCommentUpdated: string = "Commentaire mis à jour avec succès"
+export const msgCommentDeleted: string = "Commentaire supprimé avec succès"
+export const msgCommentFound: string = "Commentaire trouvé"
+export const msgCommentsFound: string = "Commentaires trouvés"
 export const msgLoginSucces: string = "Connexion réussie"
 export const msgLogoutSucces: string = "Utilisateur déconnecté avec succès"
 export const msgUserFound: string = "Utilisateur trouvé"
@@ -58,6 +65,8 @@ export const SuccesMappings: SuccesMapping[] = [
     { type: userCreated, msg: msgUserCreated, statusCode: 201 },
     { type: tokenRenewed, msg: msgTokenRenewed, statusCode: 201 },
     { type: commentCreated, msg: msgCommentCreated, statusCode: 201 },
+    { type: commentUpdated, msg: msgCommentUpdated, statusCode: 200 },
+    { type: commentDeleted, msg: msgCommentDeleted, statusCode: 200 },
     { type: getResources, msg: msgGetResources, statusCode: 200 },
     { type: createResource, msg: msgCreateResource, statusCode: 201 },
     { type: updateResource, msg: msgUpdateResource, statusCode: 200 },
@@ -65,5 +74,6 @@ export const SuccesMappings: SuccesMapping[] = [
     { type: getCategories, msg: msgGetCategories, statusCode: 200 },
     { type: createCategorySuccess, msg: msgCreateCategory, statusCode: 201 },
     { type: updateCategorySuccess, msg: msgUpdateCategory, statusCode: 200 },
-    { type: deleteCategorySuccess, msg: msgDeleteCategory, statusCode: 200 }
+    { type: deleteCategorySuccess, msg: msgDeleteCategory, statusCode: 200 },
+    { type: commentsFound, msg: msgCommentsFound, statusCode: 200 }
 ]
