@@ -30,9 +30,9 @@ const resourceSchema = new mongoose.Schema({
 		trim: true
 	},
 	category: { 
-		type: mongoose.Schema.Types.ObjectId,
-		ref: 'Category',
+		type: String,
 		required: [true, "Category is required"], 
+		trim: true
 	},
 	relationType: { 
 		type: String, 
