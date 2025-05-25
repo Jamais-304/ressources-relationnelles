@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { getAllResources, getResourceById, createResource, createTextResource, updateResource, updateResourceStatus, deleteResource, getAllPublishedResources, uploadImage, getImage, getResourceContent, } from "../controllers/resourceController.ts"
+import { getAllResources, getResourceById, createResource, createTextResource, updateResource, updateResourceStatus, deleteResource, getAllPublishedResources, uploadImage, getImage, getResourceContent, getPublishedResourceContent } from "../controllers/resourceController.ts"
 import { validationErrorHandler } from "../middleware/validationErrorHandler.ts"
 import { auth } from "../middleware/auth.ts"
 
@@ -13,6 +13,9 @@ router.get('/v1/resource/published', getAllPublishedResources)
 
 // Route publique pour accéder à une ressource publiée spécifique
 router.get('/v1/resource/published/:id', getResourceById)
+
+// Route publique pour accéder au contenu d'une ressource publiée
+router.get('/v1/resource/published/:id/content', getPublishedResourceContent)
 
 router.get('/v1/resource/:id', auth, getResourceById)
 
