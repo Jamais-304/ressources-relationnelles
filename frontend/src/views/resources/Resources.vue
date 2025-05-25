@@ -200,22 +200,18 @@ const loadResourceContent = async (resource: Resource) => {
       
       // Si c'est du texte, essayer de récupérer le contenu
       if (resourceData.resourceMIMEType.startsWith('text/')) {
-        // Pour les visiteurs non connectés, afficher un message d'information
-        if (!isAuthenticated) {
-          resourceContents.value.set(resource.uuid, '🔒 Contenu complet disponible après connexion - Connectez-vous pour voir le contenu détaillé de cette ressource')
-        } else {
-          try {
-            const contentResponse = await api.get(`resource/content/${resourceData.contentGridfsId}`, {
-              responseType: 'text'
-            })
-            const content = contentResponse.data || contentResponse
-            resourceContents.value.set(resource.uuid, content as string)
-          } catch (error: any) {
-            if (error.response?.status === 401 || error.response?.status === 403) {
-              resourceContents.value.set(resource.uuid, '🔒 Contenu protégé - Droits insuffisants pour accéder au contenu complet')
-            } else {
-              resourceContents.value.set(resource.uuid, 'Erreur lors du chargement du contenu')
-            }
+        try {
+          // Essayer de récupérer le contenu pour tous les utilisateurs (connectés ou non)
+          const contentResponse = await api.get(`resource/content/${resourceData.contentGridfsId}`, {
+            responseType: 'text'
+          })
+          const content = contentResponse.data || contentResponse
+          resourceContents.value.set(resource.uuid, content as string)
+        } catch (error: any) {
+          if (error.response?.status === 401 || error.response?.status === 403) {
+            resourceContents.value.set(resource.uuid, '🔒 Contenu protégé - Impossible d\'accéder au contenu de cette ressource')
+          } else {
+            resourceContents.value.set(resource.uuid, 'Erreur lors du chargement du contenu')
           }
         }
       } else if (resourceData.resourceMIMEType.startsWith('image/')) {
@@ -227,7 +223,7 @@ const loadResourceContent = async (resource: Resource) => {
     }
   } catch (error: any) {
     if (error.response?.status === 401 || error.response?.status === 403) {
-      resourceContents.value.set(resource.uuid, '🔒 Informations protégées - Connexion requise')
+      resourceContents.value.set(resource.uuid, '🔒 Informations protégées - Impossible d\'accéder aux informations de cette ressource')
     } else {
       resourceContents.value.set(resource.uuid, 'Erreur lors du chargement')
     }
