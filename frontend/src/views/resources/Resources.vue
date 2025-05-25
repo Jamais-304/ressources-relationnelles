@@ -97,38 +97,41 @@ const resourcesCount = computed(() => ({
 // Méthodes
 async function loadGlobalStats() {
   try {
-    // Essayer de récupérer les statistiques globales si l'utilisateur est connecté
-    if (isAuthenticated) {
-      const response = await api.resources.list()
-      const allResources = response as Resource[]
-      
-      globalStats.value = {
-        total: allResources.length,
-        published: allResources.filter(r => r.status === 'PUBLISHED').length,
-        draft: allResources.filter(r => r.status === 'DRAFT').length,
-        pending: allResources.filter(r => r.status === 'PENDING').length,
-      }
-    } else {
-      // Pour les visiteurs non connectés, récupérer seulement les ressources publiées
-      const response = await api.get('resource/published')
-      const publishedResources = response?.data as any[]
-      
-      globalStats.value = {
-        total: publishedResources?.length || 0,
-        published: publishedResources?.length || 0,
-        draft: 0,
-        pending: 0,
+    // Essayer de récupérer les statistiques globales si l'utilisateur est admin
+    if (isAuthenticated && isAdmin) {
+      try {
+        const response = await api.resources.list()
+        const allResources = response as Resource[]
+        
+        globalStats.value = {
+          total: allResources.length,
+          published: allResources.filter(r => r.status === 'PUBLISHED').length,
+          draft: allResources.filter(r => r.status === 'DRAFT').length,
+          pending: allResources.filter(r => r.status === 'PENDING').length,
+        }
+        return
+      } catch (error) {
+        console.warn('Erreur lors du chargement des statistiques admin, fallback vers endpoint public:', error)
+        // Continuer avec l'endpoint public en cas d'erreur
       }
     }
-  } catch (error) {
-    console.error('Erreur lors du chargement des statistiques:', error)
-    // En cas d'erreur, utiliser les ressources publiées comme fallback
+    
+    // Pour les visiteurs non connectés et les utilisateurs normaux, utiliser l'endpoint public
     const response = await api.get('resource/published')
     const publishedResources = response?.data as any[]
     
     globalStats.value = {
       total: publishedResources?.length || 0,
       published: publishedResources?.length || 0,
+      draft: 0,
+      pending: 0,
+    }
+  } catch (error) {
+    console.error('Erreur lors du chargement des statistiques:', error)
+    // En cas d'erreur, utiliser des valeurs par défaut
+    globalStats.value = {
+      total: 0,
+      published: 0,
       draft: 0,
       pending: 0,
     }
