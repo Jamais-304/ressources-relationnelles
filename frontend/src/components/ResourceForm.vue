@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import WysiwygEditor from './WysiwygEditor.vue'
 import { getPublicCategories, getActiveRelationTypes, type Category, type RelationType } from '@/api/services'
 import axios from 'axios'
+import { getToken } from '@/utils/cookies'
 
 interface Props {
   initialData?: {
@@ -56,19 +57,17 @@ const showNotification = (message: string, type: 'success' | 'error' = 'success'
 // Watchers
 watch(() => formData.value.contentType, (newType) => {
   if (newType === 'rich-text') {
-    formData.value.file = null
     selectedFile.value = null
   } else {
     formData.value.content = ''
   }
 })
 
-// Methods
-const onFileChange = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  if (target.files && target.files[0]) {
-    const file = target.files[0]
-    selectedFile.value = file
+// Watcher pour synchroniser selectedFile avec formData.file
+watch(selectedFile, (newFile) => {
+  if (newFile) {
+    // v-file-input peut retourner un tableau ou un seul fichier
+    const file = Array.isArray(newFile) ? newFile[0] : newFile
     formData.value.file = file
     
     // Validation simple
@@ -78,9 +77,12 @@ const onFileChange = (event: Event) => {
       selectedFile.value = null
       formData.value.file = null
     }
+  } else {
+    formData.value.file = null
   }
-}
+})
 
+// Methods
 const submitForm = async () => {
   if (!isFormValid.value) {
     showNotification('Veuillez remplir tous les champs requis', 'error')
@@ -90,21 +92,35 @@ const submitForm = async () => {
   isLoading.value = true
 
   try {
+    const accessToken = getToken('accessToken')
+    
+    if (!accessToken) {
+      showNotification('Vous devez être connecté pour créer une ressource', 'error')
+      return
+    }
+
     if (formData.value.contentType === 'rich-text') {
       // Création d'une ressource texte avec la nouvelle API
-      const response = await axios.post('http://localhost:3000/api/v1/resource/create-text', {
-        title: formData.value.title,
-        content: formData.value.content,
-        category: formData.value.category,
-        relationType: formData.value.relationType
-      }, {
+      const response = await fetch('http://localhost:3000/api/v1/resource/create-text', {
+        method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({
+          title: formData.value.title,
+          content: formData.value.content,
+          category: formData.value.category,
+          relationType: formData.value.relationType
+        })
       })
 
-      console.log('Ressource texte créée:', response.data)
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const responseData = await response.json()
+      console.log('Ressource texte créée:', responseData)
     } else {
       // Upload d'un fichier
       if (!formData.value.file) {
@@ -112,20 +128,40 @@ const submitForm = async () => {
         return
       }
 
+      console.log('🔍 DEBUG Frontend - About to send file:', {
+        file: formData.value.file,
+        fileName: formData.value.file.name,
+        fileSize: formData.value.file.size,
+        fileType: formData.value.file.type
+      })
+
       const formDataToSend = new FormData()
       formDataToSend.append('file', formData.value.file)
       formDataToSend.append('title', formData.value.title)
       formDataToSend.append('category', formData.value.category)
       formDataToSend.append('relationType', formData.value.relationType)
 
-      const response = await axios.post('http://localhost:3000/api/v1/resource/create', formDataToSend, {
+      console.log('🔍 DEBUG Frontend - FormData contents:')
+      for (let [key, value] of formDataToSend.entries()) {
+        console.log(`${key}:`, value)
+      }
+
+      // Utiliser fetch au lieu d'axios pour éviter les problèmes de Content-Type
+      const response = await fetch('http://localhost:3000/api/v1/resource/create', {
+        method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'multipart/form-data'
-        }
+          'Authorization': `Bearer ${accessToken}`
+          // Pas de Content-Type, le navigateur l'ajoute automatiquement avec la boundary
+        },
+        body: formDataToSend
       })
 
-      console.log('Ressource fichier créée:', response.data)
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const responseData = await response.json()
+      console.log('Ressource fichier créée:', responseData)
     }
 
     showNotification('Ressource créée avec succès!')
@@ -325,7 +361,6 @@ onMounted(async () => {
               accept="*/*"
               placeholder="Sélectionnez un fichier"
               show-size
-              @change="onFileChange"
               :rules="[v => !!v || 'Un fichier est requis']"
               class="mb-4"
             />
