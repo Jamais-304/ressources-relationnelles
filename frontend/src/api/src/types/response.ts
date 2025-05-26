@@ -12,5 +12,26 @@ interface Data {
   users?: UserData[]
   resource?: ResourceData
   resources?: ResourceData[]
+  category?: CategoryData
+  categories?: CategoryData[]
+  comments?: CommentData[]
   tokens?: TokenData
+}
+
+interface CategoryData {
+  _id: string
+  name: string
+  description?: string
+  createdAt: string
+  updatedAt: string
+}
+
+interface CommentData {
+  _id: string
+  content: string
+  authorId: string
+  authorPseudo: string
+  resourceId: string
+  createdAt: string
+  updatedAt: string
 }
