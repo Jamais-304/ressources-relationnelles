@@ -52,9 +52,47 @@ const fetchResources = async () => {
   try {
     // Utiliser l'endpoint public pour les ressources publiées
     const response = await api.get('resource/published')
-    const resourcesData = response?.data as any[]
+    console.log('🔍 DEBUG - Resources response:', response)
+    console.log('🔍 DEBUG - Response data:', response?.data)
     
-    resources.value = resourcesData?.map((resourceData: any) => ({
+    // Essayer différents formats de réponse
+    let resourcesData = null
+    const responseData = response as any
+    
+    // Format nouveau: { data: { ressource: [...] } } (selon votre diff)
+    if (responseData?.data?.ressource) {
+      resourcesData = Array.isArray(responseData.data.ressource) ? responseData.data.ressource : [responseData.data.ressource]
+    }
+    // Format nouveau: { data: { resources: [...] } }
+    else if (responseData?.data?.resources) {
+      resourcesData = Array.isArray(responseData.data.resources) ? responseData.data.resources : [responseData.data.resources]
+    }
+    // Format ancien: { data: [...] }
+    else if (responseData?.data && Array.isArray(responseData.data)) {
+      resourcesData = responseData.data
+    }
+    // Format direct: { ressource: [...] }
+    else if (responseData?.ressource) {
+      resourcesData = Array.isArray(responseData.ressource) ? responseData.ressource : [responseData.ressource]
+    }
+    // Format direct: { resources: [...] }
+    else if (responseData?.resources) {
+      resourcesData = Array.isArray(responseData.resources) ? responseData.resources : [responseData.resources]
+    }
+    // Format direct: [...]
+    else if (Array.isArray(responseData)) {
+      resourcesData = responseData
+    }
+    
+    console.log('🔍 DEBUG - Parsed resourcesData:', resourcesData)
+    
+    if (!resourcesData) {
+      console.log('⚠️ DEBUG - No resources found in response')
+      resources.value = []
+      return
+    }
+    
+    resources.value = resourcesData.map((resourceData: any) => ({
       uuid: resourceData._id,
       title: resourceData.title || '',
       authorUuid: resourceData.authorId || '',
@@ -65,7 +103,9 @@ const fetchResources = async () => {
       validatedBy: resourceData.validatedBy,
       createdAt: resourceData.createdAt || '',
       updatedAt: resourceData.updatedAt || '',
-    })) || []
+    }))
+    
+    console.log('🔍 DEBUG - Final resources:', resources.value)
   } catch (err) {
     console.error('Erreur lors de la récupération des ressources:', err)
     error.value = 'Impossible de charger les ressources. Veuillez réessayer plus tard.'
