@@ -70,16 +70,41 @@ const fetchComments = async () => {
     const response = await api.get(url) as any
     console.log('✅ DEBUG - Fetch response:', response)
     
-    if (response?.data?.comments) {
-      console.log('✅ DEBUG - Comments found:', response.data.comments)
-      comments.value = response.data.comments
+    // Essayer différents formats de réponse
+    let commentsData = null
+    const responseData = response as any
+    
+    // Format nouveau: { data: { comments: [...] } }
+    if (responseData?.data?.comments) {
+      commentsData = Array.isArray(responseData.data.comments) ? responseData.data.comments : [responseData.data.comments]
+    }
+    // Format ancien: { data: [...] }
+    else if (responseData?.data && Array.isArray(responseData.data)) {
+      commentsData = responseData.data
+    }
+    // Format direct: { comments: [...] }
+    else if (responseData?.comments) {
+      commentsData = Array.isArray(responseData.comments) ? responseData.comments : [responseData.comments]
+    }
+    // Format direct: [...]
+    else if (Array.isArray(responseData)) {
+      commentsData = responseData
+    }
+    
+    console.log('🔍 DEBUG - Parsed commentsData:', commentsData)
+    
+    if (commentsData) {
+      console.log('✅ DEBUG - Comments found:', commentsData)
+      comments.value = commentsData
     } else {
       console.log('⚠️ DEBUG - No comments in response')
+      comments.value = []
     }
   } catch (error: any) {
     console.error('❌ DEBUG - Fetch error details:', error)
     console.error('❌ DEBUG - Fetch error response:', error.response)
     toast.error('Erreur lors du chargement des commentaires')
+    comments.value = []
   } finally {
     console.log('🔍 DEBUG - Setting isLoading to false')
     isLoading.value = false
