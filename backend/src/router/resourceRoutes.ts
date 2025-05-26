@@ -1,7 +1,6 @@
 import { Router } from "express"
 import { getAllResources, getResourceById, createResource, createTextResource, updateResource, updateResourceStatus, deleteResource, getAllPublishedResources, uploadImage, getImage, getResourceContent, getPublishedResourceContent } from "../controllers/resourceController.ts"
 import { getCommentsByResource } from "../controllers/commentControllers.ts"
-import { validationErrorHandler } from "../middleware/validationErrorHandler.ts"
 import { auth } from "../middleware/auth.ts"
 
 import { upload } from "../middleware/fileUpload.ts"

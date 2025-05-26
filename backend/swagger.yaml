@@ -1,333 +1,1573 @@
 openapi: 3.0.0
 info:
-  description: This is the API documentation for project (Re)SourcesRelationnelles
-  version: "1.0.0"
-  title: API (Re)SourcesRelationnelles
-  contact:
-    email: quentindumon3524a@gmail.com
-  license:
-    name: Apache 2.0
-    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
-tags:
-  - name: Gestion compte super administrateurs
-    description: Gestion de la création, connexion, suppression et modification de compte des supers administrateurs
-  - name: Gestion compte administrateurs
-    description: Gestion de la création, connexion, suppression et modification de compte des administrateurs
-  - name: Gestion compte modérateurs
-    description: Gestion de la création, connexion, suppression et modification de compte des modérateurs
-  - name: Gestion compte utilisateurs
-    description: Gestion de la création, connexion, suppression et modification de compte des utilisateurs
-  - name: Gestion des ressources
-    description: Gestion de la création, modification et de la suppression des ressources
-paths:
-  /api/auth/super-admin/signup:
-    post:
-      tags:
-        - Gestion compte super administrateurs
-      summary: Création d'un super administrateur 👨‍💻
-      description: Route permettant d'enregistrer un super administrateur dans la base de données avec l'email et le password dans les paramètres ⚙️⚙️⚙️ de la requête 🛣 ️
-      operationId: createSuperAdmin
-      responses:
-          "201":
-              description: Super administrateur créé ✅
-          "400":
-              description: Requête invalide ⛔️
-          "500":
-              description: Erreur serveur ⛔️
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Utilisateur'
-  /api/auth/admin/signup:
-    post:
-      tags:
-        - Gestion compte administrateurs
-      summary: Création d'un administrateur 👨‍💻
-      description: Route permettant aux supers administrateurs d'enregistrer un administrateur dans la base de données avec l'email et le password dans les paramètres ⚙️⚙️⚙️ de la requête 🛣 ️
-      operationId: createAdmin
-      responses:
-          "201":
-              description: Administrateur créé ✅
-          "400":
-              description: Requête invalide ⛔️
-          "401":
-              description: Accès refusés ⛔️
-          "500":
-              description: Erreur serveur ⛔️
-      requestBody:
-        content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Utilisateur'
-  /api/auth/moderateur/signup:
-    post:
-      tags:
-        - Gestion compte modérateurs
-      summary: Création d'un moderateur 👨‍💻
-      description: Route permettant aux supers administrateurs d'enregistrer un moderateur dans la base de données avec l'email et le password dans les paramètres ⚙️⚙️⚙️ de la requête 🛣 ️
-      operationId: createModerateur
-      responses:
-          "201":
-              description: Modérateurs créé ✅
-          "400":
-              description: Requête invalide ⛔️
-          "500":
-              description: Erreur serveur ⛔️
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Utilisateur'
-  /api/auth/admin/login:
-    post:
-      tags:
-        - Gestion compte super administrateurs
-        - Gestion compte administrateurs
-      summary: Connexion des administrateurs et supers administrateurs 👨‍💻
-      operationId: loginAmdin
-      description: Permet de se connecter et de récupérer le token de connexion dans la réponse 👌
-      parameters:
-        - in: query
-          name: Email
-          description: Email de l'administrateur
-          required: true
-          schema:
-            type: string
-        - in: query
-          name: Password
-          description: Mot de passe de l'administrateur
-          required: true
-          schema:
-            type: string
-            minimum: 10
-      responses:
-        '200':
-          description: Opération réussite ✅
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                    userId:
-                      type: string
-                    token:
-                      type: string
-        "401":
-          description: Paire identifiant/mot de passe inccorrecte 🛑
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                password:
-                  type: string
-  /api/auth/users/signup:
-    post:
-      tags:
-        - Gestion compte utilisateurs
-      summary: Création d'un utilisateur 👨‍💻
-      description: Route permettant aux citoyens de pouvoirenregistrer leur compte dans la base de données avec l'email et le password dans les paramètres ⚙️⚙️⚙️ de la requête 🛣 ️
-      operationId: createUtilisateur
-      responses:
-          "201":
-              description: Utilisateurs créé ✅
-          "400":
-              description: Requête invalide ⛔️
-          "500":
-              description: Erreur serveur ⛔️
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                password:
-                  type: string
-                token:
-                  type: string
-  /api/auth/users/login:
-    post:
-      tags:
-        - Gestion compte utilisateurs
-        - Gestion compte modérateurs
-      summary: Connexion moderateurs ou utilisateurs 👨‍💻
-      operationId: loginUsers
-      description: Permet de se connecter et de récupérer le token de connexion dans la réponse 👌
-      parameters:
-        - in: query
-          name: Email
-          description: Email de l'utilisateur
-          required: true
-          schema:
-            type: string
-        - in: query
-          name: Password
-          description: Mot de passe de l'utilisateur
-          required: true
-          schema:
-            type: string
-            minimum: 10
-      responses:
-        '200':
-          description: Opération réussite ✅
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                    userId:
-                        type: string
-                    token:
-                        type: string
-        "401":
-          description: Paire identifiant/mot de passe inccorrecte 🛑
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                password:
-                  type: string
-  /api/ressources:
-    post:
-      tags:
-        - Gestion des ressources
-      summary: Ajout d'une nouvelle ressource
-      operationId: addRessource
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Ressource'
-      responses:
-        "201":
-          description: Ressource créée ✅
-        "400":
-          description: Requête invalide ❌
-        "401":
-          description: Accès refusé 🛑
-    
-    get:
-      tags:
-        - Gestion des ressources
-      summary: Récupération de toutes les ressources
-      operationId: getAllRessources
-      responses:
-        "200":
-          description: Opération réussie ✅
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Ressource'
-        "400":
-          description: Requête invalide ❌
-components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+    description: This is the API documentation for project (Re)SourcesRelationnelles
+    version: "1.0.0"
+    title: API (Re)SourcesRelationnelles
+    contact:
+        email: ressources.relationnelles@ressources.fr
+    license:
+        name: Apache 2.0
+        url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
-  schemas:
-    Ressource:
-      type: object
-      required:
-        - title
-        - content
-        - category
-        - realationType
-      properties:
-        title:
-          type: string
-          example: La santé mentale
-        content:
-          type: string
-          example: La santé mentale est un enjeu de santé publique
-        category:
-          type: array
-          items:
-            type: string
-          example: ["santé", "bien-être", "psychologie"]
-        relationType:
-          type: string
-        media:
-          type: array
-          items:
-            type: string
-          example: ["image1.jpg", "video1.mp4"]
-    Utilisateur:
-        type: object
-        required:
-          - pseudonyme
-          - email
-          - mdp
-        properties:
-          pseudonyme:
-            type: string
-            example: "JohnDoe"
-          email:
-            type: string
-            format: email
-            example: "johndoe@example.com"
-          mdp:
-            type: string
-            format: password
-            example: "$2a$12$EIXR5dDf.aKDgK0TV5rR7u0xL8FlpO/Y/fpFQ.wb.E5HNt4cAc0yO"
-    Commentaire:
-      type: object
-      required:
-        - authorId
-        - contenu
-        - auteur
-        - ressourceId
-      properties:
-        contenu:
-          type: string
-          example: "Ce commentaire est très pertinent concernant la ressource."
-        authorId:
-          type: string
-          format: uuid
-          description: "ID de l'utilisateur auteur du commentaire"
-          example: "987e6543-e21b-43d3-a876-426617890000"
-        ressourceId:
-          type: string
-          format: uuid
-          description: "ID de la ressource à laquelle ce commentaire est associé"
-          example: "550e8400-e29b-41d4-a716-446655440000"
-    Statistique:
-      type: object
-      required:
-        - ressourcesId
-      properties:
-        ressourcesId:
-          type: string
-          format: uuid
-          description: "ID de la ressource à laquelle ces statistiques sont associées"
-          example: "550e8400-e29b-41d4-a716-446655440000"
-        totalShare:
-          type: integer
-          description: "Nombre de fois que la ressource a été partagée"
-          example: 120
-        totalComents:
-          type: integer
-          description: "Nombre de commentaires associés à la ressource"
-          example: 45
+servers:
+    - url: /api
+      description: API base path
+
+tags:
+    - name: Authentification
+      description: Gestion de l'authentification et des tokens
+    - name: Gestion des utilisateurs
+      description: Gestion CRUD des utilisateurs
+    - name: Gestion des ressources
+      description: Gestion CRUD des ressources
+    - name: Gestion des commentaires
+      description: Gestion CRUD des commentaires
+    - name: Gestion des catégories
+      description: Gestion CRUD des catégories
+    - name: Gestion des types de relation
+      description: Gestion CRUD des types de relation
+    - name: Statistiques
+      description: Récupération des statistiques de l'application
+
+paths:
+    # ==================== AUTHENTIFICATION ====================
+    /v1/users/create-user:
+        post:
+            tags:
+                - Authentification
+            summary: Création d'un compte utilisateur
+            description: Permet à un citoyen de créer son compte. Le rôle sera automatiquement défini comme "utilisateur".
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/UserSignUp"
+            responses:
+                "201":
+                    description: Utilisateur créé avec succès
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AuthResponse"
+                "400":
+                    description: Données invalides
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                "500":
+                    description: Erreur serveur
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+
+    /v1/users/login:
+        post:
+            tags:
+                - Authentification
+            summary: Connexion utilisateur/modérateur
+            description: Permet la connexion des utilisateurs et modérateurs
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - email
+                                - password
+                            properties:
+                                email:
+                                    type: string
+                                    format: email
+                                    example: "admintest@test.com"
+                                password:
+                                    type: string
+                                    example: "Admin123!"
+            responses:
+                "200":
+                    description: Connexion réussie
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AuthResponse"
+                "401":
+                    description: Identifiants incorrects
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+
+    /v1/users/logout:
+        post:
+            tags:
+                - Authentification
+            summary: Déconnexion utilisateur
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - refreshToken
+                            properties:
+                                refreshToken:
+                                    type: string
+                                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+            responses:
+                "200":
+                    description: Déconnexion réussie
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/SuccessResponse"
+
+    /v1/users/refresh-token:
+        post:
+            tags:
+                - Authentification
+            summary: Renouvellement du token d'accès
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - refreshToken
+                            properties:
+                                refreshToken:
+                                    type: string
+                                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+            responses:
+                "200":
+                    description: Token renouvelé
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: "Token renouvelé avec succès"
+                                    data:
+                                        type: object
+                                        properties:
+                                            tokens:
+                                                type: object
+                                                properties:
+                                                    accessToken:
+                                                        type: string
+                                                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+    # ==================== GESTION DES UTILISATEURS ====================
+    /v1/users/admin/create-user:
+        post:
+            tags:
+                - Gestion des utilisateurs
+            summary: Création d'utilisateur par admin
+            description: Permet aux administrateurs de créer des comptes utilisateur
+            security:
+                - bearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/UserCreate"
+            responses:
+                "201":
+                    description: Utilisateur créé
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AuthResponse"
+                "401":
+                    description: Non autorisé
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                "403":
+                    description: Accès refusé
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+
+    /v1/users/get-all-users:
+        get:
+            tags:
+                - Gestion des utilisateurs
+            summary: Récupération de tous les utilisateurs
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      default: 1
+                      example: 1
+                - in: query
+                  name: limit
+                  schema:
+                      type: integer
+                      default: 10
+                      example: 10
+                - in: query
+                  name: role
+                  schema:
+                      type: string
+                      enum: [utilisateur, moderateur, administrateur, super-administrateur]
+                      example: "utilisateur"
+                - in: query
+                  name: pseudonyme
+                  schema:
+                      type: string
+                      example: "JohnDoe"
+                - in: query
+                  name: email
+                  schema:
+                      type: string
+                      format: email
+                      example: "user@example.com"
+            responses:
+                "200":
+                    description: Liste des utilisateurs
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: "Utilisateurs récupérés avec succès"
+                                    data:
+                                        type: object
+                                        properties:
+                                            users:
+                                                type: array
+                                                items:
+                                                    $ref: "#/components/schemas/User"
+                                            pagination:
+                                                $ref: "#/components/schemas/Pagination"
+
+    /v1/users/delete-user/{id}:
+        delete:
+            tags:
+                - Gestion des utilisateurs
+            summary: Suppression d'un utilisateur
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+                      pattern: "^[0-9a-fA-F]{24}$"
+                      example: "507f1f77bcf86cd799439011"
+            responses:
+                "200":
+                    description: Utilisateur supprimé
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/SuccessResponse"
+                "404":
+                    description: Utilisateur non trouvé
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                "401":
+                    description: Non autorisé
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+
+    /v1/users/update-user/{id}:
+        put:
+            tags:
+                - Gestion des utilisateurs
+            summary: Modification d'un utilisateur
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+                      pattern: "^[0-9a-fA-F]{24}$"
+                      example: "507f1f77bcf86cd799439011"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/UserUpdate"
+            responses:
+                "200":
+                    description: Utilisateur modifié
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: "Utilisateur modifié avec succès"
+                                    data:
+                                        type: object
+                                        properties:
+                                            user:
+                                                $ref: "#/components/schemas/User"
+
+    # ==================== GESTION DES RESSOURCES ====================
+    /v1/resource/create:
+        post:
+            tags:
+                - Gestion des ressources
+            summary: Création d'une ressource fichier
+            security:
+                - bearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    multipart/form-data:
+                        schema:
+                            type: object
+                            required:
+                                - title
+                                - category
+                                - relationType
+                                - file
+                            properties:
+                                title:
+                                    type: string
+                                    example: "Guide de santé mentale"
+                                category:
+                                    type: string
+                                    example: "507f1f77bcf86cd799439018"
+                                relationType:
+                                    type: string
+                                    example: "507f1f77bcf86cd799439019"
+                                file:
+                                    type: string
+                                    format: binary
+                                    description: "Fichier à uploader (max 500MB)"
+            responses:
+                "201":
+                    description: Ressource créée
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: "Ressource créée avec succès"
+                                    data:
+                                        type: object
+                                        properties:
+                                            ressource:
+                                                $ref: "#/components/schemas/Resource"
+
+    /v1/resource/published:
+        get:
+            tags:
+                - Gestion des ressources
+            summary: Récupération des ressources publiées
+            description: Récupère toutes les ressources publiées (accès public)
+            responses:
+                "200":
+                    description: Liste des ressources publiées
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: "Ressources publiées récupérées avec succès"
+                                    data:
+                                        type: object
+                                        properties:
+                                            ressource:
+                                                type: array
+                                                items:
+                                                    $ref: "#/components/schemas/Resource"
+
+    /v1/stats:
+        get:
+            tags:
+                - Statistiques
+            summary: Récupération des statistiques de l'application
+            responses:
+                "200":
+                    description: Statistiques récupérées
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    userCount:
+                                        type: integer
+                                        description: Nombre total d'utilisateurs
+                                        example: 150
+                                    totalResourcesCount:
+                                        type: integer
+                                        description: Nombre total de ressources
+                                        example: 75
+                                    publishedResourcesCount:
+                                        type: integer
+                                        description: Nombre de ressources publiées
+                                        example: 50
+
+    /v1/resource/:
+        get:
+            tags:
+                - Gestion des ressources
+            summary: Récupération de toutes les ressources (admin)
+            description: Récupère toutes les ressources, y compris non publiées (admin/super-admin uniquement)
+            security:
+                - bearerAuth: []
+            responses:
+                "200":
+                    description: Liste des ressources
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: "Ressources récupérées avec succès"
+                                    data:
+                                        type: object
+                                        properties:
+                                            ressource:
+                                                type: array
+                                                items:
+                                                    $ref: "#/components/schemas/Resource"
+
+    /v1/resource/published/{id}:
+        get:
+            tags:
+                - Gestion des ressources
+            summary: Récupération d'une ressource publiée par ID
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+                      pattern: "^[0-9a-fA-F]{24}$"
+                      example: "507f1f77bcf86cd799439011"
+            responses:
+                "200":
+                    description: Ressource trouvée
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: "Ressource trouvée"
+                                    data:
+                                        type: object
+                                        properties:
+                                            ressource:
+                                                $ref: "#/components/schemas/Resource"
+                "404":
+                    description: Ressource non trouvée
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+
+    /v1/resource/{id}:
+        get:
+            tags:
+                - Gestion des ressources
+            summary: Récupération d'une ressource par ID (authentifié)
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+                      pattern: "^[0-9a-fA-F]{24}$"
+                      example: "507f1f77bcf86cd799439011"
+            responses:
+                "200":
+                    description: Ressource trouvée
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: "Ressource trouvée"
+                                    data:
+                                        type: object
+                                        properties:
+                                            ressource:
+                                                $ref: "#/components/schemas/Resource"
+
+        put:
+            tags:
+                - Gestion des ressources
+            summary: Modification d'une ressource
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+                      pattern: "^[0-9a-fA-F]{24}$"
+                      example: "507f1f77bcf86cd799439011"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/ResourceUpdate"
+            responses:
+                "200":
+                    description: Ressource modifiée
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: "Ressource mise à jour avec succès"
+                                    data:
+                                        type: object
+                                        properties:
+                                            ressource:
+                                                $ref: "#/components/schemas/Resource"
+
+        delete:
+            tags:
+                - Gestion des ressources
+            summary: Suppression d'une ressource
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+                      pattern: "^[0-9a-fA-F]{24}$"
+                      example: "507f1f77bcf86cd799439011"
+            responses:
+                "200":
+                    description: Ressource supprimée
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/SuccessResponse"
+
+    /v1/resource/create-text:
+        post:
+            tags:
+                - Gestion des ressources
+            summary: Création d'une ressource texte/HTML
+            security:
+                - bearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - title
+                                - category
+                                - relationType
+                                - content
+                            properties:
+                                title:
+                                    type: string
+                                    example: "Article sur la gestion du stress"
+                                category:
+                                    type: string
+                                    example: "507f1f77bcf86cd799439018"
+                                relationType:
+                                    type: string
+                                    example: "507f1f77bcf86cd799439019"
+                                content:
+                                    type: string
+                                    description: "Contenu HTML de la ressource"
+                                    example: "<h1>Gestion du stress</h1><p>Voici quelques conseils...</p>"
+            responses:
+                "201":
+                    description: Ressource créée
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: "Ressource créée avec succès"
+                                    data:
+                                        type: object
+                                        properties:
+                                            ressource:
+                                                $ref: "#/components/schemas/Resource"
+
+    /v1/resource/status/{id}:
+        put:
+            tags:
+                - Gestion des ressources
+            summary: Modification du statut d'une ressource
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+                      pattern: "^[0-9a-fA-F]{24}$"
+                      example: "507f1f77bcf86cd799439011"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - status
+                            properties:
+                                status:
+                                    type: string
+                                    enum: [draft, published, archived]
+                                    example: "published"
+            responses:
+                "200":
+                    description: Statut modifié
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: "Statut de la ressource mis à jour avec succès"
+                                    data:
+                                        type: object
+                                        properties:
+                                            ressource:
+                                                $ref: "#/components/schemas/Resource"
+
+    /v1/resource/upload-image/{id}:
+        post:
+            tags:
+                - Gestion des ressources
+            summary: Upload d'une image pour une ressource
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+                      pattern: "^[0-9a-fA-F]{24}$"
+                      example: "507f1f77bcf86cd799439011"
+            requestBody:
+                required: true
+                content:
+                    multipart/form-data:
+                        schema:
+                            type: object
+                            required:
+                                - image
+                            properties:
+                                image:
+                                    type: string
+                                    format: binary
+                                    description: "Image à uploader (max 500MB)"
+            responses:
+                "200":
+                    description: Image uploadée
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: "Image uploadée avec succès"
+                                    data:
+                                        type: object
+                                        properties:
+                                            imageUrl:
+                                                type: string
+                                                example: "/uploads/images/resource_image_123.jpg"
+
+    /v1/resource/by-category/{categoryId}:
+        get:
+            tags:
+                - Gestion des ressources
+            summary: Récupération des ressources par catégorie
+            parameters:
+                - in: path
+                  name: categoryId
+                  required: true
+                  schema:
+                      type: string
+                      pattern: "^[0-9a-fA-F]{24}$"
+                      example: "507f1f77bcf86cd799439018"
+            responses:
+                "200":
+                    description: Ressources trouvées
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: "Ressources trouvées"
+                                    data:
+                                        type: object
+                                        properties:
+                                            ressource:
+                                                type: array
+                                                items:
+                                                    $ref: "#/components/schemas/Resource"
+
+    /v1/resource/by-relation-type/{relationTypeId}:
+        get:
+            tags:
+                - Gestion des ressources
+            summary: Récupération des ressources par type de relation
+            parameters:
+                - in: path
+                  name: relationTypeId
+                  required: true
+                  schema:
+                      type: string
+                      pattern: "^[0-9a-fA-F]{24}$"
+                      example: "507f1f77bcf86cd799439019"
+            responses:
+                "200":
+                    description: Ressources trouvées
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: "Ressources trouvées"
+                                    data:
+                                        type: object
+                                        properties:
+                                            ressource:
+                                                type: array
+                                                items:
+                                                    $ref: "#/components/schemas/Resource"
+
+    # ==================== GESTION DES COMMENTAIRES ====================
+    /v1/comments/{Id}:
+        post:
+            tags:
+                - Gestion des commentaires
+            summary: Création d'un commentaire
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: Id
+                  required: true
+                  schema:
+                      type: string
+                      pattern: "^[0-9a-fA-F]{24}$"
+                      example: "507f1f77bcf86cd799439016"
+                  description: ID de l'utilisateur auteur
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - content
+                                - authorId
+                                - resourceId
+                            properties:
+                                content:
+                                    type: string
+                                    example: "Excellent article, très informatif !"
+                                authorId:
+                                    type: string
+                                    pattern: "^[0-9a-fA-F]{24}$"
+                                    example: "507f1f77bcf86cd799439016"
+                                resourceId:
+                                    type: string
+                                    pattern: "^[0-9a-fA-F]{24}$"
+                                    example: "507f1f77bcf86cd799439017"
+            responses:
+                "201":
+                    description: Commentaire créé
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: "Commentaire créé avec succès"
+                                    data:
+                                        type: object
+                                        properties:
+                                            comments:
+                                                $ref: "#/components/schemas/Comment"
+
+    /v1/comments/resource/{resourceId}:
+        get:
+            tags:
+                - Gestion des commentaires
+            summary: Récupération des commentaires d'une ressource
+            parameters:
+                - in: path
+                  name: resourceId
+                  required: true
+                  schema:
+                      type: string
+                      pattern: "^[0-9a-fA-F]{24}$"
+                      example: "507f1f77bcf86cd799439017"
+            responses:
+                "200":
+                    description: Liste des commentaires
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: "Commentaires trouvés"
+                                    data:
+                                        type: object
+                                        properties:
+                                            comments:
+                                                type: array
+                                                items:
+                                                    $ref: "#/components/schemas/Comment"
+
+    /v1/comments/{commentId}:
+        put:
+            tags:
+                - Gestion des commentaires
+            summary: Modification d'un commentaire
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: commentId
+                  required: true
+                  schema:
+                      type: string
+                      pattern: "^[0-9a-fA-F]{24}$"
+                      example: "507f1f77bcf86cd799439015"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - content
+                            properties:
+                                content:
+                                    type: string
+                                    example: "Commentaire modifié"
+            responses:
+                "200":
+                    description: Commentaire modifié
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: "Commentaire mis à jour avec succès"
+                                    data:
+                                        type: object
+                                        properties:
+                                            comments:
+                                                $ref: "#/components/schemas/Comment"
+
+        delete:
+            tags:
+                - Gestion des commentaires
+            summary: Suppression d'un commentaire
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: commentId
+                  required: true
+                  schema:
+                      type: string
+                      pattern: "^[0-9a-fA-F]{24}$"
+                      example: "507f1f77bcf86cd799439015"
+            responses:
+                "200":
+                    description: Commentaire supprimé
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/SuccessResponse"
+
+    # ==================== GESTION DES CATÉGORIES ====================
+    /v1/categories/public:
+        get:
+            tags:
+                - Gestion des catégories
+            summary: Récupération des catégories (public)
+            responses:
+                "200":
+                    description: Liste des catégories
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: "Catégories récupérées avec succès"
+                                    data:
+                                        type: object
+                                        properties:
+                                            category:
+                                                type: array
+                                                items:
+                                                    $ref: "#/components/schemas/Category"
+
+    /v1/categories/:
+        get:
+            tags:
+                - Gestion des catégories
+            summary: Récupération de toutes les catégories (admin)
+            security:
+                - bearerAuth: []
+            responses:
+                "200":
+                    description: Liste des catégories
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: "Catégories récupérées avec succès"
+                                    data:
+                                        type: object
+                                        properties:
+                                            categories:
+                                                type: array
+                                                items:
+                                                    $ref: "#/components/schemas/Category"
+
+        post:
+            tags:
+                - Gestion des catégories
+            summary: Création d'une catégorie
+            security:
+                - bearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - name
+                            properties:
+                                name:
+                                    type: string
+                                    maxLength: 50
+                                    example: "Santé mentale"
+                                description:
+                                    type: string
+                                    example: "Ressources liées à la santé mentale"
+            responses:
+                "201":
+                    description: Catégorie créée
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: "Catégorie créée avec succès"
+                                    data:
+                                        type: object
+                                        properties:
+                                            category:
+                                                $ref: "#/components/schemas/Category"
+
+    /v1/categories/{id}:
+        get:
+            tags:
+                - Gestion des catégories
+            summary: Récupération d'une catégorie par ID
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+                      pattern: "^[0-9a-fA-F]{24}$"
+                      example: "507f1f77bcf86cd799439018"
+            responses:
+                "200":
+                    description: Catégorie trouvée
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: "Catégorie trouvée"
+                                    data:
+                                        type: object
+                                        properties:
+                                            category:
+                                                $ref: "#/components/schemas/Category"
+
+        put:
+            tags:
+                - Gestion des catégories
+            summary: Modification d'une catégorie
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+                      pattern: "^[0-9a-fA-F]{24}$"
+                      example: "507f1f77bcf86cd799439018"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - name
+                            properties:
+                                name:
+                                    type: string
+                                    maxLength: 50
+                                    example: "Bien-être mental"
+                                description:
+                                    type: string
+                                    example: "Ressources pour le bien-être mental"
+            responses:
+                "200":
+                    description: Catégorie modifiée
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: "Catégorie mise à jour avec succès"
+                                    data:
+                                        type: object
+                                        properties:
+                                            category:
+                                                $ref: "#/components/schemas/Category"
+
+        delete:
+            tags:
+                - Gestion des catégories
+            summary: Suppression d'une catégorie
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+                      pattern: "^[0-9a-fA-F]{24}$"
+                      example: "507f1f77bcf86cd799439018"
+            responses:
+                "200":
+                    description: Catégorie supprimée
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/SuccessResponse"
+
+    # ==================== GESTION DES TYPES DE RELATION ====================
+    /v1/relation-types/active:
+        get:
+            tags:
+                - Gestion des types de relation
+            summary: Récupération des types de relation actifs (public)
+            responses:
+                "200":
+                    description: Liste des types de relation actifs
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/RelationType"
+
+    /v1/relation-types/:
+        get:
+            tags:
+                - Gestion des types de relation
+            summary: Récupération de tous les types de relation (admin)
+            security:
+                - bearerAuth: []
+            responses:
+                "200":
+                    description: Liste des types de relation
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/RelationType"
+
+        post:
+            tags:
+                - Gestion des types de relation
+            summary: Création d'un type de relation
+            security:
+                - bearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - name
+                                - displayName
+                            properties:
+                                name:
+                                    type: string
+                                    maxLength: 30
+                                    example: "guide"
+                                displayName:
+                                    type: string
+                                    maxLength: 50
+                                    example: "Guide pratique"
+                                description:
+                                    type: string
+                                    example: "Type de relation pour les guides pratiques"
+                                isActive:
+                                    type: boolean
+                                    default: true
+                                    example: true
+            responses:
+                "201":
+                    description: Type de relation créé
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RelationType"
+
+    /v1/relation-types/{id}:
+        put:
+            tags:
+                - Gestion des types de relation
+            summary: Modification d'un type de relation
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+                      pattern: "^[0-9a-fA-F]{24}$"
+                      example: "507f1f77bcf86cd799439019"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                name:
+                                    type: string
+                                    maxLength: 30
+                                    example: "information"
+                                displayName:
+                                    type: string
+                                    maxLength: 50
+                                    example: "Information"
+                                description:
+                                    type: string
+                                    example: "Type de relation pour les informations"
+                                isActive:
+                                    type: boolean
+                                    example: true
+            responses:
+                "200":
+                    description: Type de relation modifié
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/RelationType"
+
+        delete:
+            tags:
+                - Gestion des types de relation
+            summary: Suppression d'un type de relation
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+                      pattern: "^[0-9a-fA-F]{24}$"
+                      example: "507f1f77bcf86cd799439019"
+            responses:
+                "200":
+                    description: Type de relation supprimé
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/SuccessResponse"
+
+components:
+    securitySchemes:
+        bearerAuth:
+            type: http
+            scheme: bearer
+            bearerFormat: JWT
+
+    schemas:
+        # ==================== SCHÉMAS DE BASE ====================
+        SuccessResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    example: "Opération réussie"
+                data:
+                    type: object
+
+        ErrorResponse:
+            type: object
+            properties:
+                error:
+                    oneOf:
+                        - type: object
+                          properties:
+                              msg:
+                                  type: string
+                                  example: "Message d'erreur"
+                              location:
+                                  type: string
+                                  example: "body"
+                        - type: object
+                          properties:
+                              errors:
+                                  type: array
+                                  items:
+                                      type: object
+                                      properties:
+                                          location:
+                                              type: string
+                                              example: "body"
+                                          msg:
+                                              type: string
+                                              example: "Le champ est requis"
+                                          path:
+                                              type: string
+                                              example: "email"
+                                          type:
+                                              type: string
+                                              example: "field"
+                                          value:
+                                              type: string
+                                              example: "invalid-email"
+
+        AuthResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    example: "Authentification réussie"
+                data:
+                    type: object
+                    properties:
+                        tokens:
+                            type: object
+                            properties:
+                                accessToken:
+                                    type: string
+                                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                                refreshToken:
+                                    type: string
+                                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                        user:
+                            $ref: "#/components/schemas/User"
+
+        Pagination:
+            type: object
+            properties:
+                currentPage:
+                    type: integer
+                    example: 1
+                totalPages:
+                    type: integer
+                    example: 10
+                totalItems:
+                    type: integer
+                    example: 100
+                itemsPerPage:
+                    type: integer
+                    example: 10
+
+        # ==================== SCHÉMAS UTILISATEUR ====================
+        User:
+            type: object
+            properties:
+                _id:
+                    type: string
+                    example: "507f1f77bcf86cd799439011"
+                email:
+                    type: string
+                    format: email
+                    example: "user@example.com"
+                pseudonyme:
+                    type: string
+                    example: "JohnDoe"
+                role:
+                    type: string
+                    enum: [utilisateur, moderateur, administrateur, super-administrateur]
+                    example: "utilisateur"
+                createdAt:
+                    type: string
+                    format: date-time
+                    example: "2024-01-01T00:00:00Z"
+                updatedAt:
+                    type: string
+                    format: date-time
+                    example: "2024-01-01T00:00:00Z"
+
+        UserSignUp:
+            type: object
+            required:
+                - email
+                - password
+                - pseudonyme
+                - role
+            properties:
+                email:
+                    type: string
+                    format: email
+                    example: "user@example.com"
+                password:
+                    type: string
+                    minLength: 8
+                    maxLength: 90
+                    pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,90}$'
+                    description: "Doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial"
+                    example: "Password123!"
+                pseudonyme:
+                    type: string
+                    minLength: 5
+                    maxLength: 50
+                    example: "JohnDoe"
+                role:
+                    type: string
+                    enum: [utilisateur]
+                    example: "utilisateur"
+                    description: "Le rôle sera automatiquement défini comme 'utilisateur'"
+
+        UserCreate:
+            type: object
+            required:
+                - email
+                - password
+                - pseudonyme
+                - role
+            properties:
+                email:
+                    type: string
+                    format: email
+                    example: "admin@example.com"
+                password:
+                    type: string
+                    minLength: 8
+                    maxLength: 90
+                    pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,90}$'
+                    description: "Doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial"
+                    example: "Password123!"
+                pseudonyme:
+                    type: string
+                    minLength: 5
+                    maxLength: 50
+                    example: "AdminUser"
+                role:
+                    type: string
+                    enum: [utilisateur, moderateur, administrateur, super-administrateur]
+                    example: "utilisateur"
+
+        UserUpdate:
+            type: object
+            properties:
+                email:
+                    type: string
+                    format: email
+                    example: "newemail@example.com"
+                pseudonyme:
+                    type: string
+                    minLength: 5
+                    maxLength: 50
+                    example: "NewPseudo"
+                role:
+                    type: string
+                    enum: [utilisateur, moderateur, administrateur, super-administrateur]
+                    example: "moderateur"
+                password:
+                    type: string
+                    minLength: 8
+                    maxLength: 90
+                    pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,90}$'
+                    description: "Mot de passe actuel pour confirmer l'identité"
+                    example: "CurrentPassword123!"
+                newPassword:
+                    type: string
+                    minLength: 8
+                    maxLength: 90
+                    pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,90}$'
+                    description: "Nouveau mot de passe (optionnel)"
+                    example: "NewPassword123!"
+
+        Resource:
+            type: object
+            properties:
+                _id:
+                    type: string
+                    example: "507f1f77bcf86cd799439011"
+                title:
+                    type: string
+                    example: "Guide de santé mentale"
+                category:
+                    type: string
+                    example: "507f1f77bcf86cd799439018"
+                relationType:
+                    type: string
+                    example: "507f1f77bcf86cd799439019"
+                createdAt:
+                    type: string
+                    format: date-time
+                    example: "2024-01-01T00:00:00Z"
+                updatedAt:
+                    type: string
+                    format: date-time
+                    example: "2024-01-01T00:00:00Z"
+
+        ResourceUpdate:
+            type: object
+            properties:
+                title:
+                    type: string
+                    example: "Guide de santé mentale"
+                category:
+                    type: string
+                    example: "507f1f77bcf86cd799439018"
+                relationType:
+                    type: string
+                    example: "507f1f77bcf86cd799439019"
+
+        Comment:
+            type: object
+            properties:
+                _id:
+                    type: string
+                    example: "507f1f77bcf86cd799439016"
+                content:
+                    type: string
+                    example: "Excellent article, très informatif !"
+                authorId:
+                    type: string
+                    example: "507f1f77bcf86cd799439016"
+                resourceId:
+                    type: string
+                    example: "507f1f77bcf86cd799439017"
+                createdAt:
+                    type: string
+                    format: date-time
+                    example: "2024-01-01T00:00:00Z"
+                updatedAt:
+                    type: string
+                    format: date-time
+                    example: "2024-01-01T00:00:00Z"
+
+        Category:
+            type: object
+            properties:
+                _id:
+                    type: string
+                    example: "507f1f77bcf86cd799439018"
+                name:
+                    type: string
+                    example: "Santé mentale"
+                description:
+                    type: string
+                    example: "Ressources liées à la santé mentale"
+
+        RelationType:
+            type: object
+            properties:
+                _id:
+                    type: string
+                    example: "507f1f77bcf86cd799439019"
+                name:
+                    type: string
+                    example: "guide"
+                displayName:
+                    type: string
+                    example: "Guide pratique"
+                description:
+                    type: string
+                    example: "Type de relation pour les guides pratiques"
+                isActive:
+                    type: boolean
+                    example: true
