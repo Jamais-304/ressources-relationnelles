@@ -118,45 +118,45 @@
         <v-divider class="my-4" />
 
         <!-- Actions de modération -->
-        <div v-if="isAdmin" class="moderation-actions mb-4">
-          <div class="text-subtitle-2 mb-3 d-flex align-center">
-            <v-icon class="mr-2" color="primary">mdi-shield-check</v-icon>
-            Actions de modération
-          </div>
+        <div v-if="isAdmin" class="d-flex gap-2 flex-wrap">
+          <v-btn
+            color="success"
+            variant="flat"
+            @click="$emit('updateStatus', resource, 'PUBLISHED')"
+            :disabled="resource.status === 'PUBLISHED'"
+          >
+            <v-icon start>mdi-check</v-icon>
+            Publier
+          </v-btn>
           
-          <div class="d-flex gap-2 flex-wrap">
-            <v-btn
-              v-if="resource.status !== 'PUBLISHED'"
-              color="success"
-              variant="flat"
-              size="small"
-              @click="$emit('updateStatus', resource, 'PUBLISHED')"
-            >
-              <v-icon start>mdi-check-circle</v-icon>
-              Publier
-            </v-btn>
-            <v-btn
-              v-if="resource.status !== 'PENDING'"
-              color="warning"
-              variant="flat"
-              size="small"
-              @click="$emit('updateStatus', resource, 'PENDING')"
-            >
-              <v-icon start>mdi-clock</v-icon>
-              En attente
-            </v-btn>
-            <v-btn
-              v-if="resource.status !== 'DRAFT'"
-              color="info"
-              variant="flat"
-              size="small"
-              @click="$emit('updateStatus', resource, 'DRAFT')"
-            >
-              <v-icon start>mdi-file-edit</v-icon>
-              Brouillon
-            </v-btn>
-          </div>
+          <v-btn
+            color="warning"
+            variant="flat"
+            @click="$emit('updateStatus', resource, 'PENDING')"
+            :disabled="resource.status === 'PENDING'"
+          >
+            <v-icon start>mdi-clock</v-icon>
+            En attente
+          </v-btn>
+          
+          <v-btn
+            color="info"
+            variant="flat"
+            @click="$emit('updateStatus', resource, 'DRAFT')"
+            :disabled="resource.status === 'DRAFT'"
+          >
+            <v-icon start>mdi-file-document-edit</v-icon>
+            Brouillon
+          </v-btn>
         </div>
+
+        <v-divider class="my-6" />
+
+        <!-- Section des commentaires -->
+        <CommentSection 
+          v-if="resource"
+          :resource-id="resource.uuid"
+        />
       </v-card-text>
 
       <!-- Actions du dialog -->
@@ -176,6 +176,7 @@ import { ref, watch, computed } from 'vue'
 import { useResourceHelpers, type Resource } from '@/composables/useResourceHelpers'
 import { useAuthUserStore } from '@/stores/authUserStore'
 import { Api } from '@/api/api'
+import CommentSection from './CommentSection.vue'
 
 // Composables
 const { 
