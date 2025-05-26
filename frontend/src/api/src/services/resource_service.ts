@@ -22,18 +22,46 @@ export class ResourceService {
   async list(): Promise<Resource[]> {
     try {
       const response = await this.api.get(`resource`)
-      console.log(response)
-      const resourcesData = response?.data as ResourceData[]
+      console.log('🔍 DEBUG - List resources response:', response)
+      
+      // Essayer différents formats de réponse
+      let resourcesData = null
+      const responseData = response as any
+      
+      // Format nouveau: { data: { resources: [...] } }
+      if (responseData?.data?.resources) {
+        resourcesData = Array.isArray(responseData.data.resources) ? responseData.data.resources : [responseData.data.resources]
+      }
+      // Format nouveau: { data: { ressource: [...] } }
+      else if (responseData?.data?.ressource) {
+        resourcesData = Array.isArray(responseData.data.ressource) ? responseData.data.ressource : [responseData.data.ressource]
+      }
+      // Format ancien: { data: [...] }
+      else if (responseData?.data && Array.isArray(responseData.data)) {
+        resourcesData = responseData.data
+      }
+      // Format direct: [...]
+      else if (Array.isArray(responseData)) {
+        resourcesData = responseData
+      }
+      
+      console.log('🔍 DEBUG - Parsed resourcesData:', resourcesData)
+      
+      if (!resourcesData) {
+        console.log('⚠️ DEBUG - No resources found in response')
+        return []
+      }
+      
       const resources = resourcesData.map((resource: ResourceData) =>
         Resource.fromJson(resource)
       )
 
-      console.log(resources)
+      console.log('🔍 DEBUG - Final resources:', resources)
 
       return resources
     } catch (error) {
       CustomError.handleError(
-        'Erreur durant la récupération d’une liste de ressources.',
+        'Erreur durant la récupération d\'une liste de ressources.',
         error
       )
     }
@@ -45,16 +73,46 @@ export class ResourceService {
    * @returns A Resource.
    * @throws {CustomError} When fetching a resource failed.
    */
-  async get(uuid: string): Promise<Resource[]> {
+  async get(uuid: string): Promise<Resource> {
     try {
       const response = await this.api.get(`resource/${uuid}`)
-      const resourceData = response?.data?.resource as ResourceData
-      const resource = Resource.fromJson(resourceData)
+      console.log('🔍 DEBUG - Get resource response:', response)
+      
+      // Essayer différents formats de réponse
+      let resourceData = null
+      const responseData = response as any
+      
+      // Format nouveau: { data: { resource: {...} } }
+      if (responseData?.data?.resource) {
+        resourceData = responseData.data.resource
+      }
+      // Format nouveau: { data: { ressource: {...} } }
+      else if (responseData?.data?.ressource) {
+        resourceData = responseData.data.ressource
+      }
+      // Format ancien: { data: {...} }
+      else if (responseData?.data && typeof responseData.data === 'object' && !Array.isArray(responseData.data)) {
+        resourceData = responseData.data
+      }
+      // Format direct: {...}
+      else if (responseData && typeof responseData === 'object') {
+        resourceData = responseData
+      }
+      
+      console.log('🔍 DEBUG - Parsed resourceData:', resourceData)
+      
+      if (!resourceData) {
+        throw new Error('No resource data found in response')
+      }
+      
+      const resource = Resource.fromJson(resourceData as ResourceData)
+
+      console.log('🔍 DEBUG - Final resource:', resource)
 
       return resource
     } catch (error) {
       CustomError.handleError(
-        'Erreur durant la récupération d’une ressource.',
+        'Erreur durant la récupération d\'une ressource.',
         error
       )
     }
@@ -73,7 +131,6 @@ export class ResourceService {
 
     formData.append('title', JSONattrs.title)
     formData.append('authorId', JSONattrs.authorId.toString())
-    formData.append('relationType', JSONattrs.relationType || 'Aucun type')
     formData.append('category', JSONattrs.category)
 
     if (JSONattrs.file) {
@@ -90,7 +147,7 @@ export class ResourceService {
       return resource
     } catch (error) {
       CustomError.handleError(
-        'Erreur durant la création d’une ressource.',
+        'Erreur durant la création d\'une ressource.',
         error
       )
     }
@@ -109,7 +166,6 @@ export class ResourceService {
 
     formData.append('title', JSONattrs.title)
     formData.append('authorId', JSONattrs.authorId.toString())
-    formData.append('relationType', JSONattrs.relationType || 'Aucun type')
     formData.append('category', JSONattrs.category)
 
     if (JSONattrs.file) {
@@ -126,7 +182,7 @@ export class ResourceService {
       return resource
     } catch (error) {
       CustomError.handleError(
-        'Erreur durant la mise à jour d’une ressource.',
+        'Erreur durant la mise à jour d\'une ressource.',
         error
       )
     }
@@ -147,7 +203,7 @@ export class ResourceService {
       return response
     } catch (error) {
       CustomError.handleError(
-        'Erreur durant la suppression d’une ressource.',
+        'Erreur durant la suppression d\'une ressource.',
         error
       )
     }
