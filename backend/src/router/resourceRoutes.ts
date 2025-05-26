@@ -1,5 +1,6 @@
 import { Router } from "express"
 import { getAllResources, getResourceById, createResource, createTextResource, updateResource, updateResourceStatus, deleteResource, getAllPublishedResources, uploadImage, getImage, getResourceContent, getPublishedResourceContent } from "../controllers/resourceController.ts"
+import { getCommentsByResource } from "../controllers/commentControllers.ts"
 import { validationErrorHandler } from "../middleware/validationErrorHandler.ts"
 import { auth } from "../middleware/auth.ts"
 
@@ -17,7 +18,13 @@ router.get('/v1/resource/published/:id', getResourceById)
 // Route publique pour accéder au contenu d'une ressource publiée
 router.get('/v1/resource/published/:id/content', getPublishedResourceContent)
 
+// Route publique pour récupérer les commentaires d'une ressource publiée
+router.get('/v1/resource/published/:resourceId/comments', getCommentsByResource)
+
 router.get('/v1/resource/:id', auth, getResourceById)
+
+// Route pour récupérer les commentaires d'une ressource (authentifié)
+router.get('/v1/resource/:resourceId/comments', auth, getCommentsByResource)
 
 // Upload d'image pour l'éditeur WYSIWYG
 router.post('/v1/resource/upload-image', auth, upload.single('image'), uploadImage)

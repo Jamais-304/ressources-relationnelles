@@ -117,11 +117,34 @@ async function loadGlobalStats() {
     
     // Pour les visiteurs non connectés et les utilisateurs normaux, utiliser l'endpoint public
     const response = await api.get('resource/published')
-    const publishedResources = response?.data as any[]
+    console.log('🔍 DEBUG - Stats response:', response)
+    
+    // Essayer différents formats de réponse
+    let publishedResources = null
+    const responseData = response as any
+    
+    // Format nouveau: { data: { ressource: [...] } }
+    if (responseData?.data?.ressource) {
+      publishedResources = Array.isArray(responseData.data.ressource) ? responseData.data.ressource : [responseData.data.ressource]
+    }
+    // Format nouveau: { data: { resources: [...] } }
+    else if (responseData?.data?.resources) {
+      publishedResources = Array.isArray(responseData.data.resources) ? responseData.data.resources : [responseData.data.resources]
+    }
+    // Format ancien: { data: [...] }
+    else if (responseData?.data && Array.isArray(responseData.data)) {
+      publishedResources = responseData.data
+    }
+    // Format direct: [...]
+    else if (Array.isArray(responseData)) {
+      publishedResources = responseData
+    }
+    
+    publishedResources = publishedResources || []
     
     globalStats.value = {
-      total: publishedResources?.length || 0,
-      published: publishedResources?.length || 0,
+      total: publishedResources.length || 0,
+      published: publishedResources.length || 0,
       draft: 0,
       pending: 0,
     }
@@ -146,10 +169,39 @@ async function listResources() {
     // Utiliser l'endpoint public pour l'affichage des ressources
     // Cet endpoint ne nécessite pas d'authentification
     const response = await api.get('resource/published')
+    console.log('🔍 DEBUG - List resources response:', response)
+    
+    // Essayer différents formats de réponse
+    let resourcesData = null
+    const responseData = response as any
+    
+    // Format nouveau: { data: { ressource: [...] } }
+    if (responseData?.data?.ressource) {
+      resourcesData = Array.isArray(responseData.data.ressource) ? responseData.data.ressource : [responseData.data.ressource]
+    }
+    // Format nouveau: { data: { resources: [...] } }
+    else if (responseData?.data?.resources) {
+      resourcesData = Array.isArray(responseData.data.resources) ? responseData.data.resources : [responseData.data.resources]
+    }
+    // Format ancien: { data: [...] }
+    else if (responseData?.data && Array.isArray(responseData.data)) {
+      resourcesData = responseData.data
+    }
+    // Format direct: [...]
+    else if (Array.isArray(responseData)) {
+      resourcesData = responseData
+    }
+    
+    console.log('🔍 DEBUG - Parsed resourcesData:', resourcesData)
+    
+    if (!resourcesData) {
+      console.log('⚠️ DEBUG - No resources found in response')
+      resources.value = []
+      return
+    }
     
     // Transformer les données en utilisant le bon mapping
-    const resourcesData = response?.data as any[]
-    resources.value = resourcesData?.map((resourceData: any) => ({
+    resources.value = resourcesData.map((resourceData: any) => ({
       uuid: resourceData._id,
       title: resourceData.title,
       authorUuid: resourceData.authorId,
@@ -160,7 +212,9 @@ async function listResources() {
       validatedBy: resourceData.validatedBy,
       createdAt: resourceData.createdAt,
       updatedAt: resourceData.updatedAt,
-    })) || []
+    }))
+    
+    console.log('🔍 DEBUG - Final resources:', resources.value)
     
   } catch (error) {
     console.error('Erreur lors du chargement des ressources:', error)

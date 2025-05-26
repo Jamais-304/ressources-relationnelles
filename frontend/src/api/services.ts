@@ -24,7 +24,34 @@ export interface RelationType {
 export const getPublicCategories = async (): Promise<Category[]> => {
   try {
     const response = await axios.get(`${API_BASE_URL}/v1/categories/public`)
-    return response.data.data || []
+    console.log('🔍 DEBUG - Categories response:', response.data)
+    
+    // Essayer différents formats de réponse
+    let categories = null
+    
+    // Format nouveau: { data: { categories: [...] } }
+    if (response.data.data?.categories) {
+      categories = response.data.data.categories
+    }
+    // Format nouveau: { data: { category: [...] } } (au cas où)
+    else if (response.data.data?.category) {
+      categories = Array.isArray(response.data.data.category) ? response.data.data.category : [response.data.data.category]
+    }
+    // Format ancien: { data: [...] }
+    else if (response.data.data && Array.isArray(response.data.data)) {
+      categories = response.data.data
+    }
+    // Format direct: { categories: [...] }
+    else if (response.data.categories) {
+      categories = response.data.categories
+    }
+    // Format direct: [...] 
+    else if (Array.isArray(response.data)) {
+      categories = response.data
+    }
+    
+    console.log('🔍 DEBUG - Parsed categories:', categories)
+    return categories || []
   } catch (error) {
     console.error('Erreur lors de la récupération des catégories:', error)
     return []
