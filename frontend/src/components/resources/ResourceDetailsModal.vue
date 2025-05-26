@@ -242,7 +242,32 @@ const loadResourceContent = async (resource: Resource) => {
       resourceResponse = await api.get(`resource/published/${resource.uuid}`)
     }
     
-    const resourceData = resourceResponse.data as any
+    console.log('🔍 DEBUG - Resource response:', resourceResponse)
+    
+    // Essayer différents formats de réponse
+    let resourceData = null
+    const responseData = resourceResponse as any
+    
+    // Format nouveau: { data: { resource: {...} } }
+    if (responseData?.data?.resource) {
+      resourceData = responseData.data.resource
+    }
+    // Format nouveau: { data: { ressource: {...} } }
+    else if (responseData?.data?.ressource) {
+      resourceData = responseData.data.ressource
+    }
+    // Format ancien: { data: {...} }
+    else if (responseData?.data && typeof responseData.data === 'object' && !Array.isArray(responseData.data)) {
+      resourceData = responseData.data
+    }
+    // Format direct: { resource: {...} }
+    else if (responseData?.resource) {
+      resourceData = responseData.resource
+    }
+    // Format direct: {...}
+    else if (responseData && typeof responseData === 'object') {
+      resourceData = responseData
+    }
     
     console.log('🔍 DEBUG - Resource data from backend:', resourceData)
     console.log('🔍 DEBUG - Resource contentGridfsId:', resourceData?.contentGridfsId)
@@ -287,12 +312,9 @@ const loadResourceContent = async (resource: Resource) => {
       resourceContent.value = 'Aucune donnée de ressource trouvée'
     }
   } catch (error: any) {
-    console.error('❌ DEBUG - Erreur lors du chargement du contenu:', error)
-    console.error('❌ DEBUG - Error response:', error.response)
-    
-    resourceContent.value = 'Informations non disponibles'
+    console.error('❌ DEBUG - Erreur chargement ressource:', error)
+    resourceContent.value = 'Erreur lors du chargement du contenu'
   } finally {
-    console.log('🔍 DEBUG - loadResourceContent finished. Final resourceContent:', resourceContent.value)
     isLoadingContent.value = false
   }
 }
