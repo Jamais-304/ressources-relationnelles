@@ -15,7 +15,7 @@ import { createCategorySuccess, deleteCategorySuccess, getCategories, updateCate
 export const getPublicCategories = async (req: Request, res: Response): Promise<void> => {
 	try {
 		const categories = await Category.find();
-		succesHandler(res, getCategories, categories as any);
+		succesHandler(res, getCategories, {category: categories});
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : unexpectedError;
 		errorHandler(res, errorMessage);
@@ -40,7 +40,7 @@ export const getAllCategories = async (req: AuthRequest, res: Response): Promise
 
 	try {
 		const categories = await Category.find();
-		succesHandler(res, getCategories, categories);
+		succesHandler(res, getCategories, { categories: categories });
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : unexpectedError;
 		errorHandler(res, errorMessage);
@@ -63,7 +63,7 @@ export const getCategoryById = async (req: Request, res: Response): Promise<void
 			return;
 		}
 
-		succesHandler(res, getCategories, category);
+		succesHandler(res, getCategories, { category: category });
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : unexpectedError;
 		errorHandler(res, errorMessage);
@@ -100,7 +100,7 @@ export const createCategory = async (req: AuthRequest, res: Response): Promise<v
 		});
 
 		await category.save();
-		succesHandler(res, createCategorySuccess, category);
+		succesHandler(res, createCategorySuccess, {category: category});
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : unexpectedError;
 		errorHandler(res, errorMessage);
@@ -144,7 +144,7 @@ export const updateCategory = async (req: AuthRequest, res: Response): Promise<v
 			return;
 		}
 
-		succesHandler(res, updateCategorySuccess, updatedCategory);
+		succesHandler(res, updateCategorySuccess, { category: updatedCategory })
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : unexpectedError;
 		errorHandler(res, errorMessage);
