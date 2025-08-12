@@ -1,0 +1,67 @@
+# .github/workflows/ci-dev.yml
+name: CI Development
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    # Backend
+    - name: Install backend dependencies
+      working-directory: ./backend
+      run: npm ci
+    
+    - name: Lint backend
+      working-directory: ./backend
+      run: npm run lint
+    
+    - name: TypeScript type checking (backend)
+      working-directory: ./backend
+      run: npm run build
+    
+    - name: Test backend
+      working-directory: ./backend
+      run: npm run test
+    
+    - name: Backend security audit
+      working-directory: ./backend
+      run: npm audit --audit-level=moderate
+    
+    # Frontend
+    # - name: Install frontend dependencies
+    #   working-directory: ./frontend
+    #   run: npm ci
+    
+    # - name: Lint frontend
+    #   working-directory: ./frontend
+    #   run: npm run lint
+    
+    # - name: TypeScript type checking (frontend)
+    #   working-directory: ./frontend
+    #   run: npm run type-check
+    
+    # - name: Test frontend
+    #   working-directory: ./frontend
+    #   run: npm test
+    
+    # - name: Build frontend
+    #   working-directory: ./frontend
+    #   run: npm run build
+    
+    # - name: Frontend security audit
+    #   working-directory: ./frontend
+    #   run: npm audit --audit-level=moderate
