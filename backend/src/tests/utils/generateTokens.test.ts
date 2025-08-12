@@ -17,7 +17,6 @@ describe("generateAccesToken", () => {
 
     it("should generate an access token", () => {
         process.env.TOKEN_SECRET = "secret"
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const signMock = jest.spyOn(jwt, "sign" as any).mockReturnValue("mocked-token")
 
         const token = generateAccesToken(user)
@@ -52,7 +51,6 @@ describe("generateRefreshToken", () => {
 
     it("should generate a refresh token and store it in the database", async () => {
         process.env.TOKEN_SECRET = "secret"
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const signMock = jest.spyOn(jwt, "sign" as any).mockReturnValue("mocked-token")
 
         const mockDocument = {
@@ -62,7 +60,6 @@ describe("generateRefreshToken", () => {
             createdAt: new Date()
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const createMock = jest.spyOn(RefreshToken, "create" as any).mockResolvedValue(mockDocument)
 
         const token = await generateRefreshToken(user)

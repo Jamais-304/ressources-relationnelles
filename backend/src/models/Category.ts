@@ -1,6 +1,6 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Document } from "mongoose";
 import { type CategoryInterface } from "../interfaces/categoryInterface.ts";
-// import { categoryMsgRequired, categoryNameMaxLength } from "../handlerResponse/errorHandler/configs.ts";
+
 
 interface ICategorySchema extends CategoryInterface, Document {}
 

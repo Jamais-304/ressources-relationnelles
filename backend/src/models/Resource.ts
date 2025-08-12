@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 import { type ResourceInterface } from '../interfaces/resourceInterface.ts';
 
 interface IResourceSchema extends ResourceInterface, Document {}

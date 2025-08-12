@@ -1,6 +1,5 @@
 import { MongoClient, GridFSBucket, ObjectId } from 'mongodb'
 import { Readable } from 'stream'
-
 const mongoUri = process.env.MONGO_URI || '' //FIXME: add default value or handle error if not set
 const dbName = process.env.DB_NAME
 
