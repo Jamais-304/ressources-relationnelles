@@ -54,7 +54,7 @@ const toggleFaq = (index: number) => {
       <h1 class="text-2xl font-bold mb-6 font-marianne">
         À propos de (RE)SOURCES RELATIONNELLES
       </h1>
-      
+
       <!-- Présentation du projet dans sa globalité -->
       <section class="mb-12">
         <div class="bg-[#F5F5FE] p-6 rounded-lg border border-[#000091]/20">
@@ -78,11 +78,11 @@ const toggleFaq = (index: number) => {
         <h2 class="text-xl font-bold mb-6 font-marianne">
           Foire aux questions
         </h2>
-        
+
         <div class="space-y-4">
-          <div 
-            v-for="(item, index) in faqItems" 
-            :key="index" 
+          <div
+            v-for="(item, index) in faqItems"
+            :key="index"
             class="border border-gray-200 rounded-lg overflow-hidden"
           >
             <button
@@ -95,8 +95,8 @@ const toggleFaq = (index: number) => {
                 {{ item.isOpen ? '−' : '+' }}
               </span>
             </button>
-            <div 
-              v-if="item.isOpen" 
+            <div
+              v-if="item.isOpen"
               class="p-4 bg-white border-t border-gray-200"
             >
               <p>{{ item.answer }}</p>

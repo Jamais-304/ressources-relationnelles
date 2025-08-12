@@ -12,10 +12,12 @@ import MyAccount from '@/views/accounts/MyAccount.vue'
 import Resources from '@/views/resources/Resources.vue'
 import CreateResource from '@/views/resources/CreateResource.vue'
 import ResourceModeration from '@/views/resources/ResourceModerationV2.vue'
+import Support from '@/views/support/Support.vue'
 
 const routes = [
   { path: '/', name: 'home', component: Home },
   { path: '/about', name: 'about', component: About },
+  { path: '/support', name: 'support', component: Support },
   { path: '/login', name: 'login', component: Login },
   { path: '/signup', name: 'signup', component: Signup },
   { path: '/not-allowed', name: 'not allowed', component: NotAllowed },
