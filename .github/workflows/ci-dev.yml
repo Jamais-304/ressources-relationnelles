@@ -2,15 +2,17 @@
 name: CI Development
 
 on:
-  push:
-    branches: [develop]
   pull_request:
-    branches: [develop]
+    branches: [develop, main]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+    env:
+      PORT_BACKEND: $ {{secrets.PORT_BACKEND}}
+      PORT_FRONTEND: ${{secrets.PORT_FRONTEND}}
+      MONGO_URI: ${{secrets.MONGO_URI}}
+      TOKEN_SECRET: ${{secrets.TOKEN_SECRET}}
     steps:
     - uses: actions/checkout@v3
     
