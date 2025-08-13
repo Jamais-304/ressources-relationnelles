@@ -2,23 +2,24 @@
 name: CI Development
 
 on:
-  push:
-    branches: [develop]
   pull_request:
-    branches: [develop]
+    branches: [develop, main]
 
 jobs:
-  test:
+  validate-code:
     runs-on: ubuntu-latest
-    
+    env:
+      PORT_BACKEND: $ {{secrets.PORT_BACKEND}}
+      PORT_FRONTEND: ${{secrets.PORT_FRONTEND}}
+      MONGO_URI: ${{secrets.MONGO_URI}}
+      TOKEN_SECRET: ${{secrets.TOKEN_SECRET}}
     steps:
     - uses: actions/checkout@v3
     
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '20'
-        cache: 'npm'
+        node-version: '23'
     
     # Backend
     - name: Install backend dependencies
