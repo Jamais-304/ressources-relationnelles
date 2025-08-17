@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { Api, User, Role } from '@/api/api'
+import { Api } from '@/api/api'
 import { useErrorsManagement } from '@/composables/useErrorsManagement'
-import { useUsersManagement } from '@/composables/useUsersManagement'
 import { useResourcesManagement } from '@/composables/useResourcesManagement'
 import { useResourceHelpers, type Resource } from '@/composables/useResourceHelpers'
 import { useAuthUserStore } from '@/stores/authUserStore'
@@ -13,16 +12,12 @@ const api = new Api()
 const apiBaseUrl = api.baseUrl
 
 const {
-  references: { users, currentUser },
-} = useUsersManagement()
-
-const {
-  references: { resources, currentResource },
+  references: { resources },
 } = useResourcesManagement()
 
 const { handleError } = useErrorsManagement()
 
-const { authUser, isAuthenticated, isAdmin } = useAuthUserStore()
+const { isAuthenticated, isAdmin } = useAuthUserStore()
 
 const {
   getStatusColor,
@@ -62,13 +57,13 @@ const selectedResourceForModal = ref<Resource | null>(null)
 // Computed properties
 const filteredResources = computed(() => {
   if (!resources.value) return []
-  
+
   let filtered = resources.value as Resource[]
 
   // Filtre par recherche
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(resource => 
+    filtered = filtered.filter(resource =>
       resource.title.toLowerCase().includes(query)
     )
   }
@@ -101,7 +96,7 @@ async function loadGlobalStats() {
       try {
         const response = await api.resources.list()
         const allResources = response as Resource[]
-        
+
         globalStats.value = {
           total: allResources.length,
           published: allResources.filter(r => r.status === 'PUBLISHED').length,
@@ -114,15 +109,15 @@ async function loadGlobalStats() {
         // Continuer avec l'endpoint public en cas d'erreur
       }
     }
-    
+
     // Pour les visiteurs non connectés et les utilisateurs normaux, utiliser l'endpoint public
     const response = await api.get('resource/published')
     console.log('🔍 DEBUG - Stats response:', response)
-    
+
     // Essayer différents formats de réponse
     let publishedResources = null
     const responseData = response as any
-    
+
     // Format nouveau: { data: { ressource: [...] } }
     if (responseData?.data?.ressource) {
       publishedResources = Array.isArray(responseData.data.ressource) ? responseData.data.ressource : [responseData.data.ressource]
@@ -139,9 +134,9 @@ async function loadGlobalStats() {
     else if (Array.isArray(responseData)) {
       publishedResources = responseData
     }
-    
+
     publishedResources = publishedResources || []
-    
+
     globalStats.value = {
       total: publishedResources.length || 0,
       published: publishedResources.length || 0,
@@ -165,16 +160,16 @@ async function listResources() {
   try {
     // Charger les statistiques globales
     await loadGlobalStats()
-    
+
     // Utiliser l'endpoint public pour l'affichage des ressources
     // Cet endpoint ne nécessite pas d'authentification
     const response = await api.get('resource/published')
     console.log('🔍 DEBUG - List resources response:', response)
-    
+
     // Essayer différents formats de réponse
     let resourcesData = null
     const responseData = response as any
-    
+
     // Format nouveau: { data: { ressource: [...] } }
     if (responseData?.data?.ressource) {
       resourcesData = Array.isArray(responseData.data.ressource) ? responseData.data.ressource : [responseData.data.ressource]
@@ -191,15 +186,15 @@ async function listResources() {
     else if (Array.isArray(responseData)) {
       resourcesData = responseData
     }
-    
+
     console.log('🔍 DEBUG - Parsed resourcesData:', resourcesData)
-    
+
     if (!resourcesData) {
       console.log('⚠️ DEBUG - No resources found in response')
       resources.value = []
       return
     }
-    
+
     // Transformer les données en utilisant le bon mapping
     resources.value = resourcesData.map((resourceData: any) => ({
       uuid: resourceData._id,
@@ -213,9 +208,9 @@ async function listResources() {
       createdAt: resourceData.createdAt,
       updatedAt: resourceData.updatedAt,
     }))
-    
+
     console.log('🔍 DEBUG - Final resources:', resources.value)
-    
+
   } catch (error) {
     console.error('Erreur lors du chargement des ressources:', error)
     handleError(error)
@@ -226,7 +221,7 @@ async function listResources() {
 
 const toggleCardExpansion = async (resource: Resource) => {
   const isExpanded = expandedCards.value.has(resource.uuid)
-  
+
   if (isExpanded) {
     expandedCards.value.delete(resource.uuid)
   } else {
@@ -240,17 +235,17 @@ const toggleCardExpansion = async (resource: Resource) => {
 
 const loadResourceContent = async (resource: Resource) => {
   if (loadingContents.value.has(resource.uuid)) return
-  
+
   loadingContents.value.add(resource.uuid)
-  
+
   try {
     // Utiliser la route publique pour les ressources publiées
     const resourceResponse = await api.get(`resource/published/${resource.uuid}`)
     const resourceData = resourceResponse.data as any
-    
+
     if (resourceData && resourceData.resourceMIMEType) {
       resourceContentTypes.value.set(resource.uuid, resourceData.resourceMIMEType)
-      
+
       // Si c'est du texte, essayer de récupérer le contenu
       if (resourceData.resourceMIMEType.startsWith('text/')) {
         try {
@@ -306,7 +301,7 @@ onMounted(() => listResources())
       <div class="absolute inset-0 opacity-10 pointer-events-none">
         <div class="w-full h-full" style="background-image: url('data:image/svg+xml,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 100 100&quot;><defs><pattern id=&quot;grain&quot; width=&quot;100&quot; height=&quot;100&quot; patternUnits=&quot;userSpaceOnUse&quot;><circle cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;1&quot; fill=&quot;white&quot; opacity=&quot;0.1&quot;/></pattern></defs><rect width=&quot;100&quot; height=&quot;100&quot; fill=&quot;url(%23grain)&quot;/></svg>')"></div>
       </div>
-      
+
       <div class="relative z-10 max-w-6xl mx-auto flex flex-col lg:flex-row justify-between items-center gap-8">
         <div class="text-center lg:text-left">
           <h1 class="flex items-center justify-center lg:justify-start gap-4 text-5xl lg:text-6xl font-bold mb-4">
@@ -317,7 +312,7 @@ onMounted(() => listResources())
             Découvrez une collection de ressources pour améliorer vos relations et votre bien-être
           </p>
         </div>
-        
+
         <v-btn
           v-if="isAuthenticated"
           class="rounded-full px-8 h-14 font-semibold tracking-wide"
@@ -329,7 +324,7 @@ onMounted(() => listResources())
           <v-icon start>mdi-plus-circle</v-icon>
           Créer une ressource
         </v-btn>
-        
+
         <v-btn
           v-else
           class="rounded-full px-8 h-14 font-semibold tracking-wide"
@@ -356,7 +351,7 @@ onMounted(() => listResources())
             <div class="text-sm text-gray-600">Total</div>
           </div>
         </div>
-        
+
         <div class="bg-white rounded-2xl p-6 flex items-center gap-4 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
           <div class="w-15 h-15 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white">
             <v-icon size="24">mdi-check-circle</v-icon>
@@ -366,7 +361,7 @@ onMounted(() => listResources())
             <div class="text-sm text-gray-600">Publiées</div>
           </div>
         </div>
-        
+
         <div class="bg-white rounded-2xl p-6 flex items-center gap-4 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
           <div class="w-15 h-15 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white">
             <v-icon size="24">mdi-file-edit</v-icon>
@@ -376,7 +371,7 @@ onMounted(() => listResources())
             <div class="text-sm text-gray-600">Brouillons</div>
           </div>
         </div>
-        
+
         <div class="bg-white rounded-2xl p-6 flex items-center gap-4 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
           <div class="w-15 h-15 rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-white">
             <v-icon size="24">mdi-clock</v-icon>
@@ -447,7 +442,7 @@ onMounted(() => listResources())
                   <v-btn value="grid" icon="mdi-view-grid" />
                   <v-btn value="list" icon="mdi-view-list" />
                 </v-btn-toggle>
-                
+
                 <v-btn
                   variant="outlined"
                   @click="clearFilters"
@@ -489,7 +484,7 @@ onMounted(() => listResources())
                     {{ getResourceIcon(resource.category) }}
                   </v-icon>
                 </div>
-                
+
                 <v-chip
                   :color="getStatusColor(resource.status)"
                   size="small"
@@ -503,7 +498,7 @@ onMounted(() => listResources())
 
               <!-- Contenu principal -->
               <h3 class="text-xl font-semibold text-gray-900 mb-3 line-clamp-2">{{ resource.title }}</h3>
-              
+
               <div class="mb-4">
                 <v-chip
                   :color="getResourceColor(resource.category)"
@@ -520,7 +515,7 @@ onMounted(() => listResources())
                   <v-icon size="16" class="text-gray-400">mdi-calendar</v-icon>
                   <span>{{ formatDate(resource.createdAt) }}</span>
                 </div>
-                
+
                 <div v-if="resource.validatedAndPublishedAt" class="flex items-center gap-2 text-green-600">
                   <v-icon size="16">mdi-check-circle</v-icon>
                   <span>Publié le {{ formatDate(resource.validatedAndPublishedAt) }}</span>
@@ -535,33 +530,33 @@ onMounted(() => listResources())
                     <v-icon size="20">mdi-eye</v-icon>
                     Aperçu du contenu
                   </h4>
-                  
+
                   <div v-if="loadingContents.has(resource.uuid)" class="flex items-center gap-3 py-4">
                     <v-progress-circular indeterminate size="24" />
                     <span class="text-gray-600">Chargement...</span>
                   </div>
-                  
+
                   <div v-else-if="resourceContents.has(resource.uuid)" class="max-h-75 overflow-y-auto">
                     <!-- Contenu texte/HTML -->
                     <div v-if="resourceContentTypes.get(resource.uuid)?.startsWith('text/')">
-                      <div v-if="resourceContentTypes.get(resource.uuid) === 'text/html'" 
-                           v-html="resourceContents.get(resource.uuid)" 
+                      <div v-if="resourceContentTypes.get(resource.uuid) === 'text/html'"
+                           v-html="resourceContents.get(resource.uuid)"
                            class="prose prose-sm max-w-none">
                       </div>
                       <div v-else class="whitespace-pre-wrap leading-relaxed text-gray-700">
                         {{ resourceContents.get(resource.uuid) }}
                       </div>
                     </div>
-                    
+
                     <!-- Contenu image -->
                     <div v-else-if="resourceContentTypes.get(resource.uuid)?.startsWith('image/')">
-                      <img 
+                      <img
                         :src="`${apiBaseUrl}/resource/image/${resource.contentGridfsUuid}`"
                         class="w-full max-h-50 object-contain rounded-xl"
                         @error="($event.target as HTMLImageElement).style.display = 'none'"
                       />
                     </div>
-                    
+
                     <!-- Autres types -->
                     <div v-else class="flex items-center gap-2 p-4 bg-gray-50 rounded-xl text-gray-600">
                       <v-icon>mdi-file</v-icon>
@@ -585,7 +580,7 @@ onMounted(() => listResources())
                 </v-icon>
                 {{ expandedCards.has(resource.uuid) ? 'Réduire' : 'Voir détails' }}
               </v-btn>
-              
+
               <v-btn
                 variant="text"
                 color="info"
@@ -629,7 +624,7 @@ onMounted(() => listResources())
                     {{ getStatusText(resource.status) }}
                   </v-chip>
                 </div>
-                
+
                 <div class="flex items-center gap-2 text-sm text-gray-600">
                   <span>{{ getCategoryDisplayName(resource.category) }}</span>
                   <span class="opacity-50">•</span>
@@ -648,7 +643,7 @@ onMounted(() => listResources())
                   <v-icon>mdi-open-in-new</v-icon>
                   <v-tooltip activator="parent">Ouvrir en grand</v-tooltip>
                 </v-btn>
-                
+
                 <v-btn
                   variant="text"
                   color="primary"
@@ -670,26 +665,26 @@ onMounted(() => listResources())
                   <v-progress-circular indeterminate size="24" />
                   <span class="text-gray-600">Chargement...</span>
                 </div>
-                
+
                 <div v-else-if="resourceContents.has(resource.uuid)" class="max-h-75 overflow-y-auto">
                   <div v-if="resourceContentTypes.get(resource.uuid)?.startsWith('text/')">
-                    <div v-if="resourceContentTypes.get(resource.uuid) === 'text/html'" 
-                         v-html="resourceContents.get(resource.uuid)" 
+                    <div v-if="resourceContentTypes.get(resource.uuid) === 'text/html'"
+                         v-html="resourceContents.get(resource.uuid)"
                          class="prose prose-sm max-w-none">
                     </div>
                     <div v-else class="whitespace-pre-wrap leading-relaxed text-gray-700">
                       {{ resourceContents.get(resource.uuid) }}
                     </div>
                   </div>
-                  
+
                   <div v-else-if="resourceContentTypes.get(resource.uuid)?.startsWith('image/')">
-                    <img 
+                    <img
                       :src="`${apiBaseUrl}/resource/image/${resource.contentGridfsUuid}`"
                       class="w-full max-h-50 object-contain rounded-xl"
                       @error="($event.target as HTMLImageElement).style.display = 'none'"
                     />
                   </div>
-                  
+
                   <div v-else class="flex items-center gap-2 p-4 bg-white rounded-xl text-gray-600">
                     <v-icon>mdi-file</v-icon>
                     <span>{{ resourceContents.get(resource.uuid) }}</span>
@@ -708,11 +703,11 @@ onMounted(() => listResources())
         </div>
         <h3 class="text-2xl font-semibold text-gray-700 mb-2">Aucune ressource trouvée</h3>
         <p class="text-gray-600 mb-8 max-w-md mx-auto">
-          {{ searchQuery || selectedCategory 
-             ? 'Essayez de modifier vos critères de recherche.' 
+          {{ searchQuery || selectedCategory
+             ? 'Essayez de modifier vos critères de recherche.'
              : 'Il n\'y a pas encore de ressources.' }}
         </p>
-        
+
         <div class="flex flex-wrap gap-4 justify-center">
           <v-btn
             v-if="searchQuery || selectedCategory"
@@ -723,7 +718,7 @@ onMounted(() => listResources())
             <v-icon start>mdi-filter-off</v-icon>
             Effacer les filtres
           </v-btn>
-          
+
           <v-btn
             v-if="isAuthenticated"
             color="primary"
@@ -733,7 +728,7 @@ onMounted(() => listResources())
             <v-icon start>mdi-plus</v-icon>
             Créer la première ressource
           </v-btn>
-          
+
           <v-btn
             v-else
             color="primary"
@@ -746,7 +741,7 @@ onMounted(() => listResources())
         </div>
       </div>
     </div>
-    
+
     <!-- Modal de détails -->
     <ResourceDetailsModal
       v-model="detailsModal"

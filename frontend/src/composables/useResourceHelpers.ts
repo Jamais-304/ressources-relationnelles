@@ -1,5 +1,3 @@
-import { computed } from 'vue'
-
 export interface Resource {
   uuid: string
   title: string
@@ -117,4 +115,4 @@ export const useResourceHelpers = () => {
     getResourceColor,
     formatDate
   }
-} 
+}

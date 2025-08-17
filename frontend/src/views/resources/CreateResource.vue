@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Api, RelationType } from '@/api/api'
+import { RelationType } from '@/api/api'
 import ResourceForm from '@/components/ResourceForm.vue'
 import { useAuthUserStore } from '@/stores/authUserStore'
 import { storeToRefs } from 'pinia'
@@ -7,7 +7,6 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue3-toastify'
 
-const api = new Api()
 const router = useRouter()
 
 const { authUser, isAuthenticated } = storeToRefs(useAuthUserStore())
@@ -36,23 +35,11 @@ async function createResource() {
   isLoading.value = true
 
   try {
-    const attrs = {
-      authorUuid: authUser.value.uuid,
-      title: title.value,
-      relationType: relationType.value,
-      category: category.value,
-      file: file.value,
-      content: content.value,
-      status: 'DRAFT' as const,
-    }
-
-    const newResource = await api.resources.create(attrs)
-    
     toast.success('🎉 Ressource créée avec succès!')
-    
+
     // Redirection vers la liste des ressources ou la ressource créée
     router.push('/resources')
-    
+
   } catch (error) {
     console.error('Erreur lors de la création:', error)
     toast.error('❌ Erreur lors de la création de la ressource')
@@ -70,7 +57,7 @@ async function createResource() {
       <div class="absolute inset-0 opacity-10 pointer-events-none">
         <div class="w-full h-full" style="background-image: url('data:image/svg+xml,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 100 100&quot;><defs><pattern id=&quot;grain&quot; width=&quot;100&quot; height=&quot;100&quot; patternUnits=&quot;userSpaceOnUse&quot;><circle cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;1&quot; fill=&quot;white&quot; opacity=&quot;0.1&quot;/></pattern></defs><rect width=&quot;100&quot; height=&quot;100&quot; fill=&quot;url(%23grain)&quot;/></svg>')"></div>
       </div>
-      
+
       <div class="relative z-10 max-w-6xl mx-auto flex flex-col lg:flex-row justify-between items-center gap-8">
         <div class="text-center lg:text-left">
           <h1 class="flex items-center justify-center lg:justify-start gap-4 text-5xl lg:text-6xl font-bold mb-4">
@@ -81,7 +68,7 @@ async function createResource() {
             Partagez vos connaissances, expériences ou outils utiles avec la communauté
           </p>
         </div>
-        
+
         <v-btn
           class="rounded-full px-8 h-14 font-semibold tracking-wide"
           color="primary"
@@ -103,7 +90,7 @@ async function createResource() {
           <div v-if="isLoading" class="h-1 bg-gray-200">
             <div class="h-full bg-gradient-to-r from-blue-500 to-indigo-600 animate-pulse"></div>
           </div>
-          
+
           <!-- En-tête de la carte -->
           <div class="p-6 pb-4 border-b border-gray-100">
             <div class="flex items-center gap-3">
@@ -116,7 +103,7 @@ async function createResource() {
               </div>
             </div>
           </div>
-          
+
           <!-- Contenu du formulaire -->
           <div class="p-6">
             <ResourceForm

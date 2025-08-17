@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import { Api, Role } from '@/api/api'
 import { useAuthUserStore } from '@/stores/authUserStore'
 import { toast } from 'vue3-toastify'
@@ -22,7 +21,6 @@ const props = defineProps<{
 }>()
 
 // Composables
-const router = useRouter()
 const api = new Api()
 const { authUser, isAuthenticated } = useAuthUserStore()
 
@@ -31,7 +29,6 @@ const comments = ref<Comment[]>([])
 const newComment = ref('')
 const isLoading = ref(false)
 const isSubmitting = ref(false)
-const showComments = ref(true)
 
 // Edit state
 const editingComment = ref<Comment | null>(null)
@@ -54,26 +51,26 @@ const rules = {
 const fetchComments = async () => {
   console.log('🔍 DEBUG - fetchComments called')
   console.log('🔍 DEBUG - props.resourceId:', props.resourceId)
-  
+
   if (!props.resourceId) {
     console.log('❌ DEBUG - No resourceId provided')
     return
   }
-  
+
   isLoading.value = true
   console.log('🔍 DEBUG - Starting fetchComments API call...')
-  
+
   try {
     const url = `resource/published/${props.resourceId}/comments`
     console.log('🔍 DEBUG - Fetch URL:', url)
-    
+
     const response = await api.get(url) as any
     console.log('✅ DEBUG - Fetch response:', response)
-    
+
     // Essayer différents formats de réponse
     let commentsData = null
     const responseData = response as any
-    
+
     // Format nouveau: { data: { comments: [...] } }
     if (responseData?.data?.comments) {
       commentsData = Array.isArray(responseData.data.comments) ? responseData.data.comments : [responseData.data.comments]
@@ -90,9 +87,9 @@ const fetchComments = async () => {
     else if (Array.isArray(responseData)) {
       commentsData = responseData
     }
-    
+
     console.log('🔍 DEBUG - Parsed commentsData:', commentsData)
-    
+
     if (commentsData) {
       console.log('✅ DEBUG - Comments found:', commentsData)
       comments.value = commentsData
@@ -116,7 +113,7 @@ const handleSubmitComment = async () => {
   console.log('🔍 DEBUG - newComment.value:', newComment.value)
   console.log('🔍 DEBUG - currentUser.value:', currentUser.value)
   console.log('🔍 DEBUG - props.resourceId:', props.resourceId)
-  
+
   if (!newComment.value.trim() || !currentUser.value) {
     console.log('❌ DEBUG - Validation failed')
     return
@@ -124,7 +121,7 @@ const handleSubmitComment = async () => {
 
   isSubmitting.value = true
   console.log('🔍 DEBUG - Starting API call...')
-  
+
   try {
     const payload = {
       content: newComment.value.trim(),
@@ -133,7 +130,7 @@ const handleSubmitComment = async () => {
     }
     console.log('🔍 DEBUG - Payload:', payload)
     console.log('🔍 DEBUG - URL:', `comments/${currentUser.value.uuid}`)
-    
+
     const response = await api.post(`comments/${currentUser.value.uuid}`, payload)
     console.log('✅ DEBUG - API response:', response)
 
@@ -207,7 +204,7 @@ const deleteComment = async () => {
   isSubmitting.value = true
   try {
     await api.delete(`comments/${commentToDelete.value._id}`)
-    
+
     toast.success('Commentaire supprimé avec succès')
     deleteDialog.value = false
     commentToDelete.value = null
@@ -255,7 +252,7 @@ onMounted(() => {
   console.log('🔍 DEBUG - isAuthenticated:', isAuthenticated)
   console.log('🔍 DEBUG - currentUser:', currentUser.value)
   console.log('🔍 DEBUG - props.resourceId:', props.resourceId)
-  
+
   if (props.resourceId) {
     fetchComments()
   }
@@ -283,7 +280,7 @@ onMounted(() => {
         <v-avatar size="40" color="blue-500" class="flex-shrink-0">
           <v-icon color="white" size="20">mdi-account</v-icon>
         </v-avatar>
-        
+
         <div class="flex-1">
           <v-form @submit.prevent="handleSubmitComment">
             <v-textarea
@@ -299,7 +296,7 @@ onMounted(() => {
               hide-details="auto"
               class="mb-3"
             />
-            
+
             <div class="flex justify-end">
               <v-btn
                 type="submit"
@@ -364,8 +361,8 @@ onMounted(() => {
               <div class="font-medium text-gray-900">{{ comment.authorPseudo }}</div>
               <div class="text-sm text-gray-500 flex items-center gap-2">
                 {{ formatDate(comment.createdAt) }}
-                <span 
-                  v-if="comment.updatedAt !== comment.createdAt" 
+                <span
+                  v-if="comment.updatedAt !== comment.createdAt"
                   class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"
                 >
                   modifié
@@ -439,7 +436,7 @@ onMounted(() => {
               </v-btn>
             </div>
           </div>
-          
+
           <!-- Mode lecture -->
           <div v-else>
             <p class="text-gray-700 leading-relaxed whitespace-pre-wrap">{{ comment.content }}</p>
@@ -522,4 +519,4 @@ onMounted(() => {
 .p-6:hover .opacity-0 {
   opacity: 1;
 }
-</style> 
+</style>

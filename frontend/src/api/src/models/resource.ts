@@ -1,6 +1,4 @@
 import {
-  relationTypeFromString,
-  relationTypeToString,
   type RelationType,
 } from './relationType'
 
