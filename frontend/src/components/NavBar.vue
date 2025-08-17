@@ -127,6 +127,14 @@ const logout = async () => {
           >
             À propos
           </AppButton>
+          <AppButton
+            variant="text"
+            color="default"
+            class="!text-sm hover:!bg-[#F5F5FE] hover:!text-[#000091]"
+            to="/support"
+          >
+            Support
+          </AppButton>
         </nav>
       </div>
     </div>
