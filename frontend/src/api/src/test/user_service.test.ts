@@ -1,63 +1,93 @@
-import {
-  describe,
-  it,
-  expect,
-  vi,
-  beforeEach,
-  afterEach,
-  type MockInstance,
-} from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { Api } from '../api'
-
-let api: Api
-let get: MockInstance
+import { UserService } from '../services/user_service'
+import { Role, User } from '../models/models'
 
 describe('UserService', () => {
-  beforeEach(() => {
-    api = new Api()
-    get = vi.spyOn(api, 'get')
+  let api: Api
+  let userService: UserService
 
-    get.mockImplementation(async (endpoint: string) => {
+  beforeEach(() => {
+    api = new Api({ baseUrl: 'http://test-api' })
+    userService = new UserService(api)
+
+    // Mock axios methods
+    vi.spyOn(api, 'get').mockImplementation(async (endpoint: string) => {
       switch (endpoint) {
-        case 'users':
-          return [
-            {
-              uuid: '1111',
-              email: 'test@test.com',
-              username: 'Test',
-              role: ['user'],
-            },
-            {
-              uuid: '1112',
-              email: 'test2@test.com',
-              username: 'Test2',
-              role: ['user'],
-            },
-          ]
+        case 'users/get-all-users':
+          return {
+            data: {
+              users: [
+                {
+                  _id: '1111',
+                  email: 'test@test.com',
+                  pseudonyme: 'Test',
+                  role: 'utilisateur',
+                },
+                {
+                  _id: '1112',
+                  email: 'test2@test.com',
+                  pseudonyme: 'Test2',
+                  role: 'utilisateur',
+                },
+              ]
+            }
+          }
         case 'users/1111':
           return {
-            uuid: '1111',
-            email: 'test@test.com',
-            username: 'Test',
-            role: ['user'],
+            data: {
+              user: {
+                _id: '1111',
+                email: 'test@test.com',
+                pseudonyme: 'Test',
+                role: 'utilisateur',
+              }
+            }
           }
+        default:
+          return { data: {} }
+      }
+    })
+
+    vi.spyOn(api, 'post').mockResolvedValue({
+      data: {
+        user: {
+          _id: '1111',
+          email: 'test@test.com',
+          pseudonyme: 'Test',
+          role: 'utilisateur',
+        },
+        tokens: {
+          accessToken: 'access-token',
+          refreshToken: 'refresh-token'
+        }
       }
     })
   })
 
   afterEach(() => {
-    get.mockRestore()
+    vi.restoreAllMocks()
   })
 
-  it('should call api.get when fetching a user', async () => {
-    await api.users.get('1111')
-    expect(get).toHaveBeenCalledTimes(1)
-    expect(get).toHaveBeenCalledWith('users/1111')
+  it('should allow to fetch a user by uuid', async () => {
+    const user = await userService.get('1111')
+    expect(user).toBeInstanceOf(User)
+    expect(user.uuid).toBe('1111')
   })
 
-  it('should call api.get when listing users', async () => {
-    await api.users.list()
-    expect(get).toHaveBeenCalledTimes(1)
-    expect(get).toHaveBeenCalledWith('users')
+  it('should allow list all users', async () => {
+    const users = await userService.list()
+    expect(users).toHaveLength(2)
+    expect(users[0]).toBeInstanceOf(User)
+  })
+
+  it('should allow to create a user', async () => {
+    const newUser = await userService.create({
+      email: 'new@test.com',
+      username: 'NewUser',
+      password: 'password',
+      role: Role.User,
+    })
+    expect(newUser).toBeInstanceOf(User)
   })
 })

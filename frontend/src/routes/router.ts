@@ -76,7 +76,7 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach((to, _from) => {
+router.beforeEach((to) => {
   const { isAuthenticated, isAdmin } = useAuthUserStore()
   if (to.meta.requiresAuth && !isAuthenticated) {
     return { name: 'login' }

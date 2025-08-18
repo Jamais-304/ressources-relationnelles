@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
 import logo from '../assets/logo.svg'
 import AppButton from './common/AppButton.vue'
 
-const router = useRouter()
 const currentYear = new Date().getFullYear()
 </script>
 
@@ -53,8 +51,8 @@ const currentYear = new Date().getFullYear()
             <p class="text-sm font-marianne">
               Pour toute question, n'hésitez pas à nous contacter.
             </p>
-            <a 
-              href="mailto:contact@ressources-relationnelles.fr" 
+            <a
+              href="mailto:contact@ressources-relationnelles.fr"
               class="text-sm font-marianne mt-2 hover:underline"
             >
               contact@ressources-relationnelles.fr
@@ -91,5 +89,3 @@ const currentYear = new Date().getFullYear()
     <!-- TODO : Ajouter les liens vers les mentions légales, politique de confidentialité et accessibilité, et revoir les boutons -->
 
    <!--  Deuxieme TODO a voir ensemble Page contact ??? -->
-
-

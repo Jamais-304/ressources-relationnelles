@@ -3,7 +3,7 @@ export interface TokenData {
   refreshToken?: string
 }
 
-export interface Token {
+export interface IToken {
   access: string
   refresh?: string
 }

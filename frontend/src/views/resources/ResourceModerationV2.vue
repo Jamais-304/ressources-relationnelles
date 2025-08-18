@@ -7,22 +7,20 @@ import { useResourceHelpers, type Resource } from '@/composables/useResourceHelp
 import { toast } from 'vue3-toastify'
 
 // Components
-import ResourceStatisticsCards from '@/components/resources/ResourceStatisticsCards.vue'
-import ResourceFilters from '@/components/resources/ResourceFilters.vue'
 import ResourceDetailsModal from '@/components/resources/ResourceDetailsModal.vue'
 
 // Composables
 const api = new Api()
 const router = useRouter()
 const { handleError } = useErrorsManagement()
-const { 
-  getStatusColor, 
-  getStatusIcon, 
-  getStatusText, 
-  getCategoryDisplayName, 
-  getResourceIcon, 
-  getResourceColor, 
-  formatDate 
+const {
+  getStatusColor,
+  getStatusIcon,
+  getStatusText,
+  getCategoryDisplayName,
+  getResourceIcon,
+  getResourceColor,
+  formatDate
 } = useResourceHelpers()
 
 // State
@@ -51,7 +49,7 @@ const filteredResources = computed(() => {
 
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(resource => 
+    filtered = filtered.filter(resource =>
       resource.title.toLowerCase().includes(query)
     )
   }
@@ -92,10 +90,10 @@ const updateResourceStatus = async () => {
     await api.put(`resource/${selectedResource.value.uuid}/status`, {
       status: newStatus.value
     })
-    
+
     toast.success(`Ressource ${newStatus.value === 'PUBLISHED' ? 'publiée' : 'mise à jour'} avec succès`)
     await loadResources()
-    
+
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue'
     toast.error(`Erreur lors de la mise à jour: ${errorMessage}`)
@@ -103,10 +101,6 @@ const updateResourceStatus = async () => {
     confirmDialog.value = false
     selectedResource.value = null
   }
-}
-
-const viewResource = (resource: Resource) => {
-  router.push(`/resources/${resource.uuid}`)
 }
 
 const openResourceDetails = (resource: Resource) => {
@@ -140,7 +134,7 @@ onMounted(() => {
       <div class="absolute inset-0 opacity-10 pointer-events-none">
         <div class="w-full h-full" style="background-image: url('data:image/svg+xml,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 100 100&quot;><defs><pattern id=&quot;grain&quot; width=&quot;100&quot; height=&quot;100&quot; patternUnits=&quot;userSpaceOnUse&quot;><circle cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;1&quot; fill=&quot;white&quot; opacity=&quot;0.1&quot;/></pattern></defs><rect width=&quot;100&quot; height=&quot;100&quot; fill=&quot;url(%23grain)&quot;/></svg>')"></div>
       </div>
-      
+
       <div class="relative z-10 max-w-6xl mx-auto flex flex-col lg:flex-row justify-between items-center gap-8">
         <div class="text-center lg:text-left">
           <h1 class="flex items-center justify-center lg:justify-start gap-4 text-5xl lg:text-6xl font-bold mb-4">
@@ -177,7 +171,7 @@ onMounted(() => {
             <div class="text-sm text-gray-600">Total</div>
           </div>
         </div>
-        
+
         <div class="bg-white rounded-2xl p-6 flex items-center gap-4 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
           <div class="w-15 h-15 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white">
             <v-icon size="24">mdi-check-circle</v-icon>
@@ -187,7 +181,7 @@ onMounted(() => {
             <div class="text-sm text-gray-600">Publiées</div>
           </div>
         </div>
-        
+
         <div class="bg-white rounded-2xl p-6 flex items-center gap-4 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
           <div class="w-15 h-15 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white">
             <v-icon size="24">mdi-file-edit</v-icon>
@@ -197,7 +191,7 @@ onMounted(() => {
             <div class="text-sm text-gray-600">Brouillons</div>
           </div>
         </div>
-        
+
         <div class="bg-white rounded-2xl p-6 flex items-center gap-4 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
           <div class="w-15 h-15 rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-white">
             <v-icon size="24">mdi-clock</v-icon>
@@ -249,7 +243,7 @@ onMounted(() => {
                   <v-btn value="grid" icon="mdi-view-grid" />
                   <v-btn value="list" icon="mdi-view-list" />
                 </v-btn-toggle>
-                
+
                 <v-btn
                   variant="outlined"
                   @click="clearFilters"
@@ -290,7 +284,7 @@ onMounted(() => {
                     {{ getResourceIcon(resource.category) }}
                   </v-icon>
                 </div>
-                
+
                 <v-chip
                   :color="getStatusColor(resource.status)"
                   size="small"
@@ -321,7 +315,7 @@ onMounted(() => {
                   <v-icon size="16" class="text-gray-400">mdi-calendar</v-icon>
                   <span>{{ formatDate(resource.createdAt) }}</span>
                 </div>
-                
+
                 <div v-if="resource.validatedAndPublishedAt" class="flex items-center gap-2 text-green-600">
                   <v-icon size="16">mdi-check-circle</v-icon>
                   <span>Publié le {{ formatDate(resource.validatedAndPublishedAt) }}</span>
@@ -413,7 +407,7 @@ onMounted(() => {
                     {{ getStatusText(resource.status) }}
           </v-chip>
                 </div>
-                
+
                 <div class="flex items-center gap-4 text-sm text-gray-600">
                   <div class="flex items-center gap-1">
                     <v-chip
@@ -490,10 +484,10 @@ onMounted(() => {
         <h3 class="text-2xl font-semibold text-gray-700 mb-2">Aucune ressource trouvée</h3>
         <p class="text-gray-600 mb-8 max-w-md mx-auto">
           {{ searchQuery || selectedStatus !== 'ALL'
-             ? 'Essayez de modifier vos critères de recherche.' 
+             ? 'Essayez de modifier vos critères de recherche.'
              : 'Il n\'y a pas encore de ressources à modérer.' }}
         </p>
-        
+
         <div class="flex flex-wrap gap-4 justify-center">
           <v-btn
             v-if="searchQuery || selectedStatus !== 'ALL'"
@@ -514,14 +508,14 @@ onMounted(() => {
         <v-card-title class="text-xl font-semibold p-6 pb-4">
           Confirmation de changement de statut
         </v-card-title>
-        
+
         <v-card-text class="px-6">
           <p class="text-gray-700 mb-4">Êtes-vous sûr de vouloir changer le statut de cette ressource ?</p>
-          
+
           <div v-if="selectedResource" class="p-4 bg-blue-50 rounded-xl border border-blue-200">
             <div class="space-y-2">
               <div><strong class="text-gray-900">Ressource :</strong> <span class="text-gray-700">{{ selectedResource.title }}</span></div>
-              <div><strong class="text-gray-900">Nouveau statut :</strong> 
+              <div><strong class="text-gray-900">Nouveau statut :</strong>
                 <v-chip
                   :color="getStatusColor(newStatus)"
                   size="small"

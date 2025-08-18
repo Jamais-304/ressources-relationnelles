@@ -3,7 +3,6 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import WysiwygEditor from './WysiwygEditor.vue'
 import { getPublicCategories, getActiveRelationTypes, type Category, type RelationType } from '@/api/services'
-import axios from 'axios'
 import { getToken } from '@/utils/cookies'
 
 interface Props {
@@ -39,8 +38,8 @@ const isFormValid = computed(() => {
   return formData.value.title.trim() &&
          formData.value.category &&
          formData.value.relationType &&
-         (formData.value.contentType === 'rich-text' ? 
-          formData.value.content.trim() : 
+         (formData.value.contentType === 'rich-text' ?
+          formData.value.content.trim() :
           formData.value.file)
 })
 
@@ -69,7 +68,7 @@ watch(selectedFile, (newFile) => {
     // v-file-input peut retourner un tableau ou un seul fichier
     const file = Array.isArray(newFile) ? newFile[0] : newFile
     formData.value.file = file
-    
+
     // Validation simple
     const maxSize = 10 * 1024 * 1024 // 10MB
     if (file.size > maxSize) {
@@ -93,7 +92,7 @@ const submitForm = async () => {
 
   try {
     const accessToken = getToken('accessToken')
-    
+
     if (!accessToken) {
       showNotification('Vous devez être connecté pour créer une ressource', 'error')
       return
@@ -142,7 +141,7 @@ const submitForm = async () => {
       formDataToSend.append('relationType', formData.value.relationType)
 
       console.log('🔍 DEBUG Frontend - FormData contents:')
-      for (let [key, value] of formDataToSend.entries()) {
+      for (const [key, value] of formDataToSend.entries()) {
         console.log(`${key}:`, value)
       }
 
@@ -183,7 +182,7 @@ onMounted(async () => {
       getPublicCategories(),
       getActiveRelationTypes()
     ])
-    
+
     categories.value = categoriesData
     relationTypes.value = relationTypesData
 

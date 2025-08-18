@@ -5,8 +5,8 @@
       <v-card-title class="social-header pa-4">
         <div class="d-flex align-center justify-space-between w-100">
           <div class="d-flex align-center">
-            <v-avatar 
-              :color="getResourceColor(resource.category)" 
+            <v-avatar
+              :color="getResourceColor(resource.category)"
               class="mr-3"
               size="40"
             >
@@ -33,9 +33,9 @@
       <v-card-text class="social-content pa-4">
         <!-- Métadonnées de la ressource -->
         <div class="mb-4">
-          <v-chip 
-            size="small" 
-            variant="tonal" 
+          <v-chip
+            size="small"
+            variant="tonal"
             :color="getResourceColor(resource.category)"
             class="mr-2"
           >
@@ -59,14 +59,14 @@
               <div class="text-caption text-medium-emphasis mb-3">
                 📄 {{ resourceContentType }}
               </div>
-              
+
               <!-- Contenu HTML -->
               <div v-if="resourceContentType === 'text/html'" class="content-display">
                 <v-card variant="outlined" class="pa-4">
                   <div v-html="resourceContent" class="rendered-content"></div>
                 </v-card>
               </div>
-              
+
               <!-- Contenu texte brut -->
               <div v-else class="content-display">
                 <v-card variant="outlined" class="pa-4">
@@ -79,8 +79,8 @@
 
             <!-- Message d'erreur ou d'information -->
             <div v-else-if="resourceContent" class="mb-4">
-              <v-alert 
-                :type="resourceContent.includes('🔒') ? 'warning' : 'info'" 
+              <v-alert
+                :type="resourceContent.includes('🔒') ? 'warning' : 'info'"
                 variant="tonal"
               >
                 {{ resourceContent }}
@@ -93,7 +93,7 @@
                 🖼️ {{ resourceContentType }}
               </div>
               <v-card variant="outlined" class="pa-4 text-center">
-                <img 
+                <img
                   :src="`${apiBaseUrl}/resource/image/${resource.contentGridfsUuid}`"
                   style="max-width: 100%; max-height: 400px; object-fit: contain; border-radius: 8px;"
                   @error="($event.target as HTMLImageElement).style.display = 'none'"
@@ -128,7 +128,7 @@
             <v-icon start>mdi-check</v-icon>
             Publier
           </v-btn>
-          
+
           <v-btn
             color="warning"
             variant="flat"
@@ -138,7 +138,7 @@
             <v-icon start>mdi-clock</v-icon>
             En attente
           </v-btn>
-          
+
           <v-btn
             color="info"
             variant="flat"
@@ -153,7 +153,7 @@
         <v-divider class="my-6" />
 
         <!-- Section des commentaires -->
-        <CommentSection 
+        <CommentSection
           v-if="resource"
           :resource-id="resource.uuid"
         />
@@ -179,14 +179,13 @@ import { Api } from '@/api/api'
 import CommentSection from './CommentSection.vue'
 
 // Composables
-const { 
-  getStatusColor, 
-  getStatusIcon, 
-  getStatusText, 
-  getCategoryDisplayName, 
-  getResourceIcon, 
-  getResourceColor, 
-  formatDate 
+const {
+  getStatusColor,
+  getStatusText,
+  getCategoryDisplayName,
+  getResourceIcon,
+  getResourceColor,
+  formatDate
 } = useResourceHelpers()
 
 // Store
@@ -224,14 +223,14 @@ const loadResourceContent = async (resource: Resource) => {
   console.log('🔍 DEBUG - Resource UUID:', resource.uuid)
   console.log('🔍 DEBUG - Resource contentGridfsUuid from frontend:', resource.contentGridfsUuid)
   console.log('🔍 DEBUG - User isAdmin:', isAdmin)
-  
+
   isLoadingContent.value = true
   resourceContent.value = null
   resourceContentType.value = null
-  
+
   try {
     let resourceResponse
-    
+
     // Si l'utilisateur est admin, utiliser l'endpoint avec authentification
     // Sinon, utiliser l'endpoint public (seulement pour les ressources publiées)
     if (isAdmin) {
@@ -241,13 +240,13 @@ const loadResourceContent = async (resource: Resource) => {
       console.log('🔍 DEBUG - Regular user, using public endpoint')
       resourceResponse = await api.get(`resource/published/${resource.uuid}`)
     }
-    
+
     console.log('🔍 DEBUG - Resource response:', resourceResponse)
-    
+
     // Essayer différents formats de réponse
     let resourceData = null
     const responseData = resourceResponse as any
-    
+
     // Format nouveau: { data: { resource: {...} } }
     if (responseData?.data?.resource) {
       resourceData = responseData.data.resource
@@ -268,21 +267,21 @@ const loadResourceContent = async (resource: Resource) => {
     else if (responseData && typeof responseData === 'object') {
       resourceData = responseData
     }
-    
+
     console.log('🔍 DEBUG - Resource data from backend:', resourceData)
     console.log('🔍 DEBUG - Resource contentGridfsId:', resourceData?.contentGridfsId)
     console.log('🔍 DEBUG - Resource resourceMIMEType:', resourceData?.resourceMIMEType)
-    
+
     if (resourceData && resourceData.resourceMIMEType) {
       resourceContentType.value = resourceData.resourceMIMEType
       console.log('🔍 DEBUG - Set resourceContentType to:', resourceContentType.value)
-      
+
       // Si c'est du texte, récupérer le contenu
       if (resourceData.resourceMIMEType.startsWith('text/')) {
         console.log('🔍 DEBUG - Resource is text type, fetching content...')
         try {
           let contentResponse
-          
+
           // Si l'utilisateur est admin, utiliser l'endpoint avec authentification
           if (isAdmin) {
             console.log('🔍 DEBUG - Admin user, fetching content with auth')
@@ -295,7 +294,7 @@ const loadResourceContent = async (resource: Resource) => {
               responseType: 'text'
             })
           }
-          
+
           const content = contentResponse.data || contentResponse
           resourceContent.value = content as string || 'Contenu non disponible'
           console.log('🔍 DEBUG - Set resourceContent:', resourceContent.value)
@@ -379,4 +378,4 @@ watch(() => props.modelValue, (newValue) => {
 .gap-2 {
   gap: 8px;
 }
-</style> 
+</style>

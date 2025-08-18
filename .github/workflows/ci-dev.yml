@@ -15,54 +15,50 @@ jobs:
       TOKEN_SECRET: ${{secrets.TOKEN_SECRET}}
     steps:
     - uses: actions/checkout@v5
-    
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '23'
-    
+
     # Backend
     - name: Install backend dependencies
       working-directory: ./backend
       run: npm ci
-    
+
     - name: Lint backend
       working-directory: ./backend
       run: npm run lint
-    
+
     - name: TypeScript type checking (backend)
       working-directory: ./backend
       run: npm run build
-    
+
     - name: Test backend
       working-directory: ./backend
       run: npm run test
-    
+
     - name: Backend security audit
       working-directory: ./backend
       run: npm audit --audit-level=moderate
-    
+
     # Frontend
-    # - name: Install frontend dependencies
-    #   working-directory: ./frontend
-    #   run: npm ci
-    
-    # - name: Lint frontend
-    #   working-directory: ./frontend
-    #   run: npm run lint
-    
-    # - name: TypeScript type checking (frontend)
-    #   working-directory: ./frontend
-    #   run: npm run type-check
-    
-    # - name: Test frontend
-    #   working-directory: ./frontend
-    #   run: npm test
-    
-    # - name: Build frontend
-    #   working-directory: ./frontend
-    #   run: npm run build
-    
-    # - name: Frontend security audit
-    #   working-directory: ./frontend
-    #   run: npm audit --audit-level=moderate
+    - name: Install frontend dependencies
+      working-directory: ./frontend
+      run: npm ci
+
+    - name: Lint frontend
+      working-directory: ./frontend
+      run: npm run lint
+
+    - name: TypeScript type checking (frontend)
+      working-directory: ./frontend
+      run: npm run type-check
+
+    - name: Test frontend
+      working-directory: ./frontend
+      run: npm test run
+
+    - name: Build frontend
+      working-directory: ./frontend
+      run: npm run build
