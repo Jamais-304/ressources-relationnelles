@@ -1,0 +1,26 @@
+services:
+  backend:
+    image: ghcr.io/jamais-304/ressources-relationnelles/backend:latest
+    # build: ./backend # Pour le build en local
+    container_name: ressources-relationnelles-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT_BACKEND=${PORT_BACKEND}
+      - PORT_FRONTEND=${PORT_FRONTEND}
+      - MONGO_URI=${MONGO_URI}
+      - TOKEN_SECRET=${TOKEN_SECRET}
+  frontend:
+    image: ghcr.io/jamais-304/ressources-relationnelles/frontend:latest
+    # build: ./frontend # Pour le build en local
+    container_name: ressources-relationnelles-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL}
+      - VITE_GITHUB_TOKEN=${VITE_GITHUB_TOKEN}
+      - VITE_GITHUB_REPO_OWNER=${VITE_GITHUB_REPO_OWNER}
+      - VITE_GITHUB_REPO_NAME=${VITE_GITHUB_REPO_NAME}
+    depends_on:
+      - backend
+    restart: unless-stopped
