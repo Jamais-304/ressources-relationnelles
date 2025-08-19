@@ -18,7 +18,19 @@ COPY src ./src
 COPY public ./public
 COPY index.html ./
 
-# Build l'application
+# Déclaration des build args depuis GitHub Actions
+ARG VITE_API_BASE_URL
+ARG VITE_GITHUB_TOKEN
+ARG VITE_GITHUB_REPO_OWNER
+ARG VITE_GITHUB_REPO_NAME
+
+# Conversion en variables d'environnement pour que Vite puisse les voir
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ENV VITE_GITHUB_TOKEN=$VITE_GITHUB_TOKEN
+ENV VITE_GITHUB_REPO_OWNER=$VITE_GITHUB_REPO_OWNER
+ENV VITE_GITHUB_REPO_NAME=$VITE_GITHUB_REPO_NAME
+
+# Build l'application avec les variables injectées
 RUN npm run build
 
 # Exposer le port
