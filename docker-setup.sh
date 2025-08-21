@@ -31,7 +31,7 @@ log_error() {
 # Charger les variables d'environnement depuis .env si le fichier existe
 if [ -f .env ]; then
     log_info "Chargement du fichier .env..."
-    source .env
+    source ./.env
 else
     log_warning "Fichier .env non trouvé. Vérifiez que GITHUB_TOKEN et GITHUB_USERNAME sont définis."
 fi
@@ -50,7 +50,7 @@ log_info "Vérification de Docker..."
 if command -v docker &> /dev/null; then
     if ! docker info &> /dev/null; then
         log_warning "Docker n'est pas en cours d'exécution. Tentative de démarrage..."
-        
+
         # Détection de l'OS et démarrage
         if [[ "$OSTYPE" == "darwin"* ]]; then
             # macOS
@@ -59,7 +59,7 @@ if command -v docker &> /dev/null; then
         elif [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ "$OS" == "Windows_NT" ]]; then
             # Windows (Git Bash/Cygwin/PowerShell)
             log_info "Tentative de démarrage de Docker Desktop sur Windows..."
-            
+
             # Chemins possibles de Docker Desktop sur Windows
             DOCKER_PATHS=(
                 "/c/Program Files/Docker/Docker/Docker Desktop.exe"
@@ -68,7 +68,7 @@ if command -v docker &> /dev/null; then
                 "/mnt/c/Program Files/Docker/Docker/Docker Desktop.exe"
                 "/mnt/c/Program Files (x86)/Docker/Docker/Docker Desktop.exe"
             )
-            
+
             DOCKER_FOUND=false
             for path in "${DOCKER_PATHS[@]}"; do
                 if [ -f "$path" ]; then
@@ -78,7 +78,7 @@ if command -v docker &> /dev/null; then
                     break
                 fi
             done
-            
+
             if [ "$DOCKER_FOUND" = false ]; then
                 # Essayer avec PowerShell et les chemins Windows natifs
                 if command -v powershell.exe &> /dev/null; then
@@ -98,13 +98,13 @@ if command -v docker &> /dev/null; then
                         Write-Host 'Docker Desktop non trouvé dans les emplacements standards'
                         exit 1
                     " 2>/dev/null
-                    
+
                     if [ $? -eq 0 ]; then
                         DOCKER_FOUND=true
                     fi
                 fi
             fi
-            
+
             if [ "$DOCKER_FOUND" = false ]; then
                 log_warning "Docker Desktop non trouvé automatiquement"
                 log_info "Veuillez démarrer Docker Desktop manuellement depuis le menu Démarrer"
@@ -123,7 +123,7 @@ if command -v docker &> /dev/null; then
                 exit 1
             fi
         fi
-        
+
         # Attendre que Docker soit prêt avec timeout plus long
         log_info "Attente que Docker soit prêt (cela peut prendre jusqu'à 2 minutes)..."
         timeout=120  # 2 minutes
@@ -140,7 +140,7 @@ if command -v docker &> /dev/null; then
             fi
         done
         echo
-        
+
         if ! docker info &> /dev/null; then
             log_error "Docker n'a pas pu démarrer dans les temps (2 minutes)."
             log_info "Solutions possibles:"
@@ -177,13 +177,13 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
         docker rm $(docker ps -aq)
         log_success "Tous les conteneurs supprimés"
     fi
-    
+
     # Supprimer toutes les images
     if [ "$(docker images -q)" ]; then
         docker rmi $(docker images -q) -f
         log_success "Toutes les images supprimées"
     fi
-    
+
     # Nettoyage complet
     docker system prune -af --volumes
     log_success "Nettoyage complet terminé"
